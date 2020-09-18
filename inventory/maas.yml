@@ -1,0 +1,5 @@
+---
+maas:
+  hosts:
+    messy-maas:
+      ansible_host: 192.168.3.1
