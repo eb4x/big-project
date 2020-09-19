@@ -8,7 +8,11 @@ maas:
         fabrics:
           fabric-0:
             vlan.2: { name: amplifi, subnet: 10.0.0.0/24 }
-            vlan.3: { name: maas,    subnet: 192.168.3.0/24 }
+            vlan.3:
+              name: maas
+              subnet: 192.168.3.0/24
+              dhcp_on: true
+              ip_range: { type: dynamic, start_ip: 192.168.3.190, end_ip: 192.168.3.253 }
             vlan.4: { name: bmc,     subnet: 192.168.4.0/24 }
             vlan.10: { name: mgmt,    mtu: 9000, subnet: 172.29.236.0/22 }
             vlan.20: { name: storage, mtu: 9000, subnet: 172.29.244.0/22 }
