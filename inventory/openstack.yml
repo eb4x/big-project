@@ -1,0 +1,192 @@
+---
+openstack:
+  hosts:
+    cool-gator:
+      ansible_user: ubuntu
+      ansible_host: 192.168.3.2
+      ansible_ssh_common_args: '-o ProxyJump=messy-maas'
+      network:
+        ethernets:
+          eno1:   { set-name: eth0, match: { macaddress: "c4:34:6b:b5:ad:80" } }
+          eno2:   { set-name: eth1, match: { macaddress: "c4:34:6b:b5:ad:81" } }
+          eno3:   { set-name: eth2, match: { macaddress: "c4:34:6b:b5:ad:82" } }
+          eno4:   { set-name: eth3, match: { macaddress: "c4:34:6b:b5:ad:83" } }
+          ens3f0: { set-name: sfp0, match: { macaddress: "a0:36:9f:93:86:78" } }
+          ens3f1: { set-name: sfp1, match: { macaddress: "a0:36:9f:93:86:7a" } }
+        bonds:
+          bond0:
+            interfaces: ['eth0', 'eth1', 'eth2', 'eth3']
+            parameters: { mode: 802.3ad }
+          bond1:
+            interfaces: ['sfp0', 'sfp1']
+            parameters: { mode: 802.3ad }
+        vlans:
+          bond1.10: { id: 10, link: bond1 }
+          bond1.20: { id: 20, link: bond1 }
+          bond1.21: { id: 21, link: bond1 }
+          bond1.30: { id: 30, link: bond1 }
+        bridges:
+          br-maas:
+            interfaces: ['bond0']
+            addresses: ['192.168.3.2/24']
+          br-mgmt:
+            interfaces: ['bond1.10']
+            addresses: ['172.29.236.2/22']
+          br-storage:
+            interfaces: ['bond1.20']
+            addresses: ['172.29.244.2/22']
+          br-iscsi:
+            interfaces: ['bond1.21']
+            addresses: ['172.16.21.2/24']
+          br-vxlan:
+            interfaces: ['bond1.30']
+            addresses: ['172.29.240.2/22']
+          br-vlan:
+            interfaces: ['bond1']
+      #boot_disk: sda
+      lvm_volumes:
+        #sda: { data_vg: ceph-4610ed10-59e6-48ad-ba88-d364911e8ed6, data: osd-block-1a6e9889-b687-46d7-b344-edff6354a29e }
+        sdb: { data_vg: ceph-4752d64f-11f0-485e-99f6-2f46909fb898, data: osd-block-908fd4a5-e9d0-429e-b7eb-dac798a72e01 }
+        #sdc: { data_vg: ceph-059c52a5-e63c-455a-96c4-dee9f646b637, data: osd-block-3f1b6b56-b56b-46ad-961c-3c8207c82172 }
+        #sdd: { data_vg: ceph-61056785-53b2-45db-9a99-2940988cae25, data: osd-block-88bb9566-7d59-4bfc-8216-53c95f716f2a }
+    key-shrimp:
+      ansible_user: ubuntu
+      ansible_host: 192.168.3.3
+      ansible_ssh_common_args: '-o ProxyJump=messy-maas'
+      network:
+        ethernets:
+          eno1:   { set-name: eth0, match: { macaddress: "c4:34:6b:b5:ad:4c" } }
+          eno2:   { set-name: eth1, match: { macaddress: "c4:34:6b:b5:ad:4d" } }
+          eno3:   { set-name: eth2, match: { macaddress: "c4:34:6b:b5:ad:4e" } }
+          eno4:   { set-name: eth3, match: { macaddress: "c4:34:6b:b5:ad:4f" } }
+          ens3f0: { set-name: sfp0, match: { macaddress: "a0:36:9f:93:85:40" } }
+          ens3f1: { set-name: sfp1, match: { macaddress: "a0:36:9f:93:85:42" } }
+        bonds:
+          bond0:
+            interfaces: ['eth0', 'eth1', 'eth2', 'eth3']
+            parameters:
+              mode: 802.3ad
+          bond1:
+            interfaces: ['sfp0', 'sfp1']
+            parameters:
+              mode: 802.3ad
+        vlans:
+          bond1.10: { id: 10, link: bond1 }
+          bond1.20: { id: 20, link: bond1 }
+          bond1.21: { id: 21, link: bond1 }
+          bond1.30: { id: 30, link: bond1 }
+        bridges:
+          br-maas:
+            interfaces: ['bond0']
+            addresses: ['192.168.3.3/24']
+          br-mgmt:
+            interfaces: ['bond1.10']
+            addresses: ['172.29.236.3/22']
+          br-storage:
+            interfaces: ['bond1.20']
+            addresses: ['172.29.244.3/22']
+          br-iscsi:
+            interfaces: ['bond1.21']
+            addresses: ['172.16.21.3/24']
+          br-vxlan:
+            interfaces: ['bond1.30']
+            addresses: ['172.29.240.3/22']
+          br-vlan:
+            interfaces: ['bond1']
+      #boot_disk: sda
+      lvm_volumes:
+        sdb: { data_vg: ceph-907b30cd-9380-4b1a-847a-da292073179e, data: osd-block-c39a9ed4-c1fa-43df-9533-e90c571facfe }
+    mint-panda:
+      ansible_user: ubuntu
+      ansible_host: 192.168.3.4
+      ansible_ssh_common_args: '-o ProxyJump=messy-maas'
+      network:
+        ethernets:
+          eno1:   { set-name: eth0, match: { macaddress: "c4:34:6b:b6:a1:e0" } }
+          eno2:   { set-name: eth1, match: { macaddress: "c4:34:6b:b6:a1:e1" } }
+          eno3:   { set-name: eth2, match: { macaddress: "c4:34:6b:b6:a1:e2" } }
+          eno4:   { set-name: eth3, match: { macaddress: "c4:34:6b:b6:a1:e3" } }
+          ens3f0: { set-name: sfp0, match: { macaddress: "00:1b:21:bc:f6:8c" } }
+          ens3f1: { set-name: sfp1, match: { macaddress: "00:1b:21:bc:f6:8d" } }
+        bonds:
+          bond0:
+            interfaces: ['eth0', 'eth1', 'eth2', 'eth3']
+            parameters:
+              mode: 802.3ad
+          bond1:
+            interfaces: ['sfp0', 'sfp1']
+            parameters:
+              mode: 802.3ad
+        vlans:
+          bond1.10: { id: 10, link: bond1 }
+          bond1.20: { id: 20, link: bond1 }
+          bond1.21: { id: 21, link: bond1 }
+          bond1.30: { id: 30, link: bond1 }
+        bridges:
+          br-maas:
+            interfaces: ['bond0']
+            addresses: ['192.168.3.4/24']
+          br-mgmt:
+            interfaces: ['bond1.10']
+            addresses: ['172.29.236.4/22']
+          br-storage:
+            interfaces: ['bond1.20']
+            addresses: ['172.29.244.4/22']
+          br-iscsi:
+            interfaces: ['bond1.21']
+            addresses: ['172.16.21.4/24']
+          br-vxlan:
+            interfaces: ['bond1.30']
+            addresses: ['172.29.240.4/22']
+          br-vlan:
+            interfaces: ['bond1']
+      #boot_disk: sda
+      lvm_volumes:
+        sdb: { data_vg: ceph-011f7cd9-70bd-42b5-9bd8-d835612f8149, data: osd-block-933ece62-b044-4bfd-a000-246139997d3d }
+    novel-dodo:
+      ansible_user: ubuntu
+      ansible_host: 192.168.3.5
+      ansible_ssh_common_args: '-o ProxyJump=messy-maas'
+      network:
+        ethernets:
+          eno1:   { set-name: eth0, match: { macaddress: "c4:34:6b:ad:74:a0" } }
+          eno2:   { set-name: eth1, match: { macaddress: "c4:34:6b:ad:74:a1" } }
+          eno3:   { set-name: eth2, match: { macaddress: "c4:34:6b:ad:74:a2" } }
+          eno4:   { set-name: eth3, match: { macaddress: "c4:34:6b:ad:74:a3" } }
+          ens3f0: { set-name: sfp0, match: { macaddress: "00:1b:21:bc:f6:9a" } }
+          ens3f1: { set-name: sfp1, match: { macaddress: "00:1b:21:bc:f6:9b" } }
+        bonds:
+          bond0:
+            interfaces: ['eth0', 'eth1', 'eth2', 'eth3']
+            parameters:
+              mode: 802.3ad
+          bond1:
+            interfaces: ['sfp0', 'sfp1']
+            parameters:
+              mode: 802.3ad
+        vlans:
+          bond1.10: { id: 10, link: bond1 }
+          bond1.20: { id: 20, link: bond1 }
+          bond1.21: { id: 21, link: bond1 }
+          bond1.30: { id: 30, link: bond1 }
+        bridges:
+          br-maas:
+            interfaces: ['bond0']
+            addresses: ['192.168.3.5/24']
+          br-mgmt:
+            interfaces: ['bond1.10']
+            addresses: ['172.29.236.5/22']
+          br-storage:
+            interfaces: ['bond1.20']
+            addresses: ['172.29.244.5/22']
+          br-iscsi:
+            interfaces: ['bond1.21']
+            addresses: ['172.16.21.5/24']
+          br-vxlan:
+            interfaces: ['bond1.30']
+            addresses: ['172.29.240.5/22']
+          br-vlan:
+            interfaces: ['bond1']
+      #boot_disk: sda
+      lvm_volumes:
+        sdb: { data_vg: ceph-5931b19d-c70b-42a8-a9e4-aa6f3711d8cc, data: osd-block-42d8df22-1c86-4edc-8ee8-d5867f3db7e8 }
