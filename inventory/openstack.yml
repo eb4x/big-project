@@ -7,12 +7,12 @@ openstack:
       ansible_ssh_common_args: '-o ProxyJump=messy-maas'
       network:
         ethernets:
-          eno1:   { set-name: eth0, match: { macaddress: "c4:34:6b:b5:ad:80" } }
-          eno2:   { set-name: eth1, match: { macaddress: "c4:34:6b:b5:ad:81" } }
-          eno3:   { set-name: eth2, match: { macaddress: "c4:34:6b:b5:ad:82" } }
-          eno4:   { set-name: eth3, match: { macaddress: "c4:34:6b:b5:ad:83" } }
-          ens3f0: { set-name: sfp0, match: { macaddress: "a0:36:9f:93:86:78" } }
-          ens3f1: { set-name: sfp1, match: { macaddress: "a0:36:9f:93:86:7a" } }
+          eno1:   { set-name: eth0, match: { macaddress: "c4:34:6b:b5:ad:80" }, native_vlan: 3 }
+          eno2:   { set-name: eth1, match: { macaddress: "c4:34:6b:b5:ad:81" }, native_vlan: 3 }
+          eno3:   { set-name: eth2, match: { macaddress: "c4:34:6b:b5:ad:82" }, native_vlan: 3 }
+          eno4:   { set-name: eth3, match: { macaddress: "c4:34:6b:b5:ad:83" }, native_vlan: 3 }
+          ens3f0: { set-name: sfp0, match: { macaddress: "a0:36:9f:93:86:78" }, native_vlan: 0 }
+          ens3f1: { set-name: sfp1, match: { macaddress: "a0:36:9f:93:86:7a" }, native_vlan: 0 }
         bonds:
           bond0:
             interfaces: ['eth0', 'eth1', 'eth2', 'eth3']
@@ -55,12 +55,12 @@ openstack:
       ansible_ssh_common_args: '-o ProxyJump=messy-maas'
       network:
         ethernets:
-          eno1:   { set-name: eth0, match: { macaddress: "c4:34:6b:b5:ad:4c" } }
-          eno2:   { set-name: eth1, match: { macaddress: "c4:34:6b:b5:ad:4d" } }
-          eno3:   { set-name: eth2, match: { macaddress: "c4:34:6b:b5:ad:4e" } }
-          eno4:   { set-name: eth3, match: { macaddress: "c4:34:6b:b5:ad:4f" } }
-          ens3f0: { set-name: sfp0, match: { macaddress: "a0:36:9f:93:85:40" } }
-          ens3f1: { set-name: sfp1, match: { macaddress: "a0:36:9f:93:85:42" } }
+          eno1:   { set-name: eth0, match: { macaddress: "c4:34:6b:b5:ad:4c" }, native_vlan: 3 }
+          eno2:   { set-name: eth1, match: { macaddress: "c4:34:6b:b5:ad:4d" }, native_vlan: 3 }
+          eno3:   { set-name: eth2, match: { macaddress: "c4:34:6b:b5:ad:4e" }, native_vlan: 3 }
+          eno4:   { set-name: eth3, match: { macaddress: "c4:34:6b:b5:ad:4f" }, native_vlan: 3 }
+          ens3f0: { set-name: sfp0, match: { macaddress: "a0:36:9f:93:85:40" }, native_vlan: 0 }
+          ens3f1: { set-name: sfp1, match: { macaddress: "a0:36:9f:93:85:42" }, native_vlan: 0 }
         bonds:
           bond0:
             interfaces: ['eth0', 'eth1', 'eth2', 'eth3']
@@ -102,12 +102,12 @@ openstack:
       ansible_ssh_common_args: '-o ProxyJump=messy-maas'
       network:
         ethernets:
-          eno1:   { set-name: eth0, match: { macaddress: "c4:34:6b:b6:a1:e0" } }
-          eno2:   { set-name: eth1, match: { macaddress: "c4:34:6b:b6:a1:e1" } }
-          eno3:   { set-name: eth2, match: { macaddress: "c4:34:6b:b6:a1:e2" } }
-          eno4:   { set-name: eth3, match: { macaddress: "c4:34:6b:b6:a1:e3" } }
-          ens3f0: { set-name: sfp0, match: { macaddress: "00:1b:21:bc:f6:8c" } }
-          ens3f1: { set-name: sfp1, match: { macaddress: "00:1b:21:bc:f6:8d" } }
+          eno1:   { set-name: eth0, match: { macaddress: "c4:34:6b:b6:a1:e0" }, native_vlan: 3 }
+          eno2:   { set-name: eth1, match: { macaddress: "c4:34:6b:b6:a1:e1" }, native_vlan: 3 }
+          eno3:   { set-name: eth2, match: { macaddress: "c4:34:6b:b6:a1:e2" }, native_vlan: 3 }
+          eno4:   { set-name: eth3, match: { macaddress: "c4:34:6b:b6:a1:e3" }, native_vlan: 3 }
+          ens3f0: { set-name: sfp0, match: { macaddress: "00:1b:21:bc:f6:8c" }, native_vlan: 0 }
+          ens3f1: { set-name: sfp1, match: { macaddress: "00:1b:21:bc:f6:8d" }, native_vlan: 0 }
         bonds:
           bond0:
             interfaces: ['eth0', 'eth1', 'eth2', 'eth3']
@@ -149,12 +149,12 @@ openstack:
       ansible_ssh_common_args: '-o ProxyJump=messy-maas'
       network:
         ethernets:
-          eno1:   { set-name: eth0, match: { macaddress: "c4:34:6b:ad:74:a0" } }
-          eno2:   { set-name: eth1, match: { macaddress: "c4:34:6b:ad:74:a1" } }
-          eno3:   { set-name: eth2, match: { macaddress: "c4:34:6b:ad:74:a2" } }
-          eno4:   { set-name: eth3, match: { macaddress: "c4:34:6b:ad:74:a3" } }
-          ens3f0: { set-name: sfp0, match: { macaddress: "00:1b:21:bc:f6:9a" } }
-          ens3f1: { set-name: sfp1, match: { macaddress: "00:1b:21:bc:f6:9b" } }
+          eno1:   { set-name: eth0, match: { macaddress: "c4:34:6b:ad:74:a0" }, native_vlan: 3 }
+          eno2:   { set-name: eth1, match: { macaddress: "c4:34:6b:ad:74:a1" }, native_vlan: 3 }
+          eno3:   { set-name: eth2, match: { macaddress: "c4:34:6b:ad:74:a2" }, native_vlan: 3 }
+          eno4:   { set-name: eth3, match: { macaddress: "c4:34:6b:ad:74:a3" }, native_vlan: 3 }
+          ens3f0: { set-name: sfp0, match: { macaddress: "00:1b:21:bc:f6:9a" }, native_vlan: 0 }
+          ens3f1: { set-name: sfp1, match: { macaddress: "00:1b:21:bc:f6:9b" }, native_vlan: 0 }
         bonds:
           bond0:
             interfaces: ['eth0', 'eth1', 'eth2', 'eth3']
