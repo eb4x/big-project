@@ -45,10 +45,10 @@ openstack:
             interfaces: ['bond1']
       #boot_disk: sda
       lvm_volumes:
-        #sda: { data_vg: ceph-4610ed10-59e6-48ad-ba88-d364911e8ed6, data: osd-block-1a6e9889-b687-46d7-b344-edff6354a29e }
         sdb: { data_vg: ceph-4752d64f-11f0-485e-99f6-2f46909fb898, data: osd-block-908fd4a5-e9d0-429e-b7eb-dac798a72e01 }
-        #sdc: { data_vg: ceph-059c52a5-e63c-455a-96c4-dee9f646b637, data: osd-block-3f1b6b56-b56b-46ad-961c-3c8207c82172 }
-        #sdd: { data_vg: ceph-61056785-53b2-45db-9a99-2940988cae25, data: osd-block-88bb9566-7d59-4bfc-8216-53c95f716f2a }
+        sdc: { data_vg: ceph-059c52a5-e63c-455a-96c4-dee9f646b637, data: osd-block-3f1b6b56-b56b-46ad-961c-3c8207c82172 }
+        sdd: { data_vg: ceph-61056785-53b2-45db-9a99-2940988cae25, data: osd-block-88bb9566-7d59-4bfc-8216-53c95f716f2a }
+        sde: { data_vg: ceph-4610ed10-59e6-48ad-ba88-d364911e8ed6, data: osd-block-1a6e9889-b687-46d7-b344-edff6354a29e }
     key-shrimp:
       ansible_user: ubuntu
       ansible_host: 192.168.3.3
@@ -96,6 +96,9 @@ openstack:
       #boot_disk: sda
       lvm_volumes:
         sdb: { data_vg: ceph-907b30cd-9380-4b1a-847a-da292073179e, data: osd-block-c39a9ed4-c1fa-43df-9533-e90c571facfe }
+        sdc: { data_vg: ceph-e97f5be3-5c21-4b19-b02e-a4098f13dde8, data: osd-block-ce53d78f-6c7f-48a3-a32a-1e575bed4c4e }
+        sdd: { data_vg: ceph-9f4ed8e4-4a42-430a-9090-e63150305528, data: osd-block-628c58a2-c36e-4aec-971c-5d4994d870a1 }
+        sde: { data_vg: ceph-277d6ed6-a0c7-47a6-b313-6ca58c1de23c, data: osd-block-91060bae-30f1-4ba6-8744-674d6629e6e8 }
     mint-panda:
       ansible_user: ubuntu
       ansible_host: 192.168.3.4
@@ -143,6 +146,9 @@ openstack:
       #boot_disk: sda
       lvm_volumes:
         sdb: { data_vg: ceph-011f7cd9-70bd-42b5-9bd8-d835612f8149, data: osd-block-933ece62-b044-4bfd-a000-246139997d3d }
+        sdc: { data_vg: ceph-d97c3f88-b2c0-410a-8408-93fe89dc54d5, data: osd-block-7e79eeaa-9c2f-4578-a06e-4f3044cb6a1d }
+        sdd: { data_vg: ceph-478ff938-df47-44f8-928e-1ad2d40536fb, data: osd-block-4d67e245-c553-4894-98fe-6cdd810df293 }
+        sde: { data_vg: ceph-0df98438-7560-4eae-b89a-21047de61d99, data: osd-block-c4a26cec-3866-4efd-ad20-13388f0bcc46 }
     novel-dodo:
       ansible_user: ubuntu
       ansible_host: 192.168.3.5
@@ -190,3 +196,6 @@ openstack:
       #boot_disk: sda
       lvm_volumes:
         sdb: { data_vg: ceph-5931b19d-c70b-42a8-a9e4-aa6f3711d8cc, data: osd-block-42d8df22-1c86-4edc-8ee8-d5867f3db7e8 }
+        sdc: { data_vg: ceph-3d57b761-d205-412d-9a65-71c6651600e9, data: osd-block-c98b7737-be5f-4d47-aaf0-e9545fda8d23 }
+        sdd: { data_vg: ceph-66ab96e8-eb37-44ad-87c8-b6bb421bf639, data: osd-block-52a42b8f-8666-4bab-b922-2ab06cde50d4 }
+        sde: { data_vg: ceph-4f20e4c1-0d7d-48e4-8d2b-746aa1843399, data: osd-block-9e89812a-b75a-4c62-ac95-d230ef975e2a }
