@@ -1,0 +1,12 @@
+---
+openstack_ansible:
+  hosts:
+    osa:
+      ansible_user: ubuntu
+      ansible_host: 192.168.3.6
+      ansible_ssh_common_args: '-o ProxyJump=messy-maas'
+      network:
+        ethernets:
+          ens4: { addresses: ['192.168.3.6/24'], set-name: maas, match: { macaddress: "52:54:00:16:dd:39" } }
+          ens7: { addresses: ['172.29.236.1/24'], set-name: mgmt, match: { macaddress: "52:54:00:04:72:2a" } }
+
