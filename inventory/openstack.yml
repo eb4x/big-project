@@ -21,14 +21,17 @@ openstack:
             interfaces: ['sfp0', 'sfp1']
             parameters: { mode: 802.3ad }
         vlans:
-          bond1.10: { id: 10, link: bond1 }
-          bond1.20: { id: 20, link: bond1 }
-          bond1.21: { id: 21, link: bond1 }
-          bond1.30: { id: 30, link: bond1 }
+          bond0.1000: { id: 1000, link: bond0 }
+          bond1.10:   { id:   10, link: bond1 }
+          bond1.20:   { id:   20, link: bond1 }
+          bond1.21:   { id:   21, link: bond1 }
+          bond1.30:   { id:   30, link: bond1 }
         bridges:
           br-maas:
             interfaces: ['bond0']
             addresses: ['192.168.3.2/24']
+          br-internet:
+            interfaces: ['bond0.1000']
           br-mgmt:
             interfaces: ['bond1.10']
             addresses: ['172.29.236.2/22']
@@ -71,14 +74,17 @@ openstack:
             parameters:
               mode: 802.3ad
         vlans:
-          bond1.10: { id: 10, link: bond1 }
-          bond1.20: { id: 20, link: bond1 }
-          bond1.21: { id: 21, link: bond1 }
-          bond1.30: { id: 30, link: bond1 }
+          bond0.1000: { id: 1000, link: bond0 }
+          bond1.10:   { id:   10, link: bond1 }
+          bond1.20:   { id:   20, link: bond1 }
+          bond1.21:   { id:   21, link: bond1 }
+          bond1.30:   { id:   30, link: bond1 }
         bridges:
           br-maas:
             interfaces: ['bond0']
             addresses: ['192.168.3.3/24']
+          br-internet:
+            interfaces: ['bond0.1000']
           br-mgmt:
             interfaces: ['bond1.10']
             addresses: ['172.29.236.3/22']
@@ -121,14 +127,17 @@ openstack:
             parameters:
               mode: 802.3ad
         vlans:
-          bond1.10: { id: 10, link: bond1 }
-          bond1.20: { id: 20, link: bond1 }
-          bond1.21: { id: 21, link: bond1 }
-          bond1.30: { id: 30, link: bond1 }
+          bond0.1000: { id: 1000, link: bond0 }
+          bond1.10:   { id:   10, link: bond1 }
+          bond1.20:   { id:   20, link: bond1 }
+          bond1.21:   { id:   21, link: bond1 }
+          bond1.30:   { id:   30, link: bond1 }
         bridges:
           br-maas:
             interfaces: ['bond0']
             addresses: ['192.168.3.4/24']
+          br-internet:
+            interfaces: ['bond0.1000']
           br-mgmt:
             interfaces: ['bond1.10']
             addresses: ['172.29.236.4/22']
@@ -171,14 +180,17 @@ openstack:
             parameters:
               mode: 802.3ad
         vlans:
-          bond1.10: { id: 10, link: bond1 }
-          bond1.20: { id: 20, link: bond1 }
-          bond1.21: { id: 21, link: bond1 }
-          bond1.30: { id: 30, link: bond1 }
+          bond0.1000: { id: 1000, link: bond0 }
+          bond1.10:   { id:   10, link: bond1 }
+          bond1.20:   { id:   20, link: bond1 }
+          bond1.21:   { id:   21, link: bond1 }
+          bond1.30:   { id:   30, link: bond1 }
         bridges:
           br-maas:
             interfaces: ['bond0']
             addresses: ['192.168.3.5/24']
+          br-internet:
+            interfaces: ['bond0.1000']
           br-mgmt:
             interfaces: ['bond1.10']
             addresses: ['172.29.236.5/22']
