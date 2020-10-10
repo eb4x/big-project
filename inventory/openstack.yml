@@ -52,6 +52,8 @@ openstack:
         sdc: { data_vg: ceph-059c52a5-e63c-455a-96c4-dee9f646b637, data: osd-block-3f1b6b56-b56b-46ad-961c-3c8207c82172 }
         sdd: { data_vg: ceph-61056785-53b2-45db-9a99-2940988cae25, data: osd-block-88bb9566-7d59-4bfc-8216-53c95f716f2a }
         sde: { data_vg: ceph-4610ed10-59e6-48ad-ba88-d364911e8ed6, data: osd-block-1a6e9889-b687-46d7-b344-edff6354a29e }
+        sdf: { data_vg: ceph-0154baad-8168-46dd-a7dd-8fe7e1998013, data: osd-block-b74260ba-3bf4-43b0-b81f-07def6101bf9 }
+        sdg: { data_vg: ceph-9d0b2340-6e64-4d1a-a91a-1e0880fbd046, data: osd-block-058296de-3b32-474c-aef0-239c0f8e822a }
     key-shrimp:
       ansible_user: ubuntu
       ansible_host: 192.168.3.3
@@ -105,6 +107,8 @@ openstack:
         sdc: { data_vg: ceph-e97f5be3-5c21-4b19-b02e-a4098f13dde8, data: osd-block-ce53d78f-6c7f-48a3-a32a-1e575bed4c4e }
         sdd: { data_vg: ceph-9f4ed8e4-4a42-430a-9090-e63150305528, data: osd-block-628c58a2-c36e-4aec-971c-5d4994d870a1 }
         sde: { data_vg: ceph-277d6ed6-a0c7-47a6-b313-6ca58c1de23c, data: osd-block-91060bae-30f1-4ba6-8744-674d6629e6e8 }
+        sdf: { data_vg: ceph-6f3b9fd7-914a-446d-8e1f-b8a96dc1da8d, data: osd-block-d905818d-5fc7-4680-ae7f-5f1ccd1485a2 }
+        sdg: { data_vg: ceph-d63b323b-c34c-4a73-bb52-c343af1fdae7, data: osd-block-5a6694df-b101-4643-9152-f43e231e6566 }
     mint-panda:
       ansible_user: ubuntu
       ansible_host: 192.168.3.4
@@ -158,6 +162,8 @@ openstack:
         sdc: { data_vg: ceph-d97c3f88-b2c0-410a-8408-93fe89dc54d5, data: osd-block-7e79eeaa-9c2f-4578-a06e-4f3044cb6a1d }
         sdd: { data_vg: ceph-478ff938-df47-44f8-928e-1ad2d40536fb, data: osd-block-4d67e245-c553-4894-98fe-6cdd810df293 }
         sde: { data_vg: ceph-0df98438-7560-4eae-b89a-21047de61d99, data: osd-block-c4a26cec-3866-4efd-ad20-13388f0bcc46 }
+        sdf: { data_vg: ceph-777f082f-a0d2-48bb-ab38-8e6562cc93df, data: osd-block-c82d1c69-130f-4ee7-baea-96aef3d7a04b }
+        sdg: { data_vg: ceph-83caf155-0365-4f58-a6a9-f6bbb1f4e2a5, data: osd-block-0b735bd7-7736-4e23-b9de-912a29e2316f }
     novel-dodo:
       ansible_user: ubuntu
       ansible_host: 192.168.3.5
@@ -211,3 +217,5 @@ openstack:
         sdc: { data_vg: ceph-3d57b761-d205-412d-9a65-71c6651600e9, data: osd-block-c98b7737-be5f-4d47-aaf0-e9545fda8d23 }
         sdd: { data_vg: ceph-66ab96e8-eb37-44ad-87c8-b6bb421bf639, data: osd-block-52a42b8f-8666-4bab-b922-2ab06cde50d4 }
         sde: { data_vg: ceph-4f20e4c1-0d7d-48e4-8d2b-746aa1843399, data: osd-block-9e89812a-b75a-4c62-ac95-d230ef975e2a }
+        sdf: { data_vg: ceph-57f15f56-4143-44b6-b22b-87c475bca255, data: osd-block-88acafd7-36a5-40ee-8e45-69ac96a28305 }
+        sdg: { data_vg: ceph-4abeb42a-ae1c-4185-86c6-e75744544296, data: osd-block-eb890222-41d0-4e16-864b-78028b48f188 }
