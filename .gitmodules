@@ -1,0 +1,6 @@
+[submodule "maas"]
+	path = maas
+	url = https://github.com/eb4x/maas-playbooks.git
+[submodule "openstack"]
+	path = openstack
+	url = https://github.com/eb4x/openstack-playbooks.git
