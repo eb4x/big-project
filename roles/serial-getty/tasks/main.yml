@@ -1,0 +1,15 @@
+---
+- name: create /etc/systemd/system/serial-getty@.service.d directory
+  file:
+    path: /etc/systemd/system/serial-getty@.service.d
+    state: directory
+
+- name: copy configuration
+  copy:
+    src: "{{ item }}"
+    dest: "/{{ item }}"
+  with_items:
+    - etc/issue
+    - etc/systemd/system/serial-getty@.service.d/override.conf
+  notify:
+    - restart serial-getty@ttyS0

@@ -1,0 +1,6 @@
+---
+- name: restart serial-getty@ttyS0
+  systemd:
+    daemon_reload: yes
+    name: serial-getty@ttyS0
+    state: restarted
