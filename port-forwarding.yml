@@ -1,0 +1,46 @@
+---
+- name: forward ports
+  hosts:
+    - messy-maas
+  become: true
+
+  tasks:
+    - sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: true
+
+    - name: forward openstack services to external_lb_vip_address
+      iptables:
+        table: nat
+        chain: PREROUTING
+        in_interface: br-internet
+        protocol: tcp
+        destination_port: "{{ item.port }}"
+        to_destination: 192.168.3.9
+        jump: DNAT
+        state: "{{ item.state | default('present') }}"
+      with_items:
+        - port: "80"   # http
+        - port: "81"   # kibana
+          state: absent
+        - port: "443"  # https
+        - port: "5000" # keystone
+        - port: "6080" # vnc_lite
+        - port: "8000" # heat-cfn
+        - port: "8004" # heat
+        - port: "8774" # nova
+        - port: "8776" # cinder
+        - port: "8780" # placement
+        - port: "9201" # elasticsearch
+          state: absent
+        - port: "9292" # glance
+        - port: "9311" # barbican
+        - port: "9696" # neutron
+
+    - name: forward internal traffic out
+      iptables:
+        table: nat
+        chain: POSTROUTING
+        out_interface: br-internet
+        jump: MASQUERADE
