@@ -1,0 +1,6 @@
+---
+- name: restart lldpd
+  systemd:
+    name: lldpd
+    state: restarted
+    enabled: true

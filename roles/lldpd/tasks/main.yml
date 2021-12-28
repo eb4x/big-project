@@ -1,0 +1,24 @@
+---
+- name: install lldpd
+  package:
+    name: "{{ item }}"
+  with_items:
+    - lldpd
+  notify:
+    - restart lldpd
+
+- name: get interfaces with pciid
+  set_fact:
+    _interfaces: "{{ ansible_facts | json_query(query) | sort }}"
+  vars:
+    query: "*.{device: device, pciid: pciid} | [?pciid].device"
+
+#DAEMON_ARGS="-x -c -s -e"
+- name: set new defaults for lldpd
+  lineinfile:
+    path: /etc/default/lldpd
+    regexp: "#?DAEMON_ARGS=.*"
+    line: "DAEMON_ARGS=\"-I {{ _interfaces | join(',') }}\""
+  when: ansible_os_family == 'Debian'
+  notify:
+    - restart lldpd
