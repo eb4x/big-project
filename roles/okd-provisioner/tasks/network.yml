@@ -1,0 +1,76 @@
+---
+# - name: firewalld settings
+#   ansible.posix.firewalld:
+#     zone: public
+#     service: http
+#     permanent: true
+#     state: enabled
+#   become: true
+
+- name: create baremetal
+  community.general.nmcli:
+    state: present
+    conn_name: "{{ item.conn_name }}"
+    type: "{{ item.type }}"
+    stp: "{{ item.stp | default(omit) }}"
+    priority: "{{ (item.stp | default(false)) | ternary(item.priority | default(omit), 32768) }}"
+    master: "{{ item.master | default(omit) }}"
+    method4: "{{ item.method4 | default(omit) }}"
+    ip4: "{{ item.ip4 | default(omit) }}"
+    gw4: "{{ item.gw4 | default(omit) }}"
+    dns4: "{{ item.dns4 | default(omit) }}"
+    routes4: "{{ item.routes4 | default(omit) }}"
+  with_items:
+    - conn_name: bond0
+      type: bond
+      mode: 802.3ad
+    - conn_name: eno1
+      type: bond-slave
+      master: bond0
+    - conn_name: eno2
+      type: bond-slave
+      master: bond0
+    - conn_name: provisioning
+      type: bridge
+      stp: false
+      method4: manual
+      ip4:
+        - 172.22.0.254/24
+        - 192.168.3.6/24
+      routes4:
+        - 192.168.4.0/24 192.168.3.254
+        - 192.168.140.0/24 192.168.3.254
+      method6: manual
+      ip6:
+        - fd00:1101::1/64
+    - conn_name: bond0
+      type: bridge-slave
+      master: provisioning
+    - conn_name: bond0.10
+      type: vlan
+      vlandev: bond0
+      vlanid: 10
+    - conn_name: bond0.10
+      type: bridge-slave
+      master: baremetal
+    - conn_name: baremetal
+      type: bridge
+      stp: false
+      method4: auto
+  become: true
+
+#- name: create provisioning
+#  community.general.nmcli:
+#    state: present
+#    conn_name: "{{ item.conn_name }}"
+#    type: "{{ item.type }}"
+#    stp: "{{ item.stp | default(omit) }}"
+#    priority: "{{ (item.stp | default(false)) | ternary(item.priority | default(omit), 32768) }}"
+#    master: "{{ item.master | default(omit) }}"
+#    method4: "{{ item.method4 | default(omit) }}"
+#    ip4: "{{ item.ip4 | default(omit) }}"
+#    gw4: "{{ item.gw4 | default(omit) }}"
+#    dns4: "{{ item.dns4 | default(omit) }}"
+#    routes4: "{{ item.routes4 | default(omit) }}"
+#  with_items:
+#  become: true

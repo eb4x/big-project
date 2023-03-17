@@ -1,0 +1,25 @@
+---
+fcos_image_cache_directory: "{{ ansible_env.HOME}}/.cache/openshift-installer/image_cache"
+installation_directory: "{{ ansible_env.HOME }}/clusterconfigs"
+user: kni
+
+ansible_package_requirements:
+  - tar
+okd_package_requirements:
+  - libvirt
+  - qemu-kvm
+  - mkisofs
+  - python3-devel
+  - jq
+  - ipmitool
+
+okd_repo: quay.io/openshift/okd
+okd_version: stable
+
+mirror_registry_version: 1.2.9
+mirror_registry_user: init
+mirror_registry_password: "{{ lookup('password', '~/.ansible/.mirror_registry_password') }}"
+mirror_registry_fqdn: provisioner.okd.slips.pl
+mirror_registry_quayroot: "{{ ansible_env.HOME }}/mirror-registry/quay-install"
+mirror_registry_authfile: "{{ ansible_env.HOME }}/.config/containers/auth.json"
+

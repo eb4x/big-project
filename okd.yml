@@ -1,0 +1,29 @@
+---
+- name: setup okd baremetal provisioner
+  hosts:
+    - provisioner
+
+  roles:
+    - okd-provisioner
+
+# root@api-int (172.22.0.2)
+# /var/lib/containers/storage/volumes/ironic/_data/html
+
+
+#---
+#- name: configure dnsmasq on router
+#  hosts:
+#    - messy-maas
+#
+#  tasks:
+#    - package:
+#        name: dnsmasq
+#    - lineinfile:
+#        dest: /etc/hosts
+#        line: "{{ hostvars[host].XXX }} {{ hostvars[host].FIXME }}"
+#      loop: "{{ groups['okd'] }}"
+#      loop_control:
+#        loop_var: host
+#    - template:
+#        src: dnsmasq-okd.conf.j2
+#        dest: /etc/dnsmasq.d/okd.conf

@@ -1,0 +1,6 @@
+bmc:
+  username: "{{ mint_panda_bmc_username }}"
+  password: "{{ mint_panda_bmc_password }}"
+  address: ipmi://192.168.4.4
+bootMACAddress: c4:34:6b:b6:a1:e0
+bootMode: legacy

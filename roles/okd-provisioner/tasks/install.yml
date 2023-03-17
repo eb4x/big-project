@@ -1,0 +1,74 @@
+---
+- name: create needed directories (if missing)
+  file:
+    state: directory
+    path: "{{ item.path }}"
+    mode: "{{ item.mode | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+  with_items:
+    - path: "{{ fcos_image_cache_directory }}"
+      setype: httpd_sys_content_t
+    - path: "{{ installation_directory }}"
+  tags:
+    - config
+    # sudo semanage fcontext -a -t httpd_sys_content_t "/home/kni/rhcos_image_cache(/.*)?"
+    # sudo restorecon -Rv /home/kni/rhcos_image_cache/
+
+# https://docs.openshift.com/container-platform/4.12/installing/installing_bare_metal_ipi/ipi-install-installation-workflow.html#ipi-install-creating-an-rhcos-images-cache_ipi-install-installation-workflow
+- name: populate fcos_image_cache_directory
+  block:
+    - name: coreos print-stream-json
+      command: openshift-baremetal-install coreos print-stream-json
+      changed_when: false
+      register: _coreos
+      tags:
+        - config
+
+    - name: create fcos fact
+      set_fact:
+        fcos: "{{ (_coreos.stdout | from_json).architectures.x86_64.artifacts.metal.formats['raw.xz'].disk }}"
+
+    - name: download baremetal image
+      get_url:
+        url: "{{ fcos.location }}"
+        checksum: "sha256:{{ fcos.sha256 }}"
+        dest: "{{ fcos_image_cache_directory }}/{{ fcos.location | basename }}"
+
+    - name: start podman container for serving image
+      containers.podman.podman_container:
+        name: fcos_image_cache
+        image: quay.io/centos7/httpd-24-centos7:latest
+        publish:
+          - 8080:8080/tcp
+        volume:
+          - "{{ fcos_image_cache_directory }}:/var/www/html"
+
+    - name: open firewall for fcos_image_cache
+      become: true
+      ansible.posix.firewalld:
+        state: enabled
+        zone: public
+        port: 8080/tcp
+        permanent: true
+        immediate: true
+
+- name: get mirror-registry cert
+  slurp:
+    path: "{{ mirror_registry_quayroot }}/quay-rootCA/rootCA.pem"
+  register: _mirror_registry_ca
+
+- name: "create {{ installation_directory }}/install-config.yaml"
+  template:
+    src: install-config.yaml.j2
+    dest: "{{ installation_directory }}/install-config.yaml"
+  vars:
+    domain: slips.pl
+    cluster_name: okd
+    ssh_key: "{{ _ssh_key.public_key }}"
+    mirror_registry_ca: "{{ _mirror_registry_ca.content | b64decode | trim }}"
+    bootstrap_os_image: "http://{{ ansible_facts['nodename'] }}:8080/{{ fcos.location | basename }}?sha256={{ fcos['uncompressed-sha256'] }}"
+  tags:
+    - config
+
+#- command: openshift-baremetal-install --dir clusterconfigs create manifests
+#- command: TF_LOG=trace openshift-baremetal-install --dir={{ installation_directory }} create cluster

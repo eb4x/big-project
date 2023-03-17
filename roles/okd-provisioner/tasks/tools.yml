@@ -1,0 +1,55 @@
+---
+- name: get latest official openshift-client
+  get_url:
+    url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ okd_version | default('stable') }}/openshift-client-linux.tar.gz"
+    #checksum: "sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ okd_version | default('stable') }}/sha256sum.txt"
+    dest: "{{ ansible_env.HOME }}/openshift-client-linux.tar.gz"
+
+- name: install latest openshift-client to .local/bin
+  unarchive:
+    src: "{{ ansible_env.HOME }}/openshift-client-linux.tar.gz"
+    remote_src: true
+    dest: "{{ ansible_env.HOME }}/.local/bin"
+    exclude:
+      - README.md
+    creates: "{{ ansible_env.HOME }}/.local/bin/oc"
+
+- name: get openshift client/installer for {{ okd_release }}
+  command: "oc adm release extract --tools {{ okd_repo }}:{{ okd_release }}"
+  args:
+    creates: openshift-client-linux-{{ okd_release }}.tar.gz
+
+- name: update openshift client/installer to {{ okd_release }}
+  unarchive:
+    src: "{{ ansible_env.HOME }}/{{ item }}"
+    remote_src: true
+    dest: "{{ ansible_env.HOME }}/.local/bin"
+    exclude:
+      - README.md
+  with_items:
+    - openshift-client-linux-{{ okd_release }}.tar.gz
+    - openshift-install-linux-{{ okd_release }}.tar.gz
+
+- name: get openshift-baremetal-install for {{ okd_release }}
+  command: "oc adm release extract --command=openshift-baremetal-install --to {{ ansible_env.HOME }}/.local/bin {{ okd_repo }}:{{ okd_release }}"
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/openshift-baremetal-install"
+
+- name: get bash-completion script for openshift commands
+  command: "{{ command }} completion bash"
+  changed_when: false
+  loop:
+    - oc
+    - openshift-install
+    - openshift-baremetal-install
+  loop_control:
+    loop_var: command
+  register: _command_completion
+
+- name: save bash-completion scripts for openshift commands
+  copy:
+    content: "{{ item.stdout }}"
+    dest: "{{ ansible_env.HOME }}/.local/share/bash-completion/completions/{{ item.command }}"
+  with_items: "{{ _command_completion.results }}"
+  loop_control:
+    label: "{{ item.command }}"

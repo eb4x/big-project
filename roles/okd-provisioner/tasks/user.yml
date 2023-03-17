@@ -1,0 +1,50 @@
+---
+- name: create user
+  ansible.builtin.user:
+    name: "{{ user }}"
+    groups:
+      - wheel
+      - libvirt
+  become: true
+
+#- name: apply to sudoers
+#  community.general.sudoers:
+#    name: "{{ user }}"
+#    user: "{{ user }}"
+#    commands: ALL
+#    runas: root
+#  become: true
+
+- name: create needed directories (if missing)
+  file:
+    state: directory
+    path: "{{ item.path }}"
+    mode: "{{ item.mode | default(omit) }}"
+  with_items:
+    - path: "{{ ansible_env.HOME }}/.local/bin"
+    - path: "{{ ansible_env.HOME }}/.local/share/bash-completion/completions"
+    - path: "{{ ansible_env.HOME }}/.ssh"
+      mode: '0700'
+  become: true
+  become_user: "{{ user }}"
+
+- name: generate ssh-key
+  community.crypto.openssh_keypair:
+    path: "/home/{{ user }}/.ssh/id_ed25519"
+    type: "ed25519"
+    regenerate: full_idempotence
+  register: _ssh_key
+  tags:
+    - config
+  #become: true
+  #become_user: "{{ user }}"
+
+- name: install my key for virt-mgmt
+  become: true
+  authorized_key:
+    user: root
+    key: "{{ lookup('file', item) }}"
+  with_first_found:
+    - "{{ lookup('env', 'HOME') }}/.ssh/id_ed25519.pub"
+    - "{{ lookup('env', 'HOME') }}/.ssh/id_ecdsa.pub"
+    - "{{ lookup('env', 'HOME') }}/.ssh/id_rsa.pub"

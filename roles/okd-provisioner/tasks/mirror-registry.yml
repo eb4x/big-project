@@ -1,0 +1,80 @@
+---
+# https://github.com/quay/mirror-registry
+# https://docs.okd.io/latest/installing/disconnected_install/installing-mirroring-creating-registry.html
+# https://docs.okd.io/latest/installing/disconnected_install/installing-mirroring-installation-images.html#installation-mirror-repository_installing-mirroring-installation-images
+
+# export REGISTRY_AUTH_FILE=$HOME/.config/containers/auth.json
+
+- name: install podman
+  package:
+    name: podman
+  become: true
+
+- name: create directories
+  file:
+    state: directory
+    path: "{{ item }}"
+  loop:
+    - "{{ ansible_env.HOME }}/.config/containers"
+    - "{{ mirror_registry_quayroot }}"
+
+- name: get mirror-registry version {{ mirror_registry_version }}
+  get_url:
+    url: "https://github.com/quay/mirror-registry/releases/download/{{ mirror_registry_version }}/mirror-registry-offline.tar.gz"
+    #checksum:
+    dest: "{{ ansible_env.HOME }}/mirror-registry/mirror-registry.tar.gz"
+
+- name: extract mirror-registry
+  unarchive:
+    src: "{{ ansible_env.HOME }}/mirror-registry/mirror-registry.tar.gz"
+    remote_src: true
+    dest:  "{{ ansible_env.HOME }}/mirror-registry"
+    creates:  "{{ ansible_env.HOME }}/mirror-registry/mirror-registry"
+
+- name: mirror-registry install {{ mirror_registry_fqdn }}
+  command: >-
+    ./mirror-registry install
+      --initUser {{ mirror_registry_user }}
+      --initPassword {{ mirror_registry_password }}
+      --quayHostname {{ mirror_registry_fqdn }}
+      --quayRoot {{ mirror_registry_quayroot }}
+  args:
+    chdir: "{{ ansible_env.HOME }}/mirror-registry"
+    creates: "{{ ansible_env.HOME }}/.ssh/quay_installer"
+
+- name: open the firewall for mirror-registry
+  become: true
+  ansible.posix.firewalld:
+    state: enabled
+    zone: public
+    port: 8443/tcp
+    permanent: true
+    immediate: true
+
+- name: check health of mirror-registry
+  uri:
+    ca_path: "{{ mirror_registry_quayroot }}/quay-rootCA/rootCA.pem"
+    url: "https://{{ mirror_registry_fqdn }}:8443/health/instance"
+  register: _mirror_registry_health
+
+#- assert:
+#    that: _mirror_registry_health.json.data.services[name]
+#  loop: "{{ _mirror_registry_health.json.data.services.keys() }}"
+#  loop_control:
+#    loop_var: name
+
+- name: create registry login
+  containers.podman.podman_login:
+    authfile: "{{ mirror_registry_authfile }}"
+    username: "{{ mirror_registry_user }}"
+    password: "{{ mirror_registry_password }}"
+    registry: "{{ mirror_registry_fqdn }}:8443"
+    tlsverify: false
+
+#- name: mirror okd:{{ okd_release }}
+#  command: >-
+#    oc adm release mirror -a {{ mirror_registry_authfile }}
+#      --from=quay.io/openshift/okd:{{ okd_release }}
+#      --to={{ mirror_registry_fqdn }}:8443/openshift/okd
+#      --to-release-image={{ mirror_registry_fqdn }}:8443/openshift/okd:{{ okd_release }}
+#      --insecure

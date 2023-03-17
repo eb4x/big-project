@@ -1,0 +1,39 @@
+---
+interfaces:
+- name: bond0
+  type: bond
+  state: up
+  mac-address: {{ bootMACAddress }}
+  link-aggregation:
+    mode: 802.3ad
+    options:
+      miimon: 100
+    port:
+    - eno1
+    - eno2
+  ipv4:
+    enabled: true
+    dhcp: true
+    auto-routes: false
+#- name: bond0.10
+#  type: vlan
+#  state: up
+#  vlan:
+#    base-iface: bond0
+#    id: 10
+#  ipv4:
+#    enabled: true
+#    dhcp: true
+- name: bond1
+  type: bond
+  state: up
+  link-aggregation:
+    mode: 802.3ad
+    options:
+      miimon: 100
+    port:
+    - eno3
+    - eno4
+  ipv4:
+    enabled: true
+    dhcp: true

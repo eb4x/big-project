@@ -1,0 +1,37 @@
+---
+# https://docs.okd.io/latest/installing/installing_bare_metal_ipi/ipi-install-installation-workflow.html
+- name: install packages
+  package:
+    name: "{{ ansible_package_requirements +
+              okd_package_requirements }}"
+  become: true
+
+# TODO: EL9 (almalinux) removes the socket when "not in use"
+# under /usr/lib/systemd/system/libvirtd.socket
+
+- name: enable libvirt
+  ansible.builtin.systemd:
+    name: libvirtd
+    enabled: true
+    state: started
+  become: true
+
+# FIXME: this currently breaks the network, maybe look into nmstate?
+#- import_tasks: network.yml
+
+- import_tasks: user.yml
+
+- when: okd_release is not defined
+  block:
+    - name: query origin-release api for latest 4-stable version
+      uri:
+        url: https://amd64.origin.releases.ci.openshift.org/api/v1/releasestream/4-stable/latest
+        return_content: true
+      register: _latest
+    - name: set_fact okd_release
+      set_fact:
+        okd_release: "{{ _latest.json.name }}"
+
+- import_tasks: tools.yml
+- import_tasks: mirror-registry.yml
+- import_tasks: install.yml

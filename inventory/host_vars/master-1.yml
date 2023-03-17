@@ -1,0 +1,6 @@
+bmc:
+  username: "{{ key_shrimp_bmc_username }}"
+  password: "{{ key_shrimp_bmc_password }}"
+  address: ipmi://192.168.4.3
+bootMACAddress: c4:34:6b:b5:ad:4c
+bootMode: legacy

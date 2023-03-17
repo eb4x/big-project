@@ -1,0 +1,24 @@
+---
+interfaces:
+- name: bond0.10
+  type: vlan
+  state: up
+  vlan:
+    base-iface: bond0
+    id: 10
+  ipv4:
+    enabled: true
+    address:
+    - ip: 172.22.0.2
+      prefix-length: 24
+- name: bond0
+  type: bond
+  state: up
+  mac-address: hello!
+  link-aggregation:
+    mode: 802.3ad
+    ports:
+    - eno1
+    - eno2
+    - eno3
+    - eno4
