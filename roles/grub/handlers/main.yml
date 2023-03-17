@@ -1,0 +1,6 @@
+---
+- name: update grub (debian)
+  command: update-grub
+
+- name: update grub (redhat)
+  command: grub2-mkconfig -o /etc/grub2.cfg
