@@ -1,0 +1,11 @@
+---
+kayobe:
+  hosts:
+    kayobe-dev:
+      ansible_user: stack
+      ansible_host: 192.168.3.22
+      #ansible_ssh_common_args: '-o ProxyJump=provisioner'
+      network:
+        ethernets:
+          ens3: { addresses: ['192.168.3.22/24'], set-name: provision, match: { macaddress: "52:54:00:33:f9:68" } }
+#          ens7: { addresses: ['172.29.236.1/24'], set-name: mgmt, match: { macaddress: "52:54:00:04:72:2a" } }

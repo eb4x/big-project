@@ -1,12 +1,11 @@
 ---
-openstack_ansible:
+tripleo:
   hosts:
-    osa:
-      ansible_user: ubuntu
-      ansible_host: 192.168.3.21
+    undercloud:
+      ansible_user: stack
+      ansible_host: 192.168.3.23
       #ansible_ssh_common_args: '-o ProxyJump=provisioner'
       network:
         ethernets:
-          ens4: { addresses: ['192.168.3.21/24'], set-name: provision, match: { macaddress: "52:54:00:16:dd:39" } }
+          ens4: { addresses: ['192.168.3.23/24'], set-name: provision, match: { macaddress: "52:54:00:16:dd:39" } }
           ens7: { addresses: ['172.29.236.1/24'], set-name: mgmt, match: { macaddress: "52:54:00:04:72:2a" } }
-
