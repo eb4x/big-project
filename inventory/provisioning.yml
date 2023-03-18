@@ -1,9 +1,10 @@
 ---
-maas:
+provisioning:
   hosts:
-    messy-maas:
-      ansible_host: 192.168.3.1
-      ansible_ssh_common_args: '-o ProxyJump=messy-maas'
+    maas:
+      ansible_user: stack
+      ansible_host: 192.168.3.11
+      #ansible_ssh_common_args: '-o ProxyJump=messy-maas'
       maas:
         fabrics:
           fabric-0:
@@ -17,8 +18,18 @@ maas:
             vlan.4:    { name: bmc,      mtu: 1500, subnet: 192.168.4.0/24 }
             vlan.10:   { name: mgmt,     mtu: 9000, subnet: 172.29.236.0/22 }
             vlan.20:   { name: storage,  mtu: 9000, subnet: 172.29.244.0/22 }
-            vlan.21:   { name: iscsi,    mtu: 9000, subnet: 172.16.21.0/24  }
+            vlan.21:   { name: iscsi,    mtu: 9000, subnet: 192.168.21.0/24 }
             vlan.30:   { name: tunnel,   mtu: 9000, subnet: 172.29.240.0/22 }
             vlan.40:   { name: dbaas,    mtu: 9000, subnet: 172.29.232.0/22 }
             vlan.50:   { name: lbaas,    mtu: 9000, subnet: 172.29.252.0/22 }
             vlan.1000: { name: internet, mtu: 1500 }
+    foreman:
+      ansible_host: 192.168.3.12
+    bifrost8:
+      ansible_host: 192.168.3.13
+    bifrost9:
+      ansible_host: 192.168.3.14
+    foreman8:
+      ansible_host: 192.168.3.15
+    foreman9:
+      ansible_host: 192.168.3.16
