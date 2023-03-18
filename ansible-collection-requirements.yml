@@ -5,3 +5,4 @@ collections:
   - name: community.general
   - name: community.libvirt
   - name: containers.podman
+  - name: junipernetworks.junos

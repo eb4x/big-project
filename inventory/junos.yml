@@ -1,0 +1,110 @@
+---
+junos:
+  hosts:
+    ex3300_48t:
+      ansible_connection: ansible.netcommon.netconf
+      ansible_network_os: junipernetworks.junos.junos
+      ansible_user: erikberg
+      #ansible_host: 192.168.3.254
+      ansible_host: 192.168.140.254
+      network:
+        lacp:
+          - name: ae0
+            description: messy-maas-bond0
+            mtu: 9216
+            members:
+              - name: ge-0/0/0
+                lacp_force_up: true
+              - name: ge-0/0/1
+              - name: ge-0/0/2
+              - name: ge-0/0/3
+          - name: ae1
+            description: cool-gator-bond0
+            mtu: 9216
+            members:
+              - name: ge-0/0/4
+                lacp_force_up: true
+              - name: ge-0/0/5
+          - name: ae2
+            description: cool-gator-bond1
+            mtu: 9216
+            members:
+              - name: ge-0/0/6
+              - name: ge-0/0/7
+          - name: ae3
+            description: key-shrimp-bond0
+            mtu: 9216
+            members:
+              - name: ge-0/0/8
+                lacp_force_up: true
+              - name: ge-0/0/9
+          - name: ae4
+            description: key-shrimp-bond1
+            mtu: 9216
+            members:
+              - name: ge-0/0/10
+              - name: ge-0/0/11
+          - name: ae5
+            description: mint-panda-bond0
+            mtu: 9216
+            members:
+              - name: ge-0/0/12
+                lacp_force_up: true
+              - name: ge-0/0/13
+          - name: ae6
+            description: mint-panda-bond1
+            mtu: 9216
+            members:
+              - name: ge-0/0/14
+              - name: ge-0/0/15
+          - name: ae7
+            description: novel-dodo-bond0
+            mtu: 9216
+            members:
+              - name: ge-0/0/16
+                lacp_force_up: true
+              - name: ge-0/0/17
+              - name: ge-0/0/18
+              - name: ge-0/0/19
+          - name: ae8
+            description: famous-koi-bond0
+            mtu: 9216
+            members:
+              - name: ge-0/0/20
+                lacp_force_up: true
+              - name: ge-0/0/21
+          - name: ae9
+            description: grand-worm-bond0
+            mtu: 9216
+            members:
+              - name: ge-0/0/22
+                lacp_force_up: true
+              - name: ge-0/0/23
+          - name: ae10
+            description: dcs7124sx
+            mtu: 9216
+            members:
+              - name: xe-0/1/0
+              - name: xe-0/1/1
+        bmc:
+          - name: ge-0/0/24
+            description: messy-maas-bmc
+          - name: ge-0/0/25
+            description: cool-gator-bmc
+          - name: ge-0/0/26
+            description: key-shrimp-bmc
+          - name: ge-0/0/27
+            description: mint-panda-bmc
+          - name: ge-0/0/28
+            description: novel-dodo-bmc
+          - name: ge-0/0/29
+            description: famous-koi-bmc
+          - name: ge-0/0/30
+            description: grand-worm-bmc
+        trunks:
+          - name: ge-0/0/46
+            description: amplifi
+            native_vlan: internet
+          - name: ge-0/0/47
+            description: external network
+            native_vlan: internet

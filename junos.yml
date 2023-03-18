@@ -1,0 +1,130 @@
+---
+
+- name: first play
+  hosts:
+    - ex3300_48t
+  gather_facts: false
+
+  pre_tasks:
+    - name: install ncclient
+      pip:
+        extra_args: "--user"
+        name:
+          - ncclient
+  tasks:
+#    - name: retrieve junos version
+#      junos_command:
+#        commands: show version
+#      vars:
+#        ansible_connection: ansible.netcommon.network_cli
+#      register: _show_version
+#    - debug:
+#        var: _show_version
+#
+#    - name: Enable NETCONF
+#      junipernetworks.junos.junos_netconf:
+#      vars:
+#        ansible_connection: ansible.netcommon.network_cli
+#      register: _enable_netconf
+#    - debug:
+#        var: _enable_netconf
+
+#    - name: get the facts straight
+#      junipernetworks.junos.junos_facts:
+#        gather_subset: interfaces
+#      register: _junos_facts
+
+#    - junipernetworks.junos.junos_config:
+#        lines:
+#          - set chassis aggregated-devices ethernet device-count {{ device_count }}
+#      register: _junos_config
+#      vars:
+#        device_count: hostvars[inventory_hostname].network.lacp | length
+
+#    - name: create entry for all interfaces in use
+#      junipernetworks.junos.junos_interfaces:
+#        config:
+#          - name: "{{ item.name }}"
+#            description: "{{ item.description | default(omit) }}"
+#      with_items:
+#        - "{{ hostvars[inventory_hostname].network.lacp | reverse }}"
+#        - "{{ hostvars[inventory_hostname].network.lacp | json_query(all_members) }}"
+#      loop_control:
+#        label: "{{ item.name }} -> {{ item.description | default('XXX') }}"
+#      vars:
+#        all_members: "[].members[]"
+#
+#      #loop: "{{ hostvars[inventory_hostname].network.lacp | reverse }}"
+#      #loop_control:
+#      #  index_var: index0
+#      #  label: "{{ item.name | default('ae' ~ index0) }} -> {{ item.description | default('XXX') }}"
+
+#    - junipernetworks.junos.junos_lag_interfaces:
+#        config:
+#          - name: "{{ item.name | default('ae' ~ index0) }}"
+#            mode: "{{item.mode | default('passive') }}"
+#            members: "{{ item.members | json_query(name_as_member) }}"
+#      loop: "{{ hostvars[inventory_hostname].network.lacp | reverse }}"
+#      loop_control:
+#        index_var: index0
+#        label: "{{ item.name | default('ae' ~ index0) }} -> {{ item.description | default('XXX') }}"
+#      vars:
+#        name_as_member: "[].{ member: name }"
+
+# {
+#   "array": [
+#     { "foo": "a" },
+#     { "foo": "b" },
+#     {},
+#     [],
+#     { "foo": "f" }
+#   ]
+# } | map(&foo, array)
+
+#    - debug:
+#        msg: "{{ item }}"
+#      with_items:
+#        - "{{ hostvars[inventory_hostname].network.lacp | reverse }}"
+#        - "{{ hostvars[inventory_hostname].network.lacp | json_query(all_members) | map(attribute='name')}}"
+#      vars:
+#        all_members: "[].members[]"
+#        #all_members: "[].members | [].{name: name}"
+#
+#    - fail:
+
+
+    - junipernetworks.junos.junos_lacp_interfaces:
+        config:
+#          - name: ge-0/0/0
+#            force_up: true
+          - name: ge-0/0/4
+            force_up: true
+#
+#    - debug:
+#        var: _junos_lacp
+
+#    - debug:
+#        var: hostvars[inventory_hostname]
+#
+#    - debug:
+#        msg: "{{ hostvars[inventory_hostname].network.lacp | json_query(query) }}"
+#      loop_control:
+#        loop_var: query
+#      loop:
+#        #lacp: '[].{name: name}'
+#        #members: '[].members[].{name: name}'
+#        - '[].[{name: name}, members[].name]'
+#        - '[].[{name: name}, members[]]'
+#        - '[].[{name: name}, members[] | map(&name, [{name:name}])]'
+#        - '[].[{name: name}, members[]] | []'
+#        - '[].[{name: name}, members[]] | [][]'
+#        - '[].[name, members[].name]'
+#        - '[].[name, members[].name] | [][]'
+#        - '[].[name, members[].name] | [][].{name: name}'
+        #all: '[name, members].{name: name}'
+
+#    - name: create l2 lag interfaces
+#      junipernetworks.junos.junos_l2_interfaces:
+#        config: "{{ hostvars[inventory_hostname].network.lacp | json_query(query) }}"
+#      vars:
+#        query: '[].{name: name}'
