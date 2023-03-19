@@ -1,7 +1,7 @@
 ---
 okd:
   hosts:
-    provisioner:
+    okd-provisioner:
       ansible_user: kni
     master-0:
       ansible_host: 10.0.0.40
