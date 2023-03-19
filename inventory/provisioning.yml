@@ -2,27 +2,33 @@
 provisioning:
   hosts:
     maas:
-      ansible_user: stack
       ansible_host: 192.168.3.11
       #ansible_ssh_common_args: '-o ProxyJump=messy-maas'
-      maas:
+      maas_network:
         fabrics:
           fabric-0:
-            vlan.2:    { name: amplifi, mtu: 1500, subnet: 10.0.0.0/24 }
-            vlan.3:
+            - { id: 2, name: amplifi, mtu: 1500, subnet: 192.168.140.0/24 }
+            - id: 3
               name: provision
               mtu: 1500
               subnet: 192.168.3.0/24
               dhcp_on: true
-              ip_range: { type: dynamic, start_ip: 192.168.3.190, end_ip: 192.168.3.253 }
-            vlan.4:    { name: bmc,      mtu: 1500, subnet: 192.168.4.0/24 }
-            vlan.10:   { name: mgmt,     mtu: 9000, subnet: 172.29.236.0/22 }
-            vlan.20:   { name: storage,  mtu: 9000, subnet: 172.29.244.0/22 }
-            vlan.21:   { name: iscsi,    mtu: 9000, subnet: 192.168.21.0/24 }
-            vlan.30:   { name: tunnel,   mtu: 9000, subnet: 172.29.240.0/22 }
-            vlan.40:   { name: dbaas,    mtu: 9000, subnet: 172.29.232.0/22 }
-            vlan.50:   { name: lbaas,    mtu: 9000, subnet: 172.29.252.0/22 }
-            vlan.1000: { name: internet, mtu: 1500 }
+              ip_range: { type: dynamic, start_ip: 192.168.3.200, end_ip: 192.168.3.249 }
+            - { id: 4,    name: bmc,      mtu: 1500, subnet: 192.168.4.0/24 }
+            - { id: 10,   name: mgmt,     mtu: 9000, subnet: 172.29.236.0/22 }
+            - { id: 20,   name: storage,  mtu: 9000, subnet: 172.29.244.0/22 }
+            - { id: 21,   name: iscsi,    mtu: 9000, subnet: 192.168.21.0/24 }
+            - { id: 30,   name: tunnel,   mtu: 9000, subnet: 172.29.240.0/22 }
+            - { id: 40,   name: dbaas,    mtu: 9000, subnet: 172.29.232.0/22 }
+            - { id: 50,   name: lbaas,    mtu: 9000, subnet: 172.29.252.0/22 }
+            - { id: 1000, name: internet, mtu: 1500 }
+          highspeed:
+            - id: 99
+              name: removeme
+              mtu: 1500
+              subnet: 123.234.0.0/22
+              ip_range: { type: dynamic, start_ip: 123.234.0.10, end_ip: 123.234.0.20 }
+            - { id: 999, name: external, mtu: 1500 }
     foreman:
       ansible_host: 192.168.3.12
     bifrost8:
