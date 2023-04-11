@@ -1,0 +1,19 @@
+bind-interfaces
+listen-address=10.0.0.1
+
+server=9.9.9.9
+server=8.8.8.8
+
+domain=okd.slips.pl,10.0.0.0/24
+address=/.apps.okd.slips.pl/10.0.0.128
+
+dhcp-option=121,192.168.4.0/24,10.0.0.254,192.168.140.0/24,10.0.0.254
+dhcp-range=10.0.0.50,10.0.0.99,2m
+
+{% for host in groups['okd_masters']  %}
+dhcp-host={% for interface in hostvars[host].interfaces %}{{ hostvars[host].interfaces[interface] }}{% if not loop.last %},{% endif %}{% endfor %},{{ hostvars[host].okd_external_addr }},master-{{ loop.index0 }},1h
+{% endfor %}
+{% for host in groups['okd_workers'] %}
+dhcp-host={% for interface in hostvars[host].interfaces %}{{ hostvars[host].interfaces[interface] }}{% if not loop.last %},{% endif %}{% endfor %},{{ hostvars[host].okd_external_addr }},worker-{{ loop.index0 }},1h
+{% endfor %}
+

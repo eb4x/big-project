@@ -1,4 +1,54 @@
 ---
+- name: configure dnsmasq on router
+  hosts:
+    - provisioner
+  become: true
+
+  tasks:
+    - package:
+        name: dnsmasq
+
+    - lineinfile:
+        dest: /etc/hosts
+        regexp: ".*master-{{ idx }}.okd.slips.pl"
+        line: "{{ hostvars[host].okd_external_addr }} master-{{ idx }}.okd.slips.pl"
+      loop: "{{ groups['okd_masters'] }}"
+      loop_control:
+        loop_var: host
+        index_var: idx
+      notify: restart dnsmasq
+
+    - lineinfile:
+        dest: /etc/hosts
+        regexp: ".*worker-{{ idx }}.okd.slips.pl"
+        line: "{{ hostvars[host].okd_external_addr }} worker-{{ idx }}.okd.slips.pl"
+      loop: "{{ groups['okd_workers'] }}"
+      loop_control:
+        loop_var: host
+        index_var: idx
+      notify: restart dnsmasq
+
+    - name: create entries for api and api-int # *.apps.okd.slips.pl is in dnsmasq-okd.conf
+      lineinfile:
+        dest: /etc/hosts
+        regexp: ".*{{ item }}.okd.slips.pl.*"
+        line: "10.0.0.127 api-int.okd.slips.pl api.okd.slips.pl"
+      loop:
+        - api-int
+        - api
+      notify: restart dnsmasq
+
+    - template:
+        src: dnsmasq-okd.conf.j2
+        dest: /etc/dnsmasq.d/okd.conf
+      notify: restart dnsmasq
+
+  handlers:
+    - name: restart dnsmasq
+      service:
+        name: dnsmasq
+        state: restarted
+
 - name: setup okd baremetal provisioner
   hosts:
     - provisioner
@@ -8,22 +58,5 @@
 
 # root@api-int (172.22.0.2)
 # /var/lib/containers/storage/volumes/ironic/_data/html
+# console=tty1 console=ttyS0,115200n8
 
-
-#---
-#- name: configure dnsmasq on router
-#  hosts:
-#    - messy-maas
-#
-#  tasks:
-#    - package:
-#        name: dnsmasq
-#    - lineinfile:
-#        dest: /etc/hosts
-#        line: "{{ hostvars[host].XXX }} {{ hostvars[host].FIXME }}"
-#      loop: "{{ groups['okd'] }}"
-#      loop_control:
-#        loop_var: host
-#    - template:
-#        src: dnsmasq-okd.conf.j2
-#        dest: /etc/dnsmasq.d/okd.conf
