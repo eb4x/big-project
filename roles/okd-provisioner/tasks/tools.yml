@@ -35,6 +35,34 @@
     - localhost
     - "{{ inventory_hostname }}"
 
+- name: get latest official opm
+  get_url:
+    url: "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ okd_version | default('stable') }}/opm-linux.tar.gz"
+    # checksum: "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ okd_version | default('stable') }}/sha256sum.txt"
+    dest: "{{ hostvars[item].ansible_env.HOME }}/opm-linux.tar.gz"
+    mode: '0644'
+  tags:
+    - tools
+  delegate_to: "{{ item }}"
+  loop:
+    - localhost
+    - "{{ inventory_hostname }}"
+
+- name: install latest opm to .local/bin
+  unarchive:
+    src: "{{ hostvars[item].ansible_env.HOME }}/opm-linux.tar.gz"
+    remote_src: true
+    dest: "{{ hostvars[item].ansible_env.HOME }}/.local/bin"
+    exclude:
+      - README.md
+    creates: "{{ hostvars[item].ansible_env.HOME }}/.local/bin/opm"
+  tags:
+    - tools
+  delegate_to: "{{ item }}"
+  loop:
+    - localhost
+    - "{{ inventory_hostname }}"
+
 - name: get openshift client/installer for {{ okd_release }}
   command: "oc adm release extract --tools {{ okd_repo }}:{{ okd_release }}"
   args:
@@ -63,6 +91,7 @@
     - oc
     - openshift-install
     - openshift-baremetal-install
+    - opm
   loop_control:
     loop_var: command
   register: _command_completion
