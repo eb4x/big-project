@@ -1,0 +1,18 @@
+okd_external_addr: 10.0.0.8
+
+bmc:
+  username: "{{ wise_grebe_bmc_username }}"
+  password: "{{ wise_grebe_bmc_password }}"
+  address: ipmi://192.168.4.8
+bootMACAddress: d4:ae:52:a6:2b:ad
+bootMode: UEFI
+
+rootDevice: 0:2:0:0
+
+#[core@master-2 ~]$ ls -l /dev/disk/by-path/
+# pci-0000:03:00.0-scsi-0:2:0:0 -> ../../sda
+# pci-0000:03:00.0-scsi-0:2:0:0-part1 -> ../../sda1
+# pci-0000:03:00.0-scsi-0:2:0:0-part2 -> ../../sda2
+# pci-0000:03:00.0-scsi-0:2:0:0-part3 -> ../../sda3
+# pci-0000:03:00.0-scsi-0:2:0:0-part4 -> ../../sda4
+# pci-0000:03:00.0-scsi-0:2:1:0 -> ../../sdb

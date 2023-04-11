@@ -1,0 +1,3 @@
+---
+provisioningBridge: br-provision
+externalBridge: br-baremetal

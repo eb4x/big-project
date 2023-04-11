@@ -1,3 +1,5 @@
+okd_external_addr: 10.0.0.3
+
 bmc:
   username: "{{ key_shrimp_bmc_username }}"
   password: "{{ key_shrimp_bmc_password }}"

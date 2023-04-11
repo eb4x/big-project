@@ -1,21 +1,16 @@
 ---
 okd:
   hosts:
-    okd-provisioner:
-      ansible_user: kni
-    master-0:
-      ansible_host: 10.0.0.40
-    master-1:
-      ansible_host: 10.0.0.41
-    master-2:
-      ansible_host: 10.0.0.42
-    worker-0:
+    famous-koi: # master-0:
+    grand-worm: # master-1:
+    wise-grebe: # master-2:
+    new-vervet: # worker-0:
   children:
     okd_masters:
       hosts:
-        master-0:
-        master-1:
-        master-2:
+        famous-koi: #master-0:
+        grand-worm: #master-1:
+        wise-grebe: #master-2:
     okd_workers:
       hosts:
-        worker-0:
+        new-vervet: #worker-0
