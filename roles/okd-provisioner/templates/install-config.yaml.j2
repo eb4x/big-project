@@ -19,8 +19,8 @@ platform:
   baremetal:
     apiVIP: 10.0.0.127
     ingressVIP: 10.0.0.128
-{% if bootstrap_os_image is defined %}
-    bootstrapOSImage: "{{ bootstrap_os_image }}"
+{% if cluster_os_image is defined %}
+    clusterOSImage: "{{ cluster_os_image }}"
 {% endif %}
     provisioningBridge: {{ provisioningBridge | default('provisioning') }}
     externalBridge: {{ externalBridge | default('baremetal') }}

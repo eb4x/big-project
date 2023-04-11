@@ -16,6 +16,7 @@
 
 # https://docs.openshift.com/container-platform/4.12/installing/installing_bare_metal_ipi/ipi-install-installation-workflow.html#ipi-install-creating-an-rhcos-images-cache_ipi-install-installation-workflow
 - name: populate fcos_image_cache_directory
+  when: use_fcos_image_cache | default(false)
   block:
     - name: coreos print-stream-json
       command: openshift-baremetal-install coreos print-stream-json
@@ -66,7 +67,7 @@
     cluster_name: okd
     ssh_key: "{{ _ssh_key.public_key }}"
     mirror_registry_ca: "{{ _mirror_registry_ca.content | b64decode | trim }}"
-    bootstrap_os_image: "http://{{ ansible_facts['nodename'] }}:8080/{{ fcos.location | basename }}?sha256={{ fcos['uncompressed-sha256'] }}"
+    #cluster_os_image: "http://{{ ansible_facts['nodename'] }}:8080/{{ fcos.location | basename }}?sha256={{ fcos['uncompressed-sha256'] }}"
   tags:
     - config
     - install-config.yaml
