@@ -71,10 +71,10 @@
     registry: "{{ mirror_registry_fqdn }}:8443"
     tlsverify: false
 
-#- name: mirror okd:{{ okd_release }}
-#  command: >-
-#    oc adm release mirror -a {{ mirror_registry_authfile }}
-#      --from=quay.io/openshift/okd:{{ okd_release }}
-#      --to={{ mirror_registry_fqdn }}:8443/openshift/okd
-#      --to-release-image={{ mirror_registry_fqdn }}:8443/openshift/okd:{{ okd_release }}
-#      --insecure
+- name: mirror okd:{{ okd_release }}
+  command: >-
+    oc adm release mirror -a {{ mirror_registry_authfile }}
+      --from=quay.io/openshift/okd:{{ okd_release }}
+      --to={{ mirror_registry_fqdn }}:8443/openshift/okd
+      --to-release-image={{ mirror_registry_fqdn }}:8443/openshift/okd:{{ okd_release }}
+      --insecure
