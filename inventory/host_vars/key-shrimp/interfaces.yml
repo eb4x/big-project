@@ -1,0 +1,6 @@
+---
+interfaces:
+  eno1: "c4:34:6b:b5:ad:4c"
+  eno2: "c4:34:6b:b5:ad:4d"
+  eno3: "c4:34:6b:b5:ad:4e"
+  eno4: "c4:34:6b:b5:ad:4f"
