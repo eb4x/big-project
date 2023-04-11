@@ -47,9 +47,9 @@
     dest: "{{ ansible_env.HOME }}/.local/bin"
     exclude:
       - README.md
-  with_items:
-    - openshift-client-linux-{{ okd_release }}.tar.gz
-    - openshift-install-linux-{{ okd_release }}.tar.gz
+  loop:
+    - "openshift-client-linux-{{ okd_release }}.tar.gz"
+    - "openshift-install-linux-{{ okd_release }}.tar.gz"
 
 - name: get openshift-baremetal-install for {{ okd_release }}
   command: "oc adm release extract --command=openshift-baremetal-install --to {{ ansible_env.HOME }}/.local/bin {{ okd_repo }}:{{ okd_release }}"
