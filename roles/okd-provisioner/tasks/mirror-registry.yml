@@ -21,7 +21,7 @@
 - name: get mirror-registry version {{ mirror_registry_version }}
   get_url:
     url: "https://github.com/quay/mirror-registry/releases/download/{{ mirror_registry_version }}/mirror-registry-offline.tar.gz"
-    #checksum:
+    checksum: "{{ mirror_registry_checksum }}"
     dest: "{{ ansible_env.HOME }}/mirror-registry/mirror-registry.tar.gz"
 
 - name: extract mirror-registry

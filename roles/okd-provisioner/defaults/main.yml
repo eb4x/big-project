@@ -17,6 +17,7 @@ okd_repo: quay.io/openshift/okd
 okd_version: stable
 
 mirror_registry_version: 1.2.9
+mirror_registry_checksum: sha256:852ea3b3efee50395344fd6fddaf3c422c435bb10120b8ee9d417c28a39070b6
 mirror_registry_user: init
 mirror_registry_password: "{{ lookup('password', '~/.ansible/.mirror_registry_password') }}"
 mirror_registry_fqdn: provisioner.okd.slips.pl
