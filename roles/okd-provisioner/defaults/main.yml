@@ -1,7 +1,6 @@
 ---
 fcos_image_cache_directory: "{{ ansible_env.HOME}}/.cache/openshift-installer/image_cache"
 installation_directory: "{{ ansible_env.HOME }}/clusterconfigs"
-user: kni
 
 ansible_package_requirements:
   - tar

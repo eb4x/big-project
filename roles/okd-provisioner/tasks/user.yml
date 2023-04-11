@@ -1,7 +1,7 @@
 ---
 - name: create user
   ansible.builtin.user:
-    name: "{{ user }}"
+    name: "{{ ansible_user }}"
     groups:
       - wheel
       - libvirt
@@ -25,19 +25,15 @@
     - path: "{{ ansible_env.HOME }}/.local/share/bash-completion/completions"
     - path: "{{ ansible_env.HOME }}/.ssh"
       mode: '0700'
-  become: true
-  become_user: "{{ user }}"
 
 - name: generate ssh-key
   community.crypto.openssh_keypair:
-    path: "/home/{{ user }}/.ssh/id_ed25519"
+    path: "/home/{{ ansible_user }}/.ssh/id_ed25519"
     type: "ed25519"
     regenerate: full_idempotence
   register: _ssh_key
   tags:
     - config
-  #become: true
-  #become_user: "{{ user }}"
 
 - name: install my key for virt-mgmt
   become: true
