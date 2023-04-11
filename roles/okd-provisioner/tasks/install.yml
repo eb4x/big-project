@@ -69,6 +69,8 @@
     bootstrap_os_image: "http://{{ ansible_facts['nodename'] }}:8080/{{ fcos.location | basename }}?sha256={{ fcos['uncompressed-sha256'] }}"
   tags:
     - config
+    - install-config.yaml
+
 
 - command: openshift-baremetal-install --dir clusterconfigs create manifests
   tags:
