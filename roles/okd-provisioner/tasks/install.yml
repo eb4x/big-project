@@ -70,5 +70,33 @@
   tags:
     - config
 
-#- command: openshift-baremetal-install --dir clusterconfigs create manifests
+- command: openshift-baremetal-install --dir clusterconfigs create manifests
+  tags:
+    - config
+
+# https://github.com/openshift/cluster-network-operator#configuring-ipsec-with-ovnkubernetes-at-runtime
+# https://docs.openshift.com/container-platform/4.11/networking/ovn_kubernetes_network_provider/configuring-ipsec-ovn.html
+# https://docs.openshift.com/container-platform/4.11/networking/changing-cluster-network-mtu.html#mtu-value-selection_changing-cluster-network-mtu
+- name: enable ipsec
+  copy:
+    content: |
+      ---
+      apiVersion: operator.openshift.io/v1
+      kind: Network
+      metadata:
+        name: cluster
+      spec:
+        defaultNetwork:
+          type: OVNKubernetes
+          ovnKubernetesConfig:
+            mtu: {{ 1500 - (ovnkubernetes_overhead + ipsec_overhead) }}
+            ipsecConfig: {}
+    dest: "{{ installation_directory }}/manifests/cluster-network-03-config.yml"
+    mode: '0644'
+  vars:
+    ovnkubernetes_overhead: 100
+    ipsec_overhead: 46
+  tags:
+    - config
+
 #- command: TF_LOG=trace openshift-baremetal-install --dir={{ installation_directory }} create cluster
