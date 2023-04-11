@@ -99,4 +99,20 @@
   tags:
     - config
 
+# - name: autologin root on serial console
+#   template:
+#     src: 99-serial-getty-override.yaml.j2
+#     dest: "{{ installation_directory }}/manifests/99-{{ role }}-serial-getty-override.yaml"
+#     mode: '0644'
+#   loop: [ master, worker ]
+#   loop_control:
+#     loop_var: role
+#   vars:
+#     override_conf: |
+#       [Service]
+#       ExecStart=
+#       ExecStart=-/sbin/agetty --autologin root --login-pause --keep-baud 115200,38400,9600 %I $TERM
+#   tags:
+#     - serial-getty
+
 #- command: TF_LOG=trace openshift-baremetal-install --dir={{ installation_directory }} create cluster
