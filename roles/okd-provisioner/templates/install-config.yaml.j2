@@ -17,14 +17,16 @@ controlPlane:
   replicas: 3
 platform:
   baremetal:
-    apiVIP: 10.0.0.8
-    ingressVIP: 10.0.0.9
+    apiVIP: 10.0.0.127
+    ingressVIP: 10.0.0.128
 {% if bootstrap_os_image is defined %}
     bootstrapOSImage: "{{ bootstrap_os_image }}"
 {% endif %}
+    provisioningBridge: {{ provisioningBridge | default('provisioning') }}
+    externalBridge: {{ externalBridge | default('baremetal') }}
     hosts:
 {% for host in groups['okd_masters'] %}
-    - name: {{ host }}
+    - name: master-{{ loop.index0 }}
       role: master
       bmc:
         username: {{ hostvars[host].bmc.username }}
@@ -33,7 +35,7 @@ platform:
       bootMACAddress: {{ hostvars[host].bootMACAddress }}
       bootMode: {{ hostvars[host].bootMode }}
       rootDeviceHints:
-        deviceName: /dev/sda
+        hctl: {{ hostvars[host].rootDevice }}
 {%   if experimental_networking | default(false) %}
       provisioningNetworkInterface: bond0
       networkConfig:
