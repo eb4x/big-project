@@ -1,18 +1,39 @@
 ---
+- name: fix localhost facts?
+  setup:
+  delegate_facts: true
+  delegate_to: localhost
+  tags:
+    - tools
+
 - name: get latest official openshift-client
   get_url:
     url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ okd_version | default('stable') }}/openshift-client-linux.tar.gz"
-    #checksum: "sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ okd_version | default('stable') }}/sha256sum.txt"
-    dest: "{{ ansible_env.HOME }}/openshift-client-linux.tar.gz"
+    # checksum: "sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ okd_version | default('stable') }}/sha256sum.txt"
+    dest: "{{ hostvars[item].ansible_env.HOME }}/openshift-client-linux.tar.gz"
+    mode: '0644'
+  tags:
+    - tools
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+  loop:
+    - localhost
+    - "{{ inventory_hostname }}"
 
 - name: install latest openshift-client to .local/bin
   unarchive:
-    src: "{{ ansible_env.HOME }}/openshift-client-linux.tar.gz"
+    src: "{{ hostvars[item].ansible_env.HOME }}/openshift-client-linux.tar.gz"
     remote_src: true
-    dest: "{{ ansible_env.HOME }}/.local/bin"
+    dest: "{{ hostvars[item].ansible_env.HOME }}/.local/bin"
     exclude:
       - README.md
-    creates: "{{ ansible_env.HOME }}/.local/bin/oc"
+    creates: "{{ hostvars[item].ansible_env.HOME }}/.local/bin/oc"
+  tags:
+    - tools
+  delegate_to: "{{ item }}"
+  loop:
+    - localhost
+    - "{{ inventory_hostname }}"
 
 - name: get openshift client/installer for {{ okd_release }}
   command: "oc adm release extract --tools {{ okd_repo }}:{{ okd_release }}"
@@ -50,6 +71,7 @@
   copy:
     content: "{{ item.stdout }}"
     dest: "{{ ansible_env.HOME }}/.local/share/bash-completion/completions/{{ item.command }}"
+    mode: '0644'
   with_items: "{{ _command_completion.results }}"
   loop_control:
     label: "{{ item.command }}"
