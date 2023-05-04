@@ -1,8 +1,5 @@
+---
 okd_external_addr: 10.0.0.2
 
-bmc:
-  username: "{{ cool_gator_bmc_username }}"
-  password: "{{ cool_gator_bmc_password }}"
-  address: ipmi://192.168.4.2
-bootMACAddress: c4:34:6b:b5:ad:80
+bootMACAddress: "{{ interfaces.eno1 }}"
 bootMode: legacy

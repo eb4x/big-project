@@ -1,10 +1,7 @@
+---
 okd_external_addr: 10.0.0.10
 
-bmc:
-  username: "{{ new_vervet_bmc_username }}"
-  password: "{{ new_vervet_bmc_password }}"
-  address: ipmi://192.168.4.10
-bootMACAddress: b8:ca:3a:6a:4b:d8
+bootMACAddress: "{{ interfaces.eno1 }}"
 bootMode: UEFI
 
 rootDevice: 0:2:0:0

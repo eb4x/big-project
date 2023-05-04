@@ -1,19 +1,7 @@
+---
 okd_external_addr: 10.0.0.6
 
-bmc:
-  username: "{{ famous_koi_bmc_username }}"
-  password: "{{ famous_koi_bmc_password }}"
-  address: ipmi://192.168.4.6
-bootMACAddress: b8:ca:3a:5f:1d:00
+bootMACAddress: "{{ interfaces.eno1 }}"
 bootMode: UEFI
 
 rootDevice: 0:0:12:0
-
-#[core@master-0 ~]$ ls -l /dev/disk/by-path/
-# pci-0000:02:00.0-scsi-0:0:0:0 -> ../../sda
-# pci-0000:02:00.0-scsi-0:0:0:0-part1 -> ../../sda1
-# pci-0000:02:00.0-scsi-0:0:0:0-part2 -> ../../sda2
-# pci-0000:02:00.0-scsi-0:0:0:0-part3 -> ../../sda3
-# pci-0000:02:00.0-scsi-0:0:0:0-part4 -> ../../sda4
-# pci-0000:02:00.0-scsi-0:0:12:0 -> ../../sdc
-# pci-0000:02:00.0-scsi-0:0:1:0 -> ../../sdb
