@@ -1,10 +1,7 @@
 ---
 okd:
   hosts:
-    famous-koi: # master-0:
-    grand-worm: # master-1:
-    wise-grebe: # master-2:
-    new-vervet: # worker-0:
+    provisioner:
   children:
     okd_masters:
       hosts:
@@ -13,4 +10,19 @@ okd:
         wise-grebe: #master-2:
     okd_workers:
       hosts:
-        new-vervet: #worker-0
+        new-vervet: #worker-0:
+
+uio_okd:
+  hosts:
+    uio-provisioner:
+  children:
+    uio_okd_masters:
+      hosts:
+        master-0:
+        master-1:
+        master-2:
+    uio_okd_workers:
+      hosts:
+        worker-0:
+        worker-1:
+        worker-2:

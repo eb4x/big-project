@@ -5,4 +5,5 @@ all:
       ansible_host: 84.49.124.126
     provisioner:
       ansible_user: stack
-      ansible_host: 192.168.3.1
+    uio-provisioner:
+      ansible_user: kni

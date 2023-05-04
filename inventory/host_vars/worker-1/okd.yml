@@ -1,0 +1,6 @@
+---
+okd_external_addr: 172.28.4.10
+
+bootMACAddress: d4:ae:52:a6:2b:ad
+bootMode: UEFI
+rootDevice: 0:2:0:0
