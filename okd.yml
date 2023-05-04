@@ -2,46 +2,69 @@
 - name: configure dnsmasq on router
   hosts:
     - provisioner
+    - uio-provisioner
   become: true
 
   tasks:
     - package:
         name: dnsmasq
 
-    - lineinfile:
-        dest: /etc/hosts
-        regexp: ".*master-{{ idx }}.okd.slips.pl"
-        line: "{{ hostvars[host].okd_external_addr }} master-{{ idx }}.okd.slips.pl"
-      loop: "{{ groups['okd_masters'] }}"
-      loop_control:
-        loop_var: host
-        index_var: idx
-      notify: restart dnsmasq
-
-    - lineinfile:
-        dest: /etc/hosts
-        regexp: ".*worker-{{ idx }}.okd.slips.pl"
-        line: "{{ hostvars[host].okd_external_addr }} worker-{{ idx }}.okd.slips.pl"
-      loop: "{{ groups['okd_workers'] }}"
-      loop_control:
-        loop_var: host
-        index_var: idx
-      notify: restart dnsmasq
-
-    - name: create entries for api and api-int # *.apps.okd.slips.pl is in dnsmasq-okd.conf
+    - name: Create dns entries of masters for dnsmasq
       lineinfile:
         dest: /etc/hosts
-        regexp: ".*{{ item }}.okd.slips.pl.*"
-        line: "10.0.0.127 api-int.okd.slips.pl api.okd.slips.pl"
-      loop:
-        - api-int
-        - api
+        regexp: ".*master-{{ idx }}.{{ cluster_domain }}"
+        line: "{{ hostvars[host].okd_external_addr }} master-{{ idx }}.{{ cluster_domain }}"
+      loop: "{{ groups[master_group] }}"
+      loop_control:
+        loop_var: host
+        index_var: idx
       notify: restart dnsmasq
 
-    - template:
+    - name: Create dns entries of workers for dnsmasq
+      lineinfile:
+        dest: /etc/hosts
+        regexp: ".*worker-{{ idx }}.{{ cluster_domain }}"
+        line: "{{ hostvars[host].okd_external_addr }} worker-{{ idx }}.{{ cluster_domain }}"
+      loop: "{{ groups[worker_group] }}"
+      loop_control:
+        loop_var: host
+        index_var: idx
+      notify: restart dnsmasq
+
+    - name: Create dns entries of various things for dnsmasq # *.apps.{{ cluster_domain }} is in dnsmasq-okd.conf
+      lineinfile:
+        dest: /etc/hosts
+        regexp: ".*{{ item.name }}.{{ cluster_domain }}.*"
+        line: "{{ item.address }} {{ item.name }}.{{ cluster_domain }}"
+      loop:
+        - name: api-int
+          address: "{{ baremetal_network_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}"
+        - name: api
+          address: "{{ baremetal_network_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}"
+        - name: mirror-registry
+          address: "{{ provisioning_network_cidr | default('172.22.0.0/24') | ansible.utils.ipaddr('254') | ansible.utils.ipaddr('address') }}"
+      notify: restart dnsmasq
+
+    - name: Dump specialized okd configuration for dnsmasq
+      template:
         src: dnsmasq-okd.conf.j2
         dest: /etc/dnsmasq.d/okd.conf
+      vars:
+        interface_list: "{{ ansible_facts.interfaces | map('replace', '-', '_') | map('extract', ansible_facts) }}"
+        interfaces_with_ipv4: "{{ interface_list | selectattr('ipv4', 'defined') }}"
+        ipv4_addresses: "{{ interfaces_with_ipv4 | map(attribute='ipv4.address') }}"
+        listen_address: "{{ ipv4_addresses | ansible.utils.ipaddr(baremetal_network_cidr | default('10.0.0.0/16')) | first }}"
       notify: restart dnsmasq
+
+    - name: Open for business
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        state: enabled
+        immediate: true
+        permanent: true
+      loop:
+        - dhcp
+        - dns
 
   handlers:
     - name: restart dnsmasq
@@ -52,6 +75,7 @@
 - name: setup okd baremetal provisioner
   hosts:
     - provisioner
+    - uio-provisioner
 
   roles:
     - okd-provisioner

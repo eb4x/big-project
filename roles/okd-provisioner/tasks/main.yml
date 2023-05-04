@@ -8,7 +8,6 @@
 
 # TODO: EL9 (almalinux) removes the socket when "not in use"
 # under /usr/lib/systemd/system/libvirtd.socket
-
 - name: enable libvirt
   ansible.builtin.systemd:
     name: libvirtd
@@ -28,6 +27,8 @@
         url: https://amd64.origin.releases.ci.openshift.org/api/v1/releasestream/4-stable/latest
         return_content: true
       register: _latest
+      environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
+
     - name: set_fact okd_release
       set_fact:
         okd_release: "{{ _latest.json.name }}"

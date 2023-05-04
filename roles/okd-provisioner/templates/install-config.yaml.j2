@@ -1,10 +1,12 @@
 ---
 apiVersion: v1
-baseDomain: {{ domain }}
+baseDomain: {{ base_domain }}
 metadata:
   name: {{ cluster_name }}
 networking:
   networkType: OVNKubernetes
+  machineNetwork:
+  - cidr: {{ baremetal_network_cidr | default('10.0.0.0/16') }}
 compute:
 - name: worker
   architecture: amd64
@@ -17,15 +19,16 @@ controlPlane:
   replicas: 3
 platform:
   baremetal:
-    apiVIP: 10.0.0.127
-    ingressVIP: 10.0.0.128
+    apiVIP: {{ baremetal_network_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}
+    ingressVIP: {{ baremetal_network_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('128') | ansible.utils.ipaddr('address') }}
 {% if cluster_os_image is defined %}
     clusterOSImage: "{{ cluster_os_image }}"
 {% endif %}
     provisioningBridge: {{ provisioningBridge | default('provisioning') }}
+    provisioningDHCPRange: 172.22.0.64,172.22.0.95
     externalBridge: {{ externalBridge | default('baremetal') }}
     hosts:
-{% for host in groups['okd_masters'] %}
+{% for host in groups[master_group] %}
     - name: master-{{ loop.index0 }}
       role: master
       bmc:
@@ -49,9 +52,9 @@ additionalTrustBundle: |
 imageContentSources:
 - source: quay.io/openshift/okd
   mirrors:
-  - provisioner.okd.slips.pl:8443/openshift/okd
+  - {{ mirror_registry_fqdn }}:8443/openshift/okd
 - source: quay.io/openshift/okd-content
   mirrors:
-  - provisioner.okd.slips.pl:8443/openshift/okd
+  - {{ mirror_registry_fqdn }}:8443/openshift/okd
 {% endif %}
 sshKey: '{{ ssh_key }}'

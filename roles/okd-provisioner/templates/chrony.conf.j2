@@ -1,0 +1,32 @@
+# The Machine Config Operator manages this file
+
+# Time sources
+{% for server in ntp_servers | default(['ntp1.uio.no', 'ntp2.uio.no']) %}
+server {{ server }} iburst
+{% endfor %}
+
+# Source selection
+stratumweight 0
+
+# System clock
+driftfile /var/lib/chrony/drift
+makestep 10 3
+
+# NTP server
+#allow all
+#noclientlog
+#local stratum 3 orphan
+
+# Command and monitoring access
+bindcmdaddress 127.0.0.1
+bindcmdaddress ::1
+
+# Real-time clock (RTC)
+rtcsync
+
+# Logging
+logchange 0.5
+logdir /var/log/chrony
+
+# Miscellaneous
+keyfile /etc/chrony.keys

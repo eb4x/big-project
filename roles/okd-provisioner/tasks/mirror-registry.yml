@@ -23,6 +23,7 @@
     url: "https://github.com/quay/mirror-registry/releases/download/{{ mirror_registry_version }}/mirror-registry-offline.tar.gz"
     checksum: "{{ mirror_registry_checksum }}"
     dest: "{{ ansible_env.HOME }}/mirror-registry/mirror-registry.tar.gz"
+  environment: "{{ hostvars[inventory_hostname].environment }}"
 
 - name: extract mirror-registry
   unarchive:
@@ -69,6 +70,7 @@
     username: "{{ mirror_registry_user }}"
     password: "{{ mirror_registry_password }}"
     registry: "{{ mirror_registry_fqdn }}:8443"
+    #certdir: "{{ mirror_registry_quayroot }}/quay-rootCA" # certdir looks for (*.crt, *.cert, *.key)
     tlsverify: false
 
 - name: mirror okd:{{ okd_release }}
@@ -78,3 +80,4 @@
       --to={{ mirror_registry_fqdn }}:8443/openshift/okd
       --to-release-image={{ mirror_registry_fqdn }}:8443/openshift/okd:{{ okd_release }}
       --insecure
+  environment: "{{ hostvars[inventory_hostname].environment }}"

@@ -1,2 +1,13 @@
 ---
+base_domain: slips.pl
+cluster_name: okd
+cluster_domain: "{{ cluster_name }}.{{ base_domain }}"
+
+master_group: okd_masters
+worker_group: okd_workers
+
+routes:
+  - 192.168.4.0/24,10.0.0.254
+  - 192.168.140.0/24,10.0.0.254
+
 #okd_release: 4.12.0-0.okd-2023-03-05-022504

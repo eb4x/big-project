@@ -28,12 +28,16 @@
     - name: create fcos fact
       set_fact:
         fcos: "{{ (_coreos.stdout | from_json).architectures.x86_64.artifacts.metal.formats['raw.xz'].disk }}"
+      tags:
+        - config
 
     - name: download baremetal image
       get_url:
         url: "{{ fcos.location }}"
         checksum: "sha256:{{ fcos.sha256 }}"
         dest: "{{ fcos_image_cache_directory }}/{{ fcos.location | basename }}"
+        setype: httpd_sys_content_t
+      environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
 
     - name: start podman container for serving image
       containers.podman.podman_container:
@@ -42,7 +46,8 @@
         publish:
           - 8080:8080/tcp
         volume:
-          - "{{ fcos_image_cache_directory }}:/var/www/html"
+          - "{{ fcos_image_cache_directory }}:/var/www/html:Z"
+      environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
 
     - name: open firewall for fcos_image_cache
       become: true
@@ -57,21 +62,21 @@
   slurp:
     path: "{{ mirror_registry_quayroot }}/quay-rootCA/rootCA.pem"
   register: _mirror_registry_ca
+  tags:
+    - config
+    - install-config.yaml
 
 - name: "create {{ installation_directory }}/install-config.yaml"
   template:
     src: install-config.yaml.j2
     dest: "{{ installation_directory }}/install-config.yaml"
   vars:
-    domain: slips.pl
-    cluster_name: okd
     ssh_key: "{{ _ssh_key.public_key }}"
     mirror_registry_ca: "{{ _mirror_registry_ca.content | b64decode | trim }}"
-    #cluster_os_image: "http://{{ ansible_facts['nodename'] }}:8080/{{ fcos.location | basename }}?sha256={{ fcos['uncompressed-sha256'] }}"
+    #cluster_os_image: "http://{{ mirror_registry_fqdn }}:8080/{{ fcos.location | basename }}?sha256={{ fcos['uncompressed-sha256'] }}"
   tags:
     - config
     - install-config.yaml
-
 
 - command: openshift-baremetal-install --dir clusterconfigs create manifests
   tags:
@@ -102,20 +107,36 @@
   tags:
     - config
 
-# - name: autologin root on serial console
-#   template:
-#     src: 99-serial-getty-override.yaml.j2
-#     dest: "{{ installation_directory }}/manifests/99-{{ role }}-serial-getty-override.yaml"
-#     mode: '0644'
-#   loop: [ master, worker ]
-#   loop_control:
-#     loop_var: role
-#   vars:
-#     override_conf: |
-#       [Service]
-#       ExecStart=
-#       ExecStart=-/sbin/agetty --autologin root --login-pause --keep-baud 115200,38400,9600 %I $TERM
-#   tags:
-#     - serial-getty
+- name: override ntp
+  copy:
+    content: |
+      ---
+      apiVersion: machineconfiguration.openshift.io/v1
+      kind: MachineConfig
+      metadata:
+        name: 99-{{ role }}-chrony-conf-override
+        labels:
+          machineconfiguration.openshift.io/role: {{ role }}
+      spec:
+        config:
+          ignition:
+            version: 3.2.0
+          storage:
+            files:
+              - filesystem: root
+                path: /etc/chrony.conf
+                contents:
+                  source: data:text/plain;base64,{{ chrony_conf | b64encode }}
+                mode: 420
+                overwrite: true
+    dest: "{{ installation_directory }}/manifests/99-{{ role }}-chrony-conf-override.yaml"
+    mode: '0644'
+  vars:
+    chrony_conf: "{{ lookup('template', 'chrony.conf.j2') }}"
+  loop: [ master, worker ]
+  loop_control:
+    loop_var: role
+  tags:
+    - config
 
 #- command: TF_LOG=trace openshift-baremetal-install --dir={{ installation_directory }} create cluster
