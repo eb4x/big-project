@@ -19,11 +19,11 @@
     - "{{ mirror_registry_quayroot }}"
 
 - name: get mirror-registry version {{ mirror_registry_version }}
+  environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
   get_url:
     url: "https://github.com/quay/mirror-registry/releases/download/{{ mirror_registry_version }}/mirror-registry-offline.tar.gz"
     checksum: "{{ mirror_registry_checksum }}"
     dest: "{{ ansible_env.HOME }}/mirror-registry/mirror-registry.tar.gz"
-  environment: "{{ hostvars[inventory_hostname].environment }}"
 
 - name: extract mirror-registry
   unarchive:
@@ -74,10 +74,10 @@
     tlsverify: false
 
 - name: mirror okd:{{ okd_release }}
+  environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
   command: >-
     oc adm release mirror -a {{ mirror_registry_authfile }}
       --from=quay.io/openshift/okd:{{ okd_release }}
       --to={{ mirror_registry_fqdn }}:8443/openshift/okd
       --to-release-image={{ mirror_registry_fqdn }}:8443/openshift/okd:{{ okd_release }}
       --insecure
-  environment: "{{ hostvars[inventory_hostname].environment }}"
