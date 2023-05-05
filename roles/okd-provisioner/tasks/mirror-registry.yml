@@ -15,7 +15,7 @@
     state: directory
     path: "{{ item }}"
   loop:
-    - "{{ ansible_env.HOME }}/.config/containers"
+    - "~/.config/containers"
     - "{{ mirror_registry_quayroot }}"
 
 - name: get mirror-registry version {{ mirror_registry_version }}
@@ -23,14 +23,14 @@
   get_url:
     url: "https://github.com/quay/mirror-registry/releases/download/{{ mirror_registry_version }}/mirror-registry-offline.tar.gz"
     checksum: "{{ mirror_registry_checksum }}"
-    dest: "{{ ansible_env.HOME }}/mirror-registry/mirror-registry.tar.gz"
+    dest: "~/mirror-registry/mirror-registry.tar.gz"
 
 - name: extract mirror-registry
   unarchive:
-    src: "{{ ansible_env.HOME }}/mirror-registry/mirror-registry.tar.gz"
+    src: "~/mirror-registry/mirror-registry.tar.gz"
     remote_src: true
-    dest:  "{{ ansible_env.HOME }}/mirror-registry"
-    creates:  "{{ ansible_env.HOME }}/mirror-registry/mirror-registry"
+    dest:  "~/mirror-registry"
+    creates:  "~/mirror-registry/mirror-registry"
 
 - name: mirror-registry install {{ mirror_registry_fqdn }}
   command: >-
@@ -40,8 +40,8 @@
       --quayHostname {{ mirror_registry_fqdn }}
       --quayRoot {{ mirror_registry_quayroot }}
   args:
-    chdir: "{{ ansible_env.HOME }}/mirror-registry"
-    creates: "{{ ansible_env.HOME }}/.ssh/quay_installer"
+    chdir: "~/mirror-registry"
+    creates: "~/.ssh/quay_installer"
 
 - name: open the firewall for mirror-registry
   become: true

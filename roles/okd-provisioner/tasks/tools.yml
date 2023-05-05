@@ -5,7 +5,7 @@
   get_url:
     url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ okd_version | default('stable') }}/openshift-client-linux.tar.gz"
     # checksum: "sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ okd_version | default('stable') }}/sha256sum.txt"
-    dest: "{{ hostvars[item].ansible_facts.env.HOME }}/openshift-client-linux.tar.gz"
+    dest: "~/openshift-client-linux.tar.gz"
     mode: '0644'
   loop:
     - localhost
@@ -16,12 +16,12 @@
 - name: install latest openshift-client to .local/bin
   delegate_to: "{{ host }}"
   unarchive:
-    src: "{{ hostvars[item].ansible_facts.env.HOME }}/openshift-client-linux.tar.gz"
+    src: "~/openshift-client-linux.tar.gz"
     remote_src: true
-    dest: "{{ hostvars[item].ansible_facts.env.HOME }}/.local/bin"
+    dest: "~/.local/bin"
     exclude:
       - README.md
-    creates: "{{ hostvars[item].ansible_facts.env.HOME }}/.local/bin/oc"
+    creates: "~/.local/bin/oc"
   loop:
     - localhost
     - "{{ inventory_hostname }}"
@@ -34,7 +34,7 @@
   get_url:
     url: "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ okd_version | default('stable') }}/opm-linux.tar.gz"
     # checksum: "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ okd_version | default('stable') }}/sha256sum.txt"
-    dest: "{{ hostvars[item].ansible_facts.env.HOME }}/opm-linux.tar.gz"
+    dest: "~/opm-linux.tar.gz"
     mode: '0644'
   loop:
     - localhost
@@ -45,12 +45,12 @@
 - name: install latest opm to .local/bin
   delegate_to: "{{ host }}"
   unarchive:
-    src: "{{ hostvars[item].ansible_facts.env.HOME }}/opm-linux.tar.gz"
+    src: "~/opm-linux.tar.gz"
     remote_src: true
-    dest: "{{ hostvars[item].ansible_facts.env.HOME }}/.local/bin"
+    dest: "~/.local/bin"
     exclude:
       - README.md
-    creates: "{{ hostvars[item].ansible_facts.env.HOME }}/.local/bin/opm"
+    creates: "~/.local/bin/opm"
   loop:
     - localhost
     - "{{ inventory_hostname }}"
@@ -65,9 +65,9 @@
 
 - name: update openshift client/installer to {{ okd_release }}
   unarchive:
-    src: "{{ ansible_env.HOME }}/{{ item }}"
+    src: "~/{{ item }}"
     remote_src: true
-    dest: "{{ ansible_env.HOME }}/.local/bin"
+    dest: "~/.local/bin"
     exclude:
       - README.md
   loop:
@@ -76,9 +76,9 @@
 
 - name: get openshift-baremetal-install for {{ okd_release }}
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
-  command: "oc adm release extract --command=openshift-baremetal-install --to {{ ansible_env.HOME }}/.local/bin {{ okd_repo }}:{{ okd_release }}"
+  command: "oc adm release extract --command=openshift-baremetal-install --to ~/.local/bin {{ okd_repo }}:{{ okd_release }}"
   args:
-    creates: "{{ ansible_env.HOME }}/.local/bin/openshift-baremetal-install"
+    creates: "~/.local/bin/openshift-baremetal-install"
 
 - name: get bash-completion script for openshift commands
   command: "{{ command }} completion bash"
@@ -95,7 +95,7 @@
 - name: save bash-completion scripts for openshift commands
   copy:
     content: "{{ item.stdout }}"
-    dest: "{{ ansible_env.HOME }}/.local/share/bash-completion/completions/{{ item.command }}"
+    dest: "~/.local/share/bash-completion/completions/{{ item.command }}"
     mode: '0644'
   loop: "{{ _command_completion.results }}"
   loop_control:

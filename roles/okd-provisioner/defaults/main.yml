@@ -1,6 +1,6 @@
 ---
-fcos_image_cache_directory: "{{ ansible_env.HOME }}/.cache/openshift-installer/image_cache"
-installation_directory: "{{ ansible_env.HOME }}/clusterconfigs"
+fcos_image_cache_directory: "/home/{{ ansible_user }}/.cache/openshift-installer/image_cache"
+installation_directory: "~/clusterconfigs"
 
 ansible_package_requirements:
   - nmstate
@@ -21,7 +21,7 @@ mirror_registry_version: 1.2.9
 mirror_registry_checksum: sha256:852ea3b3efee50395344fd6fddaf3c422c435bb10120b8ee9d417c28a39070b6
 mirror_registry_user: init
 mirror_registry_password: "{{ lookup('password', '~/.ansible/.mirror_registry_password') }}"
-mirror_registry_fqdn: provisioner.okd.slips.pl
-mirror_registry_quayroot: "{{ ansible_env.HOME }}/mirror-registry/quay-install"
-mirror_registry_authfile: "{{ ansible_env.HOME }}/.config/containers/auth.json"
+mirror_registry_fqdn: "mirror-registry.{{ cluster_domain }}"
+mirror_registry_quayroot: "~/mirror-registry/quay-install"
+mirror_registry_authfile: "~/.config/containers/auth.json"
 
