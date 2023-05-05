@@ -6,8 +6,8 @@
               okd_package_requirements }}"
   become: true
 
-# TODO: EL9 (almalinux) removes the socket when "not in use"
-# under /usr/lib/systemd/system/libvirtd.socket
+# TODO: EL9 (almalinux) removes /var/run/libvirt/libvirt-sock when
+# "not in use" under /usr/lib/systemd/system/libvirtd.socket
 - name: enable libvirt
   ansible.builtin.systemd:
     name: libvirtd
@@ -34,5 +34,8 @@
         okd_release: "{{ _latest.json.name }}"
 
 - import_tasks: tools.yml
+  tags:
+    - tools
+
 - import_tasks: mirror-registry.yml
 - import_tasks: install.yml
