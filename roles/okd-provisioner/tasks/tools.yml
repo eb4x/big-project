@@ -3,8 +3,8 @@
   delegate_to: "{{ host }}"
   environment: "{{ hostvars[host].environment | default({}) }}"
   get_url:
-    url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ okd_version | default('stable') }}/openshift-client-linux.tar.gz"
-    # checksum: "sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ okd_version | default('stable') }}/sha256sum.txt"
+    url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ ocp_version }}/openshift-client-linux-{{ ocp_version }}.tar.gz"
+    checksum: "sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ ocp_version }}/sha256sum.txt"
     dest: "~/openshift-client-linux.tar.gz"
     mode: '0644'
   loop:
@@ -32,8 +32,8 @@
   delegate_to: "{{ host }}"
   environment: "{{ hostvars[host].environment | default({}) }}"
   get_url:
-    url: "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ okd_version | default('stable') }}/opm-linux.tar.gz"
-    # checksum: "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ okd_version | default('stable') }}/sha256sum.txt"
+    url: "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ ocp_version }}/opm-linux-{{ ocp_version }}.tar.gz"
+    checksum: "sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ ocp_version }}/sha256sum.txt"
     dest: "~/opm-linux.tar.gz"
     mode: '0644'
   loop:
