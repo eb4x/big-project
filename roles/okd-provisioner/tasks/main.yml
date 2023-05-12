@@ -8,12 +8,30 @@
 
 # TODO: EL9 (almalinux) removes /var/run/libvirt/libvirt-sock when
 # "not in use" under /usr/lib/systemd/system/libvirtd.socket
-- name: enable libvirt
-  ansible.builtin.systemd:
-    name: libvirtd
-    enabled: true
-    state: started
-  become: true
+#- block:
+#    - stat:
+#        path: /var/run/libvirt/libvirt-sock
+#      register: _stat_libvirt_sock
+#    - debug:
+#        var: _stat_libvirt_sock
+#
+#    - name: disable the systemd.socket
+#      ansible.builtin.systemd:
+#        name: libvirtd.socket
+#        enabled: false
+#        state: stopped
+#        masked: false
+#      become: true
+#      register: _libvirtd_socket
+#
+#    - name: enable libvirt
+#      ansible.builtin.systemd:
+#        name: libvirtd
+#        enabled: true
+#        state: "{{ (_libvirtd_socket is changed) | ternary('restarted', 'started') }}"
+#      become: true
+#  tags:
+#    - libvirt
 
 # FIXME: this currently breaks the network, maybe look into nmstate?
 #- import_tasks: network.yml
