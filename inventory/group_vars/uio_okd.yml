@@ -12,6 +12,9 @@ dns_servers:
   - 129.240.2.27
   - 129.240.2.40
 
-#okd_release: 4.12.0-0.okd-2023-04-16-041331
 use_fcos_image_cache: true
 mirror_registry_fqdn: "mirror-registry.{{ cluster_domain }}"
+
+# Use Openshift Container Platform
+use_ocp: true
+#pullSecret: "{{ lookup('file', 'pull-secret-ocp.json') | to_nice_json }}"

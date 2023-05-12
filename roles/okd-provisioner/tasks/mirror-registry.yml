@@ -72,12 +72,3 @@
     registry: "{{ mirror_registry_fqdn }}:8443"
     #certdir: "{{ mirror_registry_quayroot }}/quay-rootCA" # certdir looks for (*.crt, *.cert, *.key)
     tlsverify: false
-
-- name: mirror okd:{{ okd_release }}
-  environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
-  command: >-
-    oc adm release mirror -a {{ mirror_registry_authfile }}
-      --from=quay.io/openshift/okd:{{ okd_release }}
-      --to={{ mirror_registry_fqdn }}:8443/openshift/okd
-      --to-release-image={{ mirror_registry_fqdn }}:8443/openshift/okd:{{ okd_release }}
-      --insecure

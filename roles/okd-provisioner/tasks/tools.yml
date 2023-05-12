@@ -57,13 +57,13 @@
   loop_control:
     loop_var: host
 
-- name: get openshift client/installer for {{ okd_release }}
+- name: get openshift client/installer for {{ release_version }}
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
-  command: "oc adm release extract --tools {{ okd_repo }}:{{ okd_release }}"
+  command: "oc adm release extract --tools {{ release_pull }}"
   args:
-    creates: openshift-client-linux-{{ okd_release }}.tar.gz
+    creates: openshift-client-linux-{{ release_version }}.tar.gz
 
-- name: update openshift client/installer to {{ okd_release }}
+- name: update openshift client/installer to {{ release_version }}
   unarchive:
     src: "~/{{ item }}"
     remote_src: true
@@ -71,14 +71,18 @@
     exclude:
       - README.md
   loop:
-    - "openshift-client-linux-{{ okd_release }}.tar.gz"
-    - "openshift-install-linux-{{ okd_release }}.tar.gz"
+    - "openshift-client-linux-{{ release_version }}.tar.gz"
+    - "openshift-install-linux-{{ release_version }}.tar.gz"
 
-- name: get openshift-baremetal-install for {{ okd_release }}
+- name: get openshift-baremetal-install for {{ release_version }}
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
-  command: "oc adm release extract --command=openshift-baremetal-install --to ~/.local/bin {{ okd_repo }}:{{ okd_release }}"
-  args:
-    creates: "~/.local/bin/openshift-baremetal-install"
+  command: >-
+    oc adm release extract --command=openshift-baremetal-install
+      --to ~/.local/bin {{ release_pull }}
+#  args:
+#    creates: "~/.local/bin/openshift-baremetal-install"
+  tags:
+    - baremetal
 
 - name: get bash-completion script for openshift commands
   command: "{{ command }} completion bash"

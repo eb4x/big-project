@@ -45,16 +45,16 @@ platform:
         {{ lookup('template', 'nmstate.yaml.j2', template_vars={ 'bootMACAddress': hostvars[host].bootMACAddress }) | from_yaml | to_nice_yaml(2) | indent(8) }}
 {%   endif %}
 {% endfor %}
-pullSecret: {{ lookup('file', 'pull-secret-okd.json') | to_nice_json }}
+pullSecret: {{ pullSecret | default(lookup('file', 'pull-secret-okd.json') | to_nice_json) }}
 {% if mirror_registry_ca is defined %}
 additionalTrustBundle: |
   {{ mirror_registry_ca | indent(2) }}
 imageContentSources:
-- source: quay.io/openshift/okd
+- source: {{ release_registry }}/{{ release_repo }}/{{ release_name }}
   mirrors:
-  - {{ mirror_registry_fqdn }}:8443/openshift/okd
-- source: quay.io/openshift/okd-content
+  - {{ mirror_registry_fqdn }}:8443/{{ release_repo }}/{{ release_name }}
+- source: {{ release_registry }}/{{ release_repo }}/{{ release_content_source }}
   mirrors:
-  - {{ mirror_registry_fqdn }}:8443/openshift/okd
+  - {{ mirror_registry_fqdn }}:8443/{{ release_repo }}/{{ release_name }}
 {% endif %}
 sshKey: '{{ ssh_key }}'

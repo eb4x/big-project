@@ -14,8 +14,13 @@ okd_package_requirements:
   - jq
   - ipmitool
 
-okd_repo: quay.io/openshift/okd
-okd_version: stable
+use_ocp: false
+release_registry: quay.io
+release_repo: "{{ use_ocp | ternary('openshift-release-dev', 'openshift') }}"
+release_name: "{{ use_ocp | ternary('ocp-release', 'okd') }}"
+#release_version:
+release_pull: "{{ release_registry }}/{{ release_repo }}/{{ release_name }}:{{ release_version }}"
+release_content_source: "{{ use_ocp | ternary('ocp-v4.0-art-dev', 'okd-content') }}"
 
 mirror_registry_version: 1.2.9
 mirror_registry_checksum: sha256:852ea3b3efee50395344fd6fddaf3c422c435bb10120b8ee9d417c28a39070b6
