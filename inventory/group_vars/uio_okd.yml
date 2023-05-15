@@ -12,7 +12,7 @@ dns_servers:
   - 129.240.2.27
   - 129.240.2.40
 
-use_fcos_image_cache: true
+use_coreos_image_cache: true
 mirror_registry_fqdn: "mirror-registry.{{ cluster_domain }}"
 
 # Use Openshift Container Platform

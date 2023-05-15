@@ -1,5 +1,5 @@
 ---
-fcos_image_cache_directory: "/home/{{ ansible_user }}/.cache/openshift-installer/image_cache"
+coreos_image_cache_directory: "/home/{{ ansible_user }}/.cache/openshift-installer/image_cache"
 installation_directory: "~/clusterconfigs"
 
 ansible_package_requirements:

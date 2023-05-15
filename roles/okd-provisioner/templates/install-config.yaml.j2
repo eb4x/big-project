@@ -21,9 +21,6 @@ platform:
   baremetal:
     apiVIP: {{ baremetal_network_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}
     ingressVIP: {{ baremetal_network_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('128') | ansible.utils.ipaddr('address') }}
-{% if cluster_os_image is defined %}
-    clusterOSImage: "{{ cluster_os_image }}"
-{% endif %}
     provisioningBridge: {{ provisioningBridge | default('provisioning') }}
     provisioningDHCPRange: 172.22.0.64,172.22.0.95
     externalBridge: {{ externalBridge | default('baremetal') }}

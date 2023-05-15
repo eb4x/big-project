@@ -4,19 +4,20 @@
     state: directory
     path: "{{ item.path }}"
     mode: "{{ item.mode | default(omit) }}"
-    setype: "{{ item.setype | default(omit) }}"
   with_items:
-    - path: "{{ fcos_image_cache_directory }}"
-      setype: httpd_sys_content_t
+    - path: "{{ coreos_image_cache_directory }}"
     - path: "{{ installation_directory }}"
   tags:
     - config
+    - install-config.yaml
     # sudo semanage fcontext -a -t httpd_sys_content_t "/home/kni/rhcos_image_cache(/.*)?"
     # sudo restorecon -Rv /home/kni/rhcos_image_cache/
 
 # https://docs.openshift.com/container-platform/4.12/installing/installing_bare_metal_ipi/ipi-install-installation-workflow.html#ipi-install-creating-an-rhcos-images-cache_ipi-install-installation-workflow
-- name: populate fcos_image_cache_directory
-  when: use_fcos_image_cache | default(false)
+- name: populate coreos_image_cache_directory
+  when: use_coreos_image_cache | default(false)
+  tags:
+    - coreos_image_cache
   block:
     - name: coreos print-stream-json
       command: openshift-baremetal-install coreos print-stream-json
@@ -25,38 +26,41 @@
       tags:
         - config
 
-    - name: create fcos fact
+    - name: create _coreos_meta fact
       set_fact:
-        fcos: "{{ (_coreos.stdout | from_json).architectures.x86_64.artifacts.metal.formats['raw.xz'].disk }}"
+        _coreos_meta: "{{ (_coreos.stdout | from_json).architectures.x86_64.artifacts.qemu.formats | json_query('*.disk | [0]') }}"
       tags:
         - config
 
-    - name: download baremetal image
+    - name: Check for decompressed qcow2 image in image cache directory
+      stat:
+        path: "{{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename | splitext | first }}"
+        checksum: sha256
+      register: _coreos
+
+    - name: download qemu image for bootstrap
+      when: not _coreos.stat.exists
       get_url:
-        url: "{{ fcos.location }}"
-        checksum: "sha256:{{ fcos.sha256 }}"
-        dest: "{{ fcos_image_cache_directory }}/{{ fcos.location | basename }}"
-        setype: httpd_sys_content_t
+        url: "{{ _coreos_meta.location }}"
+        checksum: "sha256:{{ _coreos_meta['sha256'] }}"
+        dest: "{{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename }}"
       environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
 
-    - name: start podman container for serving image
-      containers.podman.podman_container:
-        name: fcos_image_cache
-        image: quay.io/centos7/httpd-24-centos7:latest
-        publish:
-          - 8080:8080/tcp
-        volume:
-          - "{{ fcos_image_cache_directory }}:/var/www/html:Z"
-      environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
+    - name: decompress gz image
+      when:
+        - not _coreos.stat.exists
+        - (_coreos_meta.location | basename | splitext | last) == '.gz'
+      command: "gunzip --decompress {{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename }}"
+      args:
+        creates: "{{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename | splitext | first }}"
 
-    - name: open firewall for fcos_image_cache
-      become: true
-      ansible.posix.firewalld:
-        state: enabled
-        zone: public
-        port: 8080/tcp
-        permanent: true
-        immediate: true
+    - name: decompress xz image
+      when:
+        - not _coreos.stat.exists
+        - (_coreos_meta.location | basename | splitext | last) == '.xz'
+      command: "xz --decompress {{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename }}"
+      args:
+        creates: "{{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename | splitext | first }}"
 
 - name: get mirror-registry cert
   slurp:
@@ -73,7 +77,6 @@
   vars:
     ssh_key: "{{ _ssh_key.public_key }}"
     mirror_registry_ca: "{{ _mirror_registry_ca.content | b64decode | trim }}"
-    #cluster_os_image: "http://{{ mirror_registry_fqdn }}:8080/{{ fcos.location | basename }}?sha256={{ fcos['uncompressed-sha256'] }}"
   tags:
     - config
     - install-config.yaml
