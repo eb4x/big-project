@@ -7,6 +7,9 @@ server={{ ip }}
 
 domain={{ cluster_domain }},{{ baremetal_network_cidr | default('10.0.0.0/24') }}
 #local=/{{ cluster_domain }}/
+
+address=/api-int.{{ cluster_domain }}/{{ baremetal_network_cidr | default('10.0.0.0/24') | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}
+address=/api.{{ cluster_domain }}/{{ baremetal_network_cidr | default('10.0.0.0/24') | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}
 address=/.apps.{{ cluster_domain }}/{{ baremetal_network_cidr | default('10.0.0.0/24') | ansible.utils.ipaddr('128') | ansible.utils.ipaddr('address') }}
 
 #dhcp-option=option:router,{{ baremetal_network_cidr | default('10.0.0.0/24') | ansible.utils.ipaddr('1') | ansible.utils.ipaddr('address') }}

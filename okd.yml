@@ -15,10 +15,6 @@
         regexp: ".*{{ item.name }}.{{ cluster_domain }}.*"
         line: "{{ item.address }} {{ item.name }}.{{ cluster_domain }}"
       loop:
-        - name: api-int
-          address: "{{ baremetal_network_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}"
-        - name: api
-          address: "{{ baremetal_network_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}"
         - name: mirror-registry
           address: "{{ provisioning_network_cidr | default('172.22.0.0/24') | ansible.utils.ipaddr('254') | ansible.utils.ipaddr('address') }}"
       notify: restart dnsmasq
