@@ -9,16 +9,6 @@
     - package:
         name: dnsmasq
 
-    - name: Create dns entries of various things for dnsmasq # *.apps.{{ cluster_domain }} is in dnsmasq-okd.conf
-      lineinfile:
-        dest: /etc/hosts
-        regexp: ".*{{ item.name }}.{{ cluster_domain }}.*"
-        line: "{{ item.address }} {{ item.name }}.{{ cluster_domain }}"
-      loop:
-        - name: mirror-registry
-          address: "{{ provisioning_network_cidr | default('172.22.0.0/24') | ansible.utils.ipaddr('254') | ansible.utils.ipaddr('address') }}"
-      notify: restart dnsmasq
-
     - name: Dump specialized okd configuration for dnsmasq
       template:
         src: dnsmasq-okd.conf.j2
