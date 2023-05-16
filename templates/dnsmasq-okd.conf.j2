@@ -13,7 +13,7 @@ address=/api.{{ cluster_domain }}/{{ baremetal_network_cidr | default('10.0.0.0/
 address=/.apps.{{ cluster_domain }}/{{ baremetal_network_cidr | default('10.0.0.0/24') | ansible.utils.ipaddr('128') | ansible.utils.ipaddr('address') }}
 address=/mirror-registry.{{ cluster_domain }}/{{ listen_address }}
 
-#dhcp-option=option:router,{{ baremetal_network_cidr | default('10.0.0.0/24') | ansible.utils.ipaddr('1') | ansible.utils.ipaddr('address') }}
+dhcp-option=option:router,{{ baremetal_network_cidr | default('10.0.0.0/24') | ansible.utils.ipaddr('1') | ansible.utils.ipaddr('address') }}
 {% if routes is defined %}
 dhcp-option=121,{% for route in routes %}{{ route }}{% if not loop.last %},{% endif %}{% endfor %}
 {% endif %}
