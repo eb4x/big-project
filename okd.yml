@@ -9,28 +9,6 @@
     - package:
         name: dnsmasq
 
-    - name: Create dns entries of masters for dnsmasq
-      lineinfile:
-        dest: /etc/hosts
-        regexp: ".*master-{{ idx }}.{{ cluster_domain }}"
-        line: "{{ hostvars[host].okd_external_addr }} master-{{ idx }}.{{ cluster_domain }}"
-      loop: "{{ groups[master_group] }}"
-      loop_control:
-        loop_var: host
-        index_var: idx
-      notify: restart dnsmasq
-
-    - name: Create dns entries of workers for dnsmasq
-      lineinfile:
-        dest: /etc/hosts
-        regexp: ".*worker-{{ idx }}.{{ cluster_domain }}"
-        line: "{{ hostvars[host].okd_external_addr }} worker-{{ idx }}.{{ cluster_domain }}"
-      loop: "{{ groups[worker_group] }}"
-      loop_control:
-        loop_var: host
-        index_var: idx
-      notify: restart dnsmasq
-
     - name: Create dns entries of various things for dnsmasq # *.apps.{{ cluster_domain }} is in dnsmasq-okd.conf
       lineinfile:
         dest: /etc/hosts

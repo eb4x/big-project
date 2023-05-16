@@ -18,7 +18,9 @@ dhcp-range={{ baremetal_network_cidr | default('10.0.0.0/24') | ansible.utils.ip
 
 {% for host in groups[master_group]  %}
 dhcp-host={% for interface in hostvars[host].interfaces %}{{ hostvars[host].interfaces[interface] }}{% if not loop.last %},{% endif %}{% endfor %},{{ hostvars[host].okd_external_addr }},master-{{ loop.index0 }},1h
+host-record=master-{{ loop.index0 }}.{{ cluster_domain }},{{ hostvars[host].okd_external_addr }}
 {% endfor %}
 {% for host in groups[worker_group] %}
 dhcp-host={% for interface in hostvars[host].interfaces %}{{ hostvars[host].interfaces[interface] }}{% if not loop.last %},{% endif %}{% endfor %},{{ hostvars[host].okd_external_addr }},worker-{{ loop.index0 }},1h
+host-record=worker-{{ loop.index0 }}.{{ cluster_domain }},{{ hostvars[host].okd_external_addr }}
 {% endfor %}
