@@ -39,7 +39,9 @@
       register: _coreos
 
     - name: download qemu image for bootstrap
-      when: not _coreos.stat.exists
+      when:
+        - not _coreos.stat.exists or
+          _coreos.stat.checksum != _coreos_meta['uncompressed-sha256']
       get_url:
         url: "{{ _coreos_meta.location }}"
         checksum: "sha256:{{ _coreos_meta['sha256'] }}"
@@ -48,7 +50,8 @@
 
     - name: decompress gz image
       when:
-        - not _coreos.stat.exists
+        - not _coreos.stat.exists or
+          _coreos.stat.checksum != _coreos_meta['uncompressed-sha256']
         - (_coreos_meta.location | basename | splitext | last) == '.gz'
       command: "gunzip --decompress {{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename }}"
       args:
@@ -56,7 +59,8 @@
 
     - name: decompress xz image
       when:
-        - not _coreos.stat.exists
+        - not _coreos.stat.exists or
+          _coreos.stat.checksum != _coreos_meta['uncompressed-sha256']
         - (_coreos_meta.location | basename | splitext | last) == '.xz'
       command: "xz --decompress {{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename }}"
       args:
