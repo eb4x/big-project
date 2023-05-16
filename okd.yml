@@ -9,6 +9,17 @@
     - package:
         name: dnsmasq
 
+    - name: Create dns entries needed by provisioner
+      lineinfile:
+        dest: /etc/hosts
+        regexp: ".*{{ item.name }}.{{ cluster_domain }}.*"
+        line: "{{ item.address }} {{ item.name }}.{{ cluster_domain }}"
+      loop:
+        - name: api
+          address: "{{ baremetal_network_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}"
+        - name: mirror-registry
+          address: 127.0.0.1
+
     - name: Dump specialized okd configuration for dnsmasq
       template:
         src: dnsmasq-okd.conf.j2
