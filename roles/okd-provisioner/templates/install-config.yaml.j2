@@ -35,7 +35,7 @@ platform:
       bootMACAddress: {{ hostvars[host].bootMACAddress }}
       bootMode: {{ hostvars[host].bootMode }}
       rootDeviceHints:
-        hctl: {{ hostvars[host].rootDevice }}
+        hctl: {{ hostvars[host].rootDevice }} # ls -l /sys/block/*/device/scsi_device
 {%   if experimental_networking | default(false) %}
       provisioningNetworkInterface: bond0
       networkConfig:
