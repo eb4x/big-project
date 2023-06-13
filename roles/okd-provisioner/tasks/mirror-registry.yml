@@ -18,6 +18,11 @@
     - "~/.config/containers"
     - "{{ mirror_registry_quayroot }}"
 
+- name: check for existing mirror-registry
+  stat:
+    path: ~/.ssh/quay_installer
+  register: _quay_installer
+
 - name: get mirror-registry version {{ mirror_registry_version }}
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
   get_url:
@@ -34,6 +39,8 @@
     creates:  "{{ _mirror_registry_download is changed | ternary(omit, '~/mirror-registry/mirror-registry') }}"
 
 - name: mirror-registry install {{ mirror_registry_fqdn }}
+  when:
+    - not _quay_installer.stat.exists
   command: >-
     ./mirror-registry install
       --initUser {{ mirror_registry_user }}
@@ -43,6 +50,17 @@
   args:
     chdir: "~/mirror-registry"
     creates: "~/.ssh/quay_installer"
+
+- name: mirror-registry upgrade
+  when:
+    - _quay_installer.stat.exists
+    - _mirror_registry_download is changed
+  command: >-
+    ./mirror-registry upgrade -v
+      --quayHostname {{ mirror_registry_fqdn }}
+      --quayRoot {{ mirror_registry_quayroot }}
+  args:
+    chdir: "~/mirror-registry"
 
 - name: open the firewall for mirror-registry
   become: true
