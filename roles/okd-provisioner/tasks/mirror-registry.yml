@@ -51,6 +51,20 @@
     chdir: "~/mirror-registry"
     creates: "~/.ssh/quay_installer"
 
+- name: fix ssh-key in authorized_keys if missing
+  block:
+    - name: Fetch quay-installer ssh-key
+      openssh_keypair:
+        type: ed25519
+        path: ~/.ssh/quay_installer
+        regenerate: never
+      register: _quay_installer_key
+
+    - name: Patch quay-installer ssh-key in authorized_keys
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key: "{{ _quay_installer_key.public_key }} {{ _quay_installer_key.comment | default('quay-installer@mirror-registry') }}"
+
 - name: mirror-registry upgrade
   when:
     - _quay_installer.stat.exists
