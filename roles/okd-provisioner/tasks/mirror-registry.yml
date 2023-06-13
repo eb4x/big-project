@@ -24,13 +24,14 @@
     url: "https://github.com/quay/mirror-registry/releases/download/{{ mirror_registry_version }}/mirror-registry-offline.tar.gz"
     checksum: "{{ mirror_registry_checksum }}"
     dest: "~/mirror-registry/mirror-registry.tar.gz"
+  register: _mirror_registry_download
 
 - name: extract mirror-registry
   unarchive:
     src: "~/mirror-registry/mirror-registry.tar.gz"
     remote_src: true
     dest:  "~/mirror-registry"
-    creates:  "~/mirror-registry/mirror-registry"
+    creates:  "{{ _mirror_registry_download is changed | ternary(omit, '~/mirror-registry/mirror-registry') }}"
 
 - name: mirror-registry install {{ mirror_registry_fqdn }}
   command: >-
