@@ -38,7 +38,7 @@
 
 - name: install my key for virt-mgmt
   become: true
-  authorized_key:
+  ansible.posix.authorized_key:
     user: root
     key: "{{ lookup('file', item) }}"
   with_first_found:

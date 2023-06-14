@@ -140,7 +140,7 @@
     mode: '0644'
   vars:
     chrony_conf: "{{ lookup('template', 'chrony.conf.j2') }}"
-  loop: [ master, worker ]
+  loop: [master, worker]
   loop_control:
     loop_var: role
   tags:

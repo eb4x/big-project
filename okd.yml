@@ -6,7 +6,8 @@
   become: true
 
   tasks:
-    - package:
+    - name: install dnsmasq
+      package:
         name: dnsmasq
 
     - name: Create dns entries needed by provisioner
@@ -58,4 +59,3 @@
 # root@api-int (172.22.0.2)
 # /var/lib/containers/storage/volumes/ironic/_data/html
 # console=tty1 console=ttyS0,115200n8
-

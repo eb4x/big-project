@@ -29,4 +29,3 @@ mirror_registry_password: "{{ lookup('password', '~/.ansible/.mirror_registry_pa
 mirror_registry_fqdn: "mirror-registry.{{ cluster_domain }}"
 mirror_registry_quayroot: "~/mirror-registry/quay-install"
 mirror_registry_authfile: "~/.config/containers/auth.json"
-

@@ -108,7 +108,8 @@
           --insecure
       register: _oc_adm_release_mirror
   always:
-    - debug:
+    - name: take a big release-mirror dump on the screen
+      debug:
         msg: "{{ _oc_adm_release_mirror[item].split('\n') }}"
       when: _oc_adm_release_mirror is defined
       loop:
