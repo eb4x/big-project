@@ -57,5 +57,10 @@
     - okd-provisioner
 
 # root@api-int (172.22.0.2)
+
+# https://github.com/okd-project/okd/discussions/1500
+# cp /root/.docker/config.json /etc/ostree/auth.json
+# journalctl -fu release-image-pivot.service
+
 # /var/lib/containers/storage/volumes/ironic/_data/html
 # console=tty1 console=ttyS0,115200n8
