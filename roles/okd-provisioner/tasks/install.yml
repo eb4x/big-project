@@ -133,7 +133,7 @@
               - filesystem: root
                 path: /etc/chrony.conf
                 contents:
-                  source: data:text/plain;base64,{{ chrony_conf | b64encode }}
+                  source: "data:text/plain;base64,{{ chrony_conf | b64encode }}"
                 mode: 420
                 overwrite: true
     dest: "{{ installation_directory }}/manifests/99-{{ role }}-chrony-conf-override.yaml"
