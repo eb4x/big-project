@@ -1,5 +1,21 @@
 ---
 apiVersion: v1
+{% if openshift_install_version is version('4.11', '>=') %}
+capabilities:
+  baselineCapabilitySet: None
+  additionalEnabledCapabilities:
+    - baremetal
+    - marketplace
+{%   if openshift_install_version is version('4.12', '>=') %}
+    - Console
+    - Insights
+    - Storage
+    - CSISnapshot
+{%   endif %}
+{%   if openshift_install_version is version('4.13', '>=') %}
+    - NodeTuning
+{%   endif %}
+{% endif %}
 baseDomain: {{ base_domain }}
 metadata:
   name: {{ cluster_name }}
