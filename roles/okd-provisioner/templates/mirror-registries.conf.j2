@@ -1,0 +1,29 @@
+[[registry]]
+prefix="docker.io/library"
+location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/docker.io/library"
+
+[[registry]]
+prefix="docker.io"
+location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/docker.io"
+
+# 2023-03-20 k8s.gcr.io => registry.k8s.io
+[[registry]]
+prefix="k8s.gcr.io"
+location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/registry.k8s.io"
+
+[[registry]]
+prefix="registry.k8s.io"
+location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/registry.k8s.io"
+
+[[registry]]
+prefix="quay.io"
+location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/quay.io"
+
+# registry.access.redhat.com => registry.redhat.io
+[[registry]]
+prefix="registry.access.redhat.com"
+location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/registry.redhat.io"
+
+[[registry]]
+prefix="registry.redhat.io"
+location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/registry.redhat.io"
