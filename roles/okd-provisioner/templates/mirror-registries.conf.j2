@@ -1,3 +1,17 @@
+# Keep this list sorted alphabetically by tld on domain
+
+[[registry]]
+prefix="public.ecr.aws"
+location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/public.ecr.aws"
+
+[[registry]]
+prefix="docker.elastic.co"
+location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/docker.elastic.co"
+
+[[registry]]
+prefix="registry.access.redhat.com"
+location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/registry.access.redhat.com"
+
 [[registry]]
 prefix="docker.io/library"
 location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/docker.io/library"
@@ -5,6 +19,14 @@ location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/dock
 [[registry]]
 prefix="docker.io"
 location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/docker.io"
+
+[[registry]]
+prefix="gcr.io"
+location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/gcr.io"
+
+[[registry]]
+prefix="ghcr.io"
+location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/ghcr.io"
 
 # 2023-03-20 k8s.gcr.io => registry.k8s.io
 [[registry]]
@@ -18,12 +40,3 @@ location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/regi
 [[registry]]
 prefix="quay.io"
 location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/quay.io"
-
-# registry.access.redhat.com => registry.redhat.io
-[[registry]]
-prefix="registry.access.redhat.com"
-location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/registry.redhat.io"
-
-[[registry]]
-prefix="registry.redhat.io"
-location="mirror-registry.{{ cluster_name }}.{{ base_domain }}:8443/mirrors/registry.redhat.io"
