@@ -1,0 +1,6 @@
+---
+- name: restart quay-app
+  systemd:
+    name: quay-app.service
+    state: restarted
+    scope: user

@@ -76,6 +76,14 @@
   args:
     chdir: "~/mirror-registry"
 
+- name: make mirror-registry repos public on push by default
+  lineinfile:
+    path: "{{ mirror_registry_quayroot }}/quay-config/config.yaml"
+    line: "CREATE_PRIVATE_REPO_ON_PUSH: false"
+  notify: restart quay-app
+
+- meta: flush_handlers
+
 - name: open the firewall for mirror-registry
   become: true
   ansible.posix.firewalld:
