@@ -65,9 +65,9 @@ additionalTrustBundle: |
 imageContentSources:
 - source: {{ release_registry }}/{{ release_repo }}/{{ release_name }}
   mirrors:
-  - {{ mirror_registry_fqdn }}:8443/{{ release_repo }}/{{ release_name }}
+  - {{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}
 - source: {{ release_registry }}/{{ release_repo }}/{{ release_content_source }}
   mirrors:
-  - {{ mirror_registry_fqdn }}:8443/{{ release_repo }}/{{ release_name }}
+  - {{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}
 {% endif %}
 sshKey: '{{ ssh_key }}'

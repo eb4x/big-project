@@ -103,8 +103,8 @@
       command: >-
         oc adm release mirror -a {{ mirror_registry_authfile }}
           --from={{ release_pull }}
-          --to={{ mirror_registry_fqdn }}:8443/{{ release_repo }}/{{ release_name }}
-          --to-release-image={{ mirror_registry_fqdn }}:8443/{{ release_repo }}/{{ release_name }}:{{ release_version }}
+          --to={{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}
+          --to-release-image={{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}:{{ release_version }}
           --insecure
       register: _oc_adm_release_mirror
   always:
