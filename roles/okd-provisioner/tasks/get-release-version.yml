@@ -1,0 +1,43 @@
+---
+- name: get release_version for ocp
+  block:
+    - name: query ocp/stable/release.txt for latest stable version
+      uri:
+        url: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ ocp_version | default('stable') }}/release.txt
+        return_content: true
+      environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
+      register: _ocp_release
+
+    - name: set_fact ocp_version
+      set_fact:
+        ocp_version: "{{ _ocp_release.content | regex_search(q_release_version, '\\1') | first }}"
+      vars:
+        q_release_version: "Name:\\s+(.*)"
+
+    - name: set_fact release_version
+      when:
+        - use_ocp
+        - release_version is not defined
+      set_fact:
+        release_pull: "{{ _ocp_release.content | regex_search(q_pull_from, '\\1') | first }}"
+        release_version: "{{ _ocp_release.content | regex_search(q_release_version, '\\1') | first }}"
+      vars:
+        q_pull_from: "Pull [Ff]rom:\\s+(.*)"
+        q_release_version: "Name:\\s+(.*)"
+
+- name: get release_version for okd
+  when:
+    - not use_ocp
+    - release_version is not defined
+  block:
+    - name: query origin-release api for latest 4-stable version
+      uri:
+        url: https://amd64.origin.releases.ci.openshift.org/api/v1/releasestream/4-stable/latest
+        return_content: true
+      register: _latest
+      environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
+
+    - name: set_fact release_version
+      set_fact:
+        release_version: "{{ _latest.json.name }}"
+
