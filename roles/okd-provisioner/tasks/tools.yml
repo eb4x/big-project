@@ -1,20 +1,13 @@
 ---
 - name: get latest official openshift-client
-  delegate_to: "{{ host }}"
-  environment: "{{ hostvars[host].environment | default({}) }}"
+  environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
   get_url:
     url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ ocp_version }}/openshift-client-linux-{{ ocp_version }}.tar.gz"
     checksum: "sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ ocp_version }}/sha256sum.txt"
     dest: "~/openshift-client-linux.tar.gz"
     mode: '0644'
-  loop:
-    - localhost
-    - "{{ inventory_hostname }}"
-  loop_control:
-    loop_var: host
 
 - name: install latest openshift-client to .local/bin
-  delegate_to: "{{ host }}"
   unarchive:
     src: "~/openshift-client-linux.tar.gz"
     remote_src: true
@@ -22,28 +15,16 @@
     exclude:
       - README.md
     creates: "~/.local/bin/oc"
-  loop:
-    - localhost
-    - "{{ inventory_hostname }}"
-  loop_control:
-    loop_var: host
 
 - name: get latest official opm
-  delegate_to: "{{ host }}"
-  environment: "{{ hostvars[host].environment | default({}) }}"
+  environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
   get_url:
     url: "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ ocp_version }}/opm-linux-{{ ocp_version }}.tar.gz"
     checksum: "sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ ocp_version }}/sha256sum.txt"
     dest: "~/opm-linux.tar.gz"
     mode: '0644'
-  loop:
-    - localhost
-    - "{{ inventory_hostname }}"
-  loop_control:
-    loop_var: host
 
 - name: install latest opm to .local/bin
-  delegate_to: "{{ host }}"
   unarchive:
     src: "~/opm-linux.tar.gz"
     remote_src: true
@@ -51,17 +32,13 @@
     exclude:
       - README.md
     creates: "~/.local/bin/opm"
-  loop:
-    - localhost
-    - "{{ inventory_hostname }}"
-  loop_control:
-    loop_var: host
 
 - name: get openshift client/installer for {{ release_version }}
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
   command: "oc adm release extract --tools {{ release_pull }}"
   args:
-    creates: openshift-client-linux-{{ release_version }}.tar.gz
+    chdir: "~/"
+    creates: "~/openshift-client-linux-{{ release_version }}.tar.gz"
 
 - name: update openshift client/installer to {{ release_version }}
   unarchive:

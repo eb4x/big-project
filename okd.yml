@@ -48,6 +48,17 @@
         name: dnsmasq
         state: restarted
 
+- name: install openshift tools to localhost
+  hosts:
+    - localhost
+  tasks:
+    - import_role:
+        name: okd-provisioner
+        tasks_from: get-release-version
+    - import_role:
+        name: okd-provisioner
+        tasks_from: tools
+
 - name: setup okd baremetal provisioner
   hosts:
     - provisioner
