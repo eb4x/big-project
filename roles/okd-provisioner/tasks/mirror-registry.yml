@@ -98,6 +98,8 @@
     ca_path: "{{ mirror_registry_quayroot }}/quay-rootCA/rootCA.pem"
     url: "https://{{ mirror_registry_fqdn }}:8443/health/instance"
   register: _mirror_registry_health
+  until: _mirror_registry_health.status == 200
+  retries: 10
 
 #- assert:
 #    that: _mirror_registry_health.json.data.services[name]
