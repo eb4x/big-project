@@ -1,37 +1,29 @@
 ---
-- name: get latest official openshift-client
+- name: get latest official openshift-tools
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
   get_url:
-    url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ ocp_version }}/openshift-client-linux-{{ ocp_version }}.tar.gz"
+    url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ ocp_version }}/{{ item }}.tar.gz"
     checksum: "sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ ocp_version }}/sha256sum.txt"
-    dest: "~/openshift-client-linux.tar.gz"
+    dest: "~/{{ item }}.tar.gz"
     mode: '0644'
+  loop:
+    - "openshift-client-linux-{{ ocp_version }}"
+    - "opm-linux-{{ ocp_version }}"
+    - oc-mirror
 
-- name: install latest openshift-client to .local/bin
+- name: install latest openshift-tools to .local/bin
   unarchive:
-    src: "~/openshift-client-linux.tar.gz"
+    src: "~/{{ item.src }}.tar.gz"
     remote_src: true
     dest: "~/.local/bin"
     exclude:
       - README.md
-    creates: "~/.local/bin/oc"
-
-- name: get latest official opm
-  environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
-  get_url:
-    url: "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ ocp_version }}/opm-linux-{{ ocp_version }}.tar.gz"
-    checksum: "sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ ocp_version }}/sha256sum.txt"
-    dest: "~/opm-linux.tar.gz"
-    mode: '0644'
-
-- name: install latest opm to .local/bin
-  unarchive:
-    src: "~/opm-linux.tar.gz"
-    remote_src: true
-    dest: "~/.local/bin"
-    exclude:
-      - README.md
-    creates: "~/.local/bin/opm"
+    creates: "{{ item.creates | default(omit) }}"
+  loop:
+    - src: "openshift-client-linux-{{ ocp_version }}"
+      creates: "~/.local/bin/oc"
+    - src: "opm-linux-{{ ocp_version }}"
+    - src: oc-mirror
 
 - name: get openshift client/installer for {{ release_version }}
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
@@ -61,11 +53,24 @@
   tags:
     - baremetal
 
+# oc-mirror is archived non-executable
+- name: make sure tools are executable
+  file:
+    path: "~/.local/bin/{{ item }}"
+    mode: '0755'
+  loop:
+    - oc
+    - oc-mirror
+    - openshift-install
+    - openshift-baremetal-install
+    - opm
+
 - name: get bash-completion script for openshift commands
   command: "{{ command }} completion bash"
   changed_when: false
   loop:
     - oc
+    - oc-mirror
     - openshift-install
     - openshift-baremetal-install
     - opm
