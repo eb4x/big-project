@@ -67,6 +67,7 @@
         creates: "{{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename | splitext | first }}"
 
 - name: get mirror-registry cert
+  when: mirror_registry_is_self_signed
   slurp:
     path: "{{ mirror_registry_quayroot }}/quay-rootCA/rootCA.pem"
   register: _mirror_registry_ca
@@ -80,7 +81,7 @@
     dest: "{{ installation_directory }}/install-config.yaml"
   vars:
     ssh_key: "{{ _ssh_key.public_key }}"
-    mirror_registry_ca: "{{ _mirror_registry_ca.content | b64decode | trim }}"
+    mirror_registry_ca: "{{ _mirror_registry_ca.content | default('') | b64decode | trim }}"
     openshift_install_version: "{{ (lookup('pipe', 'openshift-install version') | regex_search('openshift-install (?P<version>\\d+\\.\\d+).', '\\g<version>'))[0] }}"
   tags:
     - config

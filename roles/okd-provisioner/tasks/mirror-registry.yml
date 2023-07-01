@@ -38,6 +38,21 @@
     dest: "~/mirror-registry"
     creates: "{{ _mirror_registry_download is changed | ternary(omit, '~/mirror-registry/mirror-registry') }}"
 
+- name: dump ssl certs
+  when:
+    - mirror_registry_ssl_key is defined
+    - mirror_registry_ssl_crt is defined
+  copy:
+    content: "{{ item.content }}"
+    dest: "~/mirror-registry/{{ mirror_registry_fqdn | replace('.', '_') }}.{{ item.ext }}"
+  loop:
+    - content: "{{ (mirror_registry_ssl_key | trim) ~ '\n'}}"
+      ext: key
+    - content: "{{ (mirror_registry_ssl_crt | trim) ~ '\n'}}"
+      ext: crt
+  loop_control:
+    label: "{{ mirror_registry_fqdn | replace('.', '_') }}.{{ item.ext }}"
+
 - name: mirror-registry install {{ mirror_registry_fqdn }}
   when:
     - not _quay_installer.stat.exists
@@ -47,6 +62,10 @@
       --initPassword {{ mirror_registry_password }}
       --quayHostname {{ mirror_registry_fqdn }}
       --quayRoot {{ mirror_registry_quayroot }}
+      {% if mirror_registry_ssl_key is defined and mirror_registry_ssl_crt is defined %}
+      --sslKey {{ mirror_registry_fqdn | replace('.', '_') }}.key
+      --sslCert {{ mirror_registry_fqdn | replace('.', '_') }}.crt
+      {% endif %}
   args:
     chdir: "~/mirror-registry"
     creates: "~/.ssh/quay_installer"
@@ -95,7 +114,7 @@
 
 - name: check health of mirror-registry
   uri:
-    ca_path: "{{ mirror_registry_quayroot }}/quay-rootCA/rootCA.pem"
+    ca_path: "{{ mirror_registry_is_self_signed | ternary(mirror_registry_quayroot ~ '/quay-rootCA/rootCA.pem', omit) }}"
     url: "https://{{ mirror_registry_fqdn }}:8443/health/instance"
   register: _mirror_registry_health
   until: _mirror_registry_health.status == 200
@@ -114,4 +133,4 @@
     password: "{{ mirror_registry_password }}"
     registry: "{{ mirror_registry_fqdn }}:8443"
     #certdir: "{{ mirror_registry_quayroot }}/quay-rootCA" # certdir looks for (*.crt, *.cert, *.key)
-    tlsverify: false
+    tlsverify: "{{ not mirror_registry_is_self_signed }}"
