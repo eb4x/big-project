@@ -59,9 +59,11 @@ platform:
 {%   endif %}
 {% endfor %}
 pullSecret: {{ pullSecret | default(lookup('file', 'pull-secret-okd.json') | to_nice_json) }}
-{% if mirror_registry_ca is defined %}
+{% if use_mirror_registry %}
+{%   if mirror_registry_ca is defined %}
 additionalTrustBundle: |
   {{ mirror_registry_ca | indent(2) }}
+{%   endif %}
 imageContentSources:
 - source: {{ release_registry }}/{{ release_repo }}/{{ release_name }}
   mirrors:

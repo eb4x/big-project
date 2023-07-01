@@ -22,6 +22,7 @@ release_name: "{{ use_ocp | ternary('ocp-release', 'okd') }}"
 release_pull: "{{ release_registry }}/{{ release_repo }}/{{ release_name }}:{{ release_version }}"
 release_content_source: "{{ use_ocp | ternary('ocp-v4.0-art-dev', 'okd-content') }}"
 
+use_mirror_registry: true
 mirror_registry_version: v1.3.5
 mirror_registry_checksum: sha256:7671d846eb0763428b26facffc6ed8b013fe247f87cdc8aa3b4a19717defcb7b
 mirror_registry_user: init

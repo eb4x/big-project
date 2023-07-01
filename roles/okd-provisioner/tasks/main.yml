@@ -37,11 +37,12 @@
 #- import_tasks: network.yml
 
 - import_tasks: user.yml
-- import_tasks: mirror-registry.yml
+- when: use_mirror_registry
+  include_tasks: mirror-registry.yml
 - import_tasks: get-release-version.yml
 
 - name: "push {{ release_name }}:{{ release_version }} to mirror-registry"
-  when: use_mirror_registry | default(true)
+  when: use_mirror_registry
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
   block:
     - name: create ocp registry login
