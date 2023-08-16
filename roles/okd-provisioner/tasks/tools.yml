@@ -2,14 +2,20 @@
 - name: get latest official openshift-tools
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
   get_url:
-    url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ ocp_version }}/{{ item }}.tar.gz"
-    checksum: "sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ ocp_version }}/sha256sum.txt"
-    dest: "~/{{ item }}.tar.gz"
-    mode: '0644'
+    url: "{{ item.url | default('https://mirror.openshift.com/pub/openshift-v4/clients/ocp/' ~ ocp_version ~ '/' ~ item.tool ~ '.tar.gz') }}"
+    checksum: "{{ item.checksum | default('sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/' ~ ocp_version ~ '/sha256sum.txt') }}"
+    dest: "{{ item.dest | default('~/' ~ item.tool ~ '.tar.gz') }}"
+    mode: "{{ item.mode | default('0644') }}"
   loop:
-    - "openshift-client-linux-{{ ocp_version }}"
-    - "opm-linux-{{ ocp_version }}"
-    - oc-mirror
+    - tool: "openshift-client-linux-{{ ocp_version }}"
+    - tool: opm
+      url: https://github.com/operator-framework/operator-registry/releases/download/v1.28.0/linux-amd64-opm
+      checksum: sha256:https://github.com/operator-framework/operator-registry/releases/download/v1.28.0/checksums.txt
+      dest: ~/.local/bin/opm
+      mode: '0755'
+    - tool: oc-mirror
+  loop_control:
+    label: "{{ item.tool }}"
 
 - name: install latest openshift-tools to .local/bin
   unarchive:
@@ -22,7 +28,6 @@
   loop:
     - src: "openshift-client-linux-{{ ocp_version }}"
       creates: "~/.local/bin/oc"
-    - src: "opm-linux-{{ ocp_version }}"
     - src: oc-mirror
 
 - name: get openshift client/installer for {{ release_version }}
