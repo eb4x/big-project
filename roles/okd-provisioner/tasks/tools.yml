@@ -14,6 +14,7 @@
       dest: ~/.local/bin/opm
       mode: '0755'
     - tool: oc-mirror
+      checksum: sha256:cb62a359d35fc7e85b67d1184fd498d9e366d066a71135ac2c18e109251c304e
   loop_control:
     label: "{{ item.tool }}"
 
