@@ -13,6 +13,11 @@
       checksum: sha256:https://github.com/operator-framework/operator-registry/releases/download/v1.28.0/checksums.txt
       dest: ~/.local/bin/opm
       mode: '0755'
+    - tool: operator-sdk
+      url: https://github.com/operator-framework/operator-sdk/releases/download/v1.31.0/operator-sdk_linux_amd64
+      checksum: sha256:https://github.com/operator-framework/operator-sdk/releases/download/v1.31.0/checksums.txt
+      dest: ~/.local/bin/operator-sdk
+      mode: '0755'
     - tool: oc-mirror
       checksum: sha256:cb62a359d35fc7e85b67d1184fd498d9e366d066a71135ac2c18e109251c304e
   loop_control:
