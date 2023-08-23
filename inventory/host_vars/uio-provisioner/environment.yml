@@ -2,4 +2,4 @@
 environment:
   http_proxy: http://software-proxy.uio.no:3128
   https_proxy: http://software-proxy.uio.no:3128
-  no_proxy: "{{ mirror_registry_fqdn }}"
+  no_proxy: "api.{{ cluster_domain }},{{ mirror_registry_fqdn }}"
