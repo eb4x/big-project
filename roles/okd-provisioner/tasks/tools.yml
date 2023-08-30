@@ -2,26 +2,27 @@
 - name: get latest official openshift-tools
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
   get_url:
-    url: "{{ item.url | default('https://mirror.openshift.com/pub/openshift-v4/clients/ocp/' ~ ocp_version ~ '/' ~ item.tool ~ '.tar.gz') }}"
-    checksum: "{{ item.checksum | default('sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/' ~ ocp_version ~ '/sha256sum.txt') }}"
-    dest: "{{ item.dest | default('~/' ~ item.tool ~ '.tar.gz') }}"
-    mode: "{{ item.mode | default('0644') }}"
+    url: "{{ tool.url | default('https://mirror.openshift.com/pub/openshift-v4/clients/ocp/' ~ ocp_version ~ '/' ~ tool.name ~ '.tar.gz') }}"
+    checksum: "{{ tool.checksum | default('sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/' ~ ocp_version ~ '/sha256sum.txt') }}"
+    dest: "{{ tool.dest | default('~/' ~ tool.name ~ '.tar.gz') }}"
+    mode: "{{ tool.mode | default('0644') }}"
   loop:
-    - tool: "openshift-client-linux-{{ ocp_version }}"
-    - tool: opm
+    - name: "openshift-client-linux-{{ ocp_version }}"
+    - name: opm
       url: https://github.com/operator-framework/operator-registry/releases/download/v1.28.0/linux-amd64-opm
       checksum: sha256:https://github.com/operator-framework/operator-registry/releases/download/v1.28.0/checksums.txt
       dest: ~/.local/bin/opm
       mode: '0755'
-    - tool: operator-sdk
+    - name: operator-sdk
       url: https://github.com/operator-framework/operator-sdk/releases/download/v1.31.0/operator-sdk_linux_amd64
       checksum: sha256:https://github.com/operator-framework/operator-sdk/releases/download/v1.31.0/checksums.txt
       dest: ~/.local/bin/operator-sdk
       mode: '0755'
-    - tool: oc-mirror
+    - name: oc-mirror
       checksum: sha256:ce836663e4d649666e973a48a93cbf8b6bb8d88c4141dceca7c3d0b281a075c5
   loop_control:
-    label: "{{ item.tool }}"
+    loop_var: tool
+    label: "{{ tool.name }}"
 
 - name: install latest openshift-tools to .local/bin
   unarchive:
