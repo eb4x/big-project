@@ -1,0 +1,128 @@
+---
+- name: install zabbix-server
+  hosts:
+    - uio-provisioner
+  become: true
+
+  tasks:
+    - name: Create dns entries needed by provisioner
+      lineinfile:
+        dest: /etc/hosts
+        regexp: ".*{{ item.name }}.{{ cluster_domain }}.*"
+        line: "{{ item.address }} {{ item.name }}.{{ cluster_domain }}"
+      loop:
+        - name: zabbix-server
+          address: 127.0.0.1
+
+    - name: Dump specialized zabbix configuration for dnsmasq
+      copy:
+        content: |
+          address=/zabbix-server.{{ cluster_domain }}/{{ listen_address }}
+        dest: /etc/dnsmasq.d/zabbix.conf
+      vars:
+        interface_list: "{{ ansible_facts.interfaces | map('replace', '-', '_') | map('extract', ansible_facts) }}"
+        interfaces_with_ipv4: "{{ interface_list | selectattr('ipv4', 'defined') }}"
+        ipv4_addresses: "{{ interfaces_with_ipv4 | map(attribute='ipv4.address') }}"
+        listen_address: "{{ ipv4_addresses | ansible.utils.ipaddr(baremetal_network_cidr | default('10.0.0.0/16')) | first }}"
+      notify: restart dnsmasq
+
+    - name: copy zabbix kubeplay
+      template:
+        src: zabbix-mysql-pod.yaml.j2
+        dest: zabbix-mysql-pod.yaml
+      vars:
+        zabbix_version: 6.0-latest
+        zabbix_https_port: 10443
+        mysql_version: 10.6
+        mysql_password: "{{ lookup('password', '~/.ansible/.zabbix_mysql_password') }}"
+
+    - name: prop up zabbix pod
+      containers.podman.podman_play:
+        kube_file: zabbix-mysql-pod.yaml
+        state: started
+      become: false
+
+    - name: open zabbix-web
+      ansible.posix.firewalld:
+        port: "{{ item }}"
+        permanent: true
+        state: enabled
+      loop:
+        - 8080/tcp
+        #- 10443/tcp
+
+    - name: wait_for zabbix
+      uri:
+        url: "http://{{ hostvars['zabbix-server'].ansible_host }}:8080"
+      register: _res
+      retries: 10
+      delay: 10
+      until: _res.status == 200
+
+    - debug:
+        var: _res
+
+  handlers:
+    - name: restart dnsmasq
+      service:
+        name: dnsmasq
+        state: restarted
+
+- name: configure zabbix-server
+  hosts:
+    - zabbix-server
+
+  tasks:
+    - name: configure Zabbix server agent as active
+      community.zabbix.zabbix_host:
+        host_name: Zabbix server
+        interfaces: []
+        link_templates:
+          - Zabbix server health
+          - Linux by Zabbix agent active
+
+    - name: get Zabbix server info
+      community.zabbix.zabbix_host_info:
+        host_name: Zabbix server
+      register: _zabbix_host
+
+    - name: remove passive agent interface on Zabbix server if present
+      when: _zabbix_host | json_query(passive_interface_id) is not none
+      vars:
+#        zabbix_server: "[?host=='Zabbix server'] | [0]"
+#        passive_port: "[?port=='10050'] | [0]"
+        passive_interface_id: "hosts[?host=='Zabbix server'] | [0].hostinterfaces[?port=='10050'].interfaceid | [0]"
+      block:
+        - name: get auth token
+          when: ansible_zabbix_auth_key is not defined
+          uri:
+            url: "http://{{ ansible_host }}:8080/api_jsonrpc.php"
+            method: POST
+            headers:
+              Content-Type: application/json-rpc
+            body_format: json
+            body:
+              jsonrpc: "2.0"
+              method: user.login
+              params:
+                username: "{{ ansible_user }}"
+                password: "{{ ansible_httpapi_pass }}"
+              id: 1
+            return_content: true
+          register: _auth
+
+        - name: remove Zabbix server passive agent interface
+          uri:
+            url: "http://{{ ansible_host }}:8080/api_jsonrpc.php"
+            method: POST
+            headers:
+              Content-Type: application/json-rpc
+            body_format: json
+            body:
+              jsonrpc: "2.0"
+              auth: "{{ ansible_zabbix_auth_key | default(_auth.json.result) }}"
+              method: hostinterface.delete
+              params:
+                - "{{ _zabbix_host | json_query(interface_id) }}"
+              id: 2
+            return_content: true

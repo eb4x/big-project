@@ -1,8 +1,13 @@
 ---
+# Install with
+# ansible-galaxy collection install -r ansible-collection-requirements.yml
 collections:
+  - name: ansible.netcommon
   - name: ansible.posix
   - name: community.crypto
   - name: community.general
   - name: community.libvirt
+  - name: community.zabbix
+    version: ">=2.0.0"
   - name: containers.podman
   - name: junipernetworks.junos

@@ -1,0 +1,10 @@
+---
+zabbix:
+  hosts:
+    zabbix-server:
+      ansible_network_os: community.zabbix.zabbix
+      ansible_connection: httpapi
+      ansible_httpapi_use_ssl: false
+      ansible_host: zabbix-server.openshift-utv.uio.no
+      ansible_httpapi_port: 8080
+      ansible_zabbix_url_path: ''
