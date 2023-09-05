@@ -36,11 +36,15 @@
 # FIXME: this currently breaks the network, maybe look into nmstate?
 #- import_tasks: network.yml
 
-- import_tasks: user.yml
-- when: use_mirror_registry
+- name: import_tasks doesn't display the name section
+  import_tasks: user.yml
+- name: setup mirror-registry
+  when: use_mirror_registry
   include_tasks: mirror-registry.yml
-- import_tasks: get-release-version.yml
-- import_tasks: tools.yml
+- name: import_tasks doesn't display the name section
+  import_tasks: get-release-version.yml
+- name: import_tasks doesn't display the name section
+  import_tasks: tools.yml
   tags:
     - tools
 
@@ -79,4 +83,5 @@
         - stdout
         - stderr
 
-- import_tasks: install.yml
+- name: import_tasks doesn't display the name section
+  import_tasks: install.yml

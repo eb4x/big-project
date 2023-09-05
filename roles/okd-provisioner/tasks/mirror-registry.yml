@@ -106,7 +106,8 @@
     line: "CREATE_PRIVATE_REPO_ON_PUSH: false"
   notify: restart quay-app
 
-- meta: flush_handlers
+- name: force restart of quay-app
+  meta: flush_handlers
 
 - name: open the firewall for mirror-registry
   become: true

@@ -53,10 +53,12 @@
   hosts:
     - localhost
   tasks:
-    - import_role:
+    - name: import okd-provisioner/get-release-version
+      import_role:
         name: okd-provisioner
         tasks_from: get-release-version
-    - import_role:
+    - name: import okd-provisioner/tools
+      import_role:
         name: okd-provisioner
         tasks_from: tools
 
