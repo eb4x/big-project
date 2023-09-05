@@ -25,6 +25,7 @@
       template:
         src: dnsmasq-okd.conf.j2
         dest: /etc/dnsmasq.d/okd.conf
+        mode: '0644'
       vars:
         interface_list: "{{ ansible_facts.interfaces | map('replace', '-', '_') | map('extract', ansible_facts) }}"
         interfaces_with_ipv4: "{{ interface_list | selectattr('ipv4', 'defined') }}"

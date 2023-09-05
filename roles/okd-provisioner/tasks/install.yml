@@ -46,6 +46,7 @@
         url: "{{ _coreos_meta.location }}"
         checksum: "sha256:{{ _coreos_meta['sha256'] }}"
         dest: "{{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename }}"
+        mode: '0644'
       environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
 
     - name: decompress gz image
@@ -79,6 +80,7 @@
   template:
     src: install-config.yaml.j2
     dest: "{{ installation_directory }}/install-config.yaml"
+    mode: '0644'
   vars:
     ssh_key: "{{ _ssh_key.public_key }}"
     mirror_registry_ca: "{{ _mirror_registry_ca.content | default('') | b64decode | trim }}"

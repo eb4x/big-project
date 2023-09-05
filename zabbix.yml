@@ -19,6 +19,7 @@
         content: |
           address=/zabbix-server.{{ cluster_domain }}/{{ listen_address }}
         dest: /etc/dnsmasq.d/zabbix.conf
+        mode: '0644'
       vars:
         interface_list: "{{ ansible_facts.interfaces | map('replace', '-', '_') | map('extract', ansible_facts) }}"
         interfaces_with_ipv4: "{{ interface_list | selectattr('ipv4', 'defined') }}"
@@ -30,6 +31,7 @@
       template:
         src: zabbix-mysql-pod.yaml.j2
         dest: zabbix-mysql-pod.yaml
+        mode: '0644'
       vars:
         zabbix_version: 6.0-latest
         zabbix_https_port: 10443

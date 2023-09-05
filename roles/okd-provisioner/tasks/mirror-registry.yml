@@ -14,6 +14,7 @@
   file:
     state: directory
     path: "{{ item }}"
+    mode: '0755'
   loop:
     - "~/.config/containers"
     - "{{ mirror_registry_quayroot }}"
@@ -29,6 +30,7 @@
     url: "https://github.com/quay/mirror-registry/releases/download/{{ mirror_registry_version }}/mirror-registry-offline.tar.gz"
     checksum: "{{ mirror_registry_checksum }}"
     dest: "~/mirror-registry/mirror-registry.tar.gz"
+    mode: '0644'
   register: _mirror_registry_download
 
 - name: extract mirror-registry
@@ -45,11 +47,14 @@
   copy:
     content: "{{ item.content }}"
     dest: "~/mirror-registry/{{ mirror_registry_fqdn | replace('.', '_') }}.{{ item.ext }}"
+    mode: "{{ item.mode }}"
   loop:
     - content: "{{ (mirror_registry_ssl_key | trim) ~ '\n'}}"
       ext: key
+      mode: '0600'
     - content: "{{ (mirror_registry_ssl_crt | trim) ~ '\n'}}"
       ext: crt
+      mode: '0644'
   loop_control:
     label: "{{ mirror_registry_fqdn | replace('.', '_') }}.{{ item.ext }}"
 
