@@ -24,5 +24,3 @@ uio_okd:
     uio_okd_workers:
       hosts:
         worker-0:
-        worker-1:
-        worker-2:

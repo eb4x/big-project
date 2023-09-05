@@ -1,6 +1,6 @@
 ---
 interfaces:
-  eno1: "d4:ae:52:8b:55:d6"
-  eno2: "d4:ae:52:8b:55:d7"
-  eno3: "d4:ae:52:8b:55:d8"
-  eno4: "d4:ae:52:8b:55:d9"
+  eno1: "b8:ca:3a:64:22:18"
+  eno2: "b8:ca:3a:64:22:19"
+  eno3: "b8:ca:3a:64:22:1a"
+  eno4: "b8:ca:3a:64:22:1b"

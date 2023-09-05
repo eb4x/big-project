@@ -1,7 +1,0 @@
----
-okd_external_addr: 172.28.4.11
-
-bootMACAddress: "{{ interfaces.eno1 }}"
-bootMode: UEFI
-
-rootDevice: "6:2:0:0"

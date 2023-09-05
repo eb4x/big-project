@@ -1,6 +1,6 @@
 ---
 interfaces:
-  eno1: "54:9f:35:04:a9:a4"
-  eno2: "54:9f:35:04:a9:a5"
-  eno3: "54:9f:35:04:a9:a6"
-  eno4: "54:9f:35:04:a9:a7"
+  eno1: "b8:ca:3a:67:9a:c8"
+  eno2: "b8:ca:3a:67:9a:c9"
+  eno3: "b8:ca:3a:67:9a:ca"
+  eno4: "b8:ca:3a:67:9a:cb"
