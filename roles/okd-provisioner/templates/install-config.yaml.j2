@@ -15,6 +15,11 @@ capabilities:
 {%   if openshift_install_version is version('4.13', '>=') %}
     - NodeTuning
 {%   endif %}
+{%   if openshift_install_version is version('4.14', '>=') %}
+    - MachineAPI
+    - Build
+    - ImageRegistry
+{%   endif %}
 {% endif %}
 baseDomain: {{ base_domain }}
 metadata:
