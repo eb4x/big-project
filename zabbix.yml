@@ -44,14 +44,15 @@
         state: started
       become: false
 
-    - name: open zabbix-web
+    - name: open zabbix ports
       ansible.posix.firewalld:
         port: "{{ item }}"
+        immediate: true
         permanent: true
         state: enabled
       loop:
         - 8080/tcp
-        #- 10443/tcp
+        - 10051/tcp
 
     - name: wait_for zabbix
       uri:
