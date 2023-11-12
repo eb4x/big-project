@@ -48,6 +48,16 @@
   tags:
     - tools
 
+- name: set openshift_install_version
+  block:
+    - name: get openshift-install version
+      command: openshift-install version
+      changed_when: false
+      register: _cmd_openshift_install_version
+    - name: set _openshift_install_version
+      set_fact:
+        _openshift_install_version: "{{ _cmd_openshift_install_version.stdout | regex_search('openshift-install (?P<version>\\d+\\.\\d+)\\.', '\\g<version>') | first }}"
+
 - name: "push {{ release_name }}:{{ release_version }} to mirror-registry"
   when: use_mirror_registry
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"

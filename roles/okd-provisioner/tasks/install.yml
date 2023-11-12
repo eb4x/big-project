@@ -84,7 +84,7 @@
   vars:
     ssh_key: "{{ _ssh_key.public_key }}"
     mirror_registry_ca: "{{ _mirror_registry_ca.content | default('') | b64decode | trim }}"
-    openshift_install_version: "{{ (lookup('pipe', 'openshift-install version') | regex_search('openshift-install (?P<version>\\d+\\.\\d+).', '\\g<version>'))[0] }}"
+    openshift_install_version: "{{ _openshift_install_version }}"
   tags:
     - config
     - install-config.yaml
