@@ -90,7 +90,7 @@
     - install-config.yaml
 
 - name: openshift-install create manifests
-  command: openshift-baremetal-install --dir clusterconfigs create manifests
+  command: openshift-baremetal-install --dir {{ installation_directory }} create manifests
   tags:
     - config
 
