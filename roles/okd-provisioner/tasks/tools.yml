@@ -19,7 +19,6 @@
       dest: ~/.local/bin/operator-sdk
       mode: '0755'
     - name: oc-mirror
-      checksum: sha256:7fa3fb5fe7758028f4bfd4f282259db4fa8b896714af98f0757193ba55e90f86
   loop_control:
     loop_var: tool
     label: "{{ tool.name }}"
