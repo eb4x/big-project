@@ -82,7 +82,7 @@
     dest: "{{ installation_directory }}/install-config.yaml"
     mode: '0644'
   vars:
-    ssh_key: "{{ _ssh_key.public_key }}"
+    ssh_key: "{{ _ssh_key.public_key }} {{ _ssh_key.comment }}"
     mirror_registry_ca: "{{ _mirror_registry_ca.content | default('') | b64decode | trim }}"
     openshift_install_version: "{{ _openshift_install_version }}"
   tags:

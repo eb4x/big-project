@@ -30,6 +30,7 @@
   community.crypto.openssh_keypair:
     path: "~/.ssh/id_ed25519"
     type: "ed25519"
+    comment: "{{ ansible_user }}@{{ inventory_hostname }}"
     regenerate: full_idempotence
   register: _ssh_key
   tags:
