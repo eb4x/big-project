@@ -182,4 +182,38 @@
   tags:
     - config
 
-#- command: TF_LOG=trace openshift-baremetal-install --dir={{ installation_directory }} create cluster
+- name: openshift-baremetal-install create cluster
+  command: openshift-baremetal-install --dir {{ installation_directory }} create cluster
+  environment:
+    TF_LOG: trace
+  async: 7200
+  poll: 0
+  register: _create_cluster
+
+# https://github.com/okd-project/okd/discussions/1500
+- name: fix release-image-pivot.service
+  when: _openshift_install_version is version('4.13', '>=')
+  block:
+    - name: Wait for bootstrap
+      wait_for:
+        host: 172.22.0.2
+        port: 22
+    - name: patch rpm-ostree auth
+      command: >-
+        ssh -o StrictHostKeyChecking=no core@172.22.0.2 -t
+        sudo cp /root/.docker/config.json /etc/ostree/auth.json
+
+- name: get results of openshift-baremetal-install create cluster
+  block:
+    - name: check openshift-baremetal-install process
+      async_status:
+        jid: "{{ _create_cluster.ansible_job_id }}"
+      register: _async_status
+      retries: 240
+      delay: 30
+      until: _async_status.finished
+  always:
+    - name: print results
+      debug:
+        msg: "{{ _async_status[item].split('\n') }}"
+      loop: [stdout, stderr]
