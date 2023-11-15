@@ -1,10 +1,12 @@
 ---
 zabbix:
   hosts:
-    zabbix-server:
+    zabbix.openshift-utv.uio.no:
       ansible_network_os: community.zabbix.zabbix
       ansible_connection: httpapi
-      ansible_httpapi_use_ssl: false
-      ansible_host: zabbix-server.openshift-utv.uio.no
-      ansible_httpapi_port: 8080
+      ansible_httpapi_use_ssl: true
+      ansible_user: Admin
+      ansible_httpapi_pass: zabbix
+      ansible_host: zabbix.openshift-utv.uio.no
+      ansible_httpapi_port: 10443
       ansible_zabbix_url_path: ''

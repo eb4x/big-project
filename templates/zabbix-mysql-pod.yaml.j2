@@ -31,7 +31,11 @@ spec:
     - { name: PHP_TZ, value: "Europe/Oslo" }
     ports:
     - { hostPort: {{ zabbix_http_port | default('8080') }}, containerPort: 8080, protocol: TCP }
-    #- { hostPort: {{ zabbix_https_port | default('8443') }}, containerPort: 8443, protocol: TCP }
+{%  if zabbix_web_ssl_key is defined and zabbix_web_ssl_cert is defined %}
+    - { hostPort: {{ zabbix_https_port | default('8443') }}, containerPort: 8443, protocol: TCP }
+    volumeMounts:
+    - { name: zabbix-web-ssl, mountPath: "/etc/ssl/nginx" }
+{% endif %}
 
   - name: agent
     image: docker.io/zabbix/zabbix-agent2:alpine-{{ zabbix_version | default('latest') }}
@@ -53,3 +57,10 @@ spec:
   - name: zabbix-mysql-data
     persistentVolumeClaim:
       claimName: zabbix-mysql-pvc
+{%  if zabbix_web_ssl_key is defined and
+       zabbix_web_ssl_cert is defined %}
+  - name: zabbix-web-ssl
+    secret:
+      secretName: zabbix-web-ssl
+      optional: false
+{% endif %}
