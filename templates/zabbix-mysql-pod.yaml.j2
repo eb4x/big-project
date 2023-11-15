@@ -20,8 +20,21 @@ spec:
     - { name: MYSQL_ROOT_PASSWORD, value: {{ mysql_password }} }
     - { name: MYSQL_USER, value: zabbix }
     - { name: ZBX_CACHESIZE, value: 64M }
+{%  if zabbix_server_tls_key is defined and
+       zabbix_server_tls_cert is defined and
+       zabbix_server_tls_ca is defined %}
+    - { name: ZBX_TLSCAFILE, value: zabbix-ca.crt }
+    - { name: ZBX_TLSCERTFILE, value: zabbix-server.crt }
+    - { name: ZBX_TLSKEYFILE, value: zabbix-server.key }
+{% endif %}
     ports:
     - { hostPort: 10051, containerPort: 10051, protocol: TCP }
+{%  if zabbix_server_tls_key is defined and
+       zabbix_server_tls_cert is defined and
+       zabbix_server_tls_ca is defined %}
+    volumeMounts:
+    - { name: zabbix-server-tls, mountPath: "/var/lib/zabbix/enc:ro" }
+{% endif %}
 
   - name: web
     image: docker.io/zabbix/zabbix-web-nginx-mysql:alpine-{{ zabbix_version | default('latest') }}
@@ -43,10 +56,22 @@ spec:
     - { name: ZBX_HOSTNAME, value: "Zabbix server" }
     - { name: ZBX_PASSIVE_ALLOW, value: false }
     - { name: ZBX_ACTIVE_ALLOW, value: true }
-    #ports:
-    #- { hostPort: 10050, containerPort: 10050, protocol: TCP }
+{% if zabbix_server_tls_key is defined and
+      zabbix_server_tls_cert is defined and
+      zabbix_server_tls_ca is defined %}
+    - { name: ZBX_TLSCONNECT, value: cert }
+    - { name: ZBX_TLSCAFILE, value: zabbix-ca.crt }
+    - { name: ZBX_TLSCERTFILE, value: zabbix-server.crt }
+    - { name: ZBX_TLSKEYFILE, value: zabbix-server.key }
+{% endif %}
     securityContext:
       allowPrivilegeEscalation: true
+{%  if zabbix_server_tls_key is defined and
+       zabbix_server_tls_cert is defined and
+       zabbix_server_tls_ca is defined %}
+    volumeMounts:
+    - { name: zabbix-server-tls, mountPath: "/var/lib/zabbix/enc:ro" }
+{% endif %}
 
   hostAliases:
   - ip: 127.0.0.1
@@ -57,6 +82,14 @@ spec:
   - name: zabbix-mysql-data
     persistentVolumeClaim:
       claimName: zabbix-mysql-pvc
+{%  if zabbix_server_tls_key is defined and
+       zabbix_server_tls_cert is defined and
+       zabbix_server_tls_ca is defined %}
+  - name: zabbix-server-tls
+    secret:
+      secretName: zabbix-server-tls
+      optional: false
+{% endif %}
 {%  if zabbix_web_ssl_key is defined and
        zabbix_web_ssl_cert is defined %}
   - name: zabbix-web-ssl
