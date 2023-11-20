@@ -85,11 +85,13 @@
         zabbix_https_port: 10443
         mysql_version: 10.6
         mysql_password: "{{ lookup('password', '~/.ansible/.zabbix_mysql_password') }}"
+      register: _zabbix_pod_config
 
     - name: prop up zabbix pod
       containers.podman.podman_play:
         kube_file: zabbix-mysql-pod.yaml
         state: started
+        recreate: "{{ _zabbix_pod_config is changed | ternary(true, false) }}"
       become: false
 
     - name: open zabbix ports
