@@ -8,11 +8,12 @@
     - name: Create dns entries needed by provisioner
       lineinfile:
         dest: /etc/hosts
-        regexp: ".*{{ item.name }}.{{ cluster_domain }}.*"
-        line: "{{ item.address }} {{ item.name }}.{{ cluster_domain }}"
+        regexp: "{{ item.regexp | default(omit) }}"
+        line: "{{ item.address }} {{ item.name }}"
       loop:
-        - name: zabbix-server
+        - name: "zabbix.{{ cluster_domain }} zabbix-server.{{ cluster_domain }}"
           address: 127.0.0.1
+          regexp: ".*zabbix-server.*"
 
     - name: Dump specialized zabbix configuration for dnsmasq
       copy:
