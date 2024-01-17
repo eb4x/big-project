@@ -4,6 +4,15 @@
     - uio-provisioner
   become: true
 
+  pre_tasks:
+    - package:
+        name: container-selinux
+        state: latest # >= v2.219.0
+    - ansible.posix.seboolean:
+        name: container_read_certs
+        state: true
+        persistent: true
+
   tasks:
     - name: Create dns entries needed by provisioner
       lineinfile:
