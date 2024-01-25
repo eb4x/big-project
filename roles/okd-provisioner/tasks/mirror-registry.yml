@@ -5,9 +5,11 @@
 
 # export REGISTRY_AUTH_FILE=$HOME/.config/containers/auth.json
 
-- name: install podman
+- name: install podman/skopeo
   package:
-    name: podman
+    name:
+      - podman
+      - skopeo
   become: true
 
 - name: create directories

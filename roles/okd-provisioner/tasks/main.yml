@@ -76,6 +76,11 @@
       loop_control:
         loop_var: registry
 
+    - name: check for release tag
+      command: "skopeo inspect docker://{{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}:{{ release_version }}"
+      changed_when: false
+
+  rescue:
     - name: mirror {{ release_name }}:{{ release_version }}
       command: >-
         oc adm release mirror -a {{ mirror_registry_authfile }}
@@ -86,12 +91,10 @@
       register: _oc_adm_release_mirror
   always:
     - name: take a big release-mirror dump on the screen
+      when: _oc_adm_release_mirror is defined
       debug:
         msg: "{{ _oc_adm_release_mirror[item].split('\n') }}"
-      when: _oc_adm_release_mirror is defined
-      loop:
-        - stdout
-        - stderr
+      loop: [stdout, stderr]
 
 - name: import_tasks doesn't display the name section
   import_tasks: install.yml
