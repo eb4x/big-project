@@ -57,6 +57,8 @@
     - name: set _openshift_install_version
       set_fact:
         _openshift_install_version: "{{ _cmd_openshift_install_version.stdout | regex_search('openshift-install (?P<version>\\d+\\.\\d+)\\.', '\\g<version>') | first }}"
+  tags:
+    - install-config.yaml
 
 - name: "push {{ release_name }}:{{ release_version }} to mirror-registry"
   when: use_mirror_registry
