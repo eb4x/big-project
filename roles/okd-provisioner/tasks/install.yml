@@ -192,7 +192,9 @@
 
 # https://github.com/okd-project/okd/discussions/1500
 - name: fix release-image-pivot.service
-  when: _openshift_install_version is version('4.13', '>=')
+  when:
+    - _openshift_install_version is version('4.13', '>=')
+    - fix_ostree_auth | default(true) | bool
   block:
     - name: Wait for bootstrap
       wait_for:
