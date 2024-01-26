@@ -89,6 +89,7 @@
           --from={{ release_pull }}
           --to={{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}
           --to-release-image={{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}:{{ release_version }}
+          {% if _openshift_install_version is version('4.13' '>=') %} --print-mirror-instructions=idms{% endif %}
           --keep-manifest-list=true
           --insecure
       register: _oc_adm_release_mirror
