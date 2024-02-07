@@ -19,7 +19,9 @@ use_coreos_image_cache: true
 
 mirror_registry_fqdn: "mirror-registry.{{ cluster_domain }}"
 
-release_version: 4.13.0-0.okd-2023-08-04-164726
+#release_version: 4.13.0-0.okd-2023-10-28-065448
+release_version: 4.14.0-0.okd-2024-01-26-175629
+#release_version: 4.15.0-0.okd-2024-01-27-070424
 
 # Use Openshift Container Platform
 # use_ocp: true
