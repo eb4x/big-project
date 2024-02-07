@@ -99,6 +99,11 @@
         mysql_password: "{{ lookup('password', '~/.ansible/.zabbix_mysql_password') }}"
       register: _zabbix_pod_config
 
+    - name: enable lingering for systemd user processes
+      command: loginctl enable-linger
+      args:
+        creates: "/var/lib/systemd/linger/{{ ansible_user }}"
+
     - name: prop up zabbix pod
       containers.podman.podman_play:
         kube_file: zabbix-mysql-pod.yaml
