@@ -34,38 +34,38 @@
 
     - name: Check for decompressed qcow2 image in image cache directory
       stat:
-        path: "{{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename | splitext | first }}"
+        path: "{{ coreos_image_cache_directory }}/{{ coreos_meta_location | default(_coreos_meta.location) | basename | splitext | first }}"
         checksum: sha256
       register: _coreos
 
     - name: download qemu image for bootstrap
       when:
         - not _coreos.stat.exists or
-          _coreos.stat.checksum != _coreos_meta['uncompressed-sha256']
+          _coreos.stat.checksum != coreos_meta_uncompressed_sha256 | default(_coreos_meta['uncompressed-sha256'])
       get_url:
-        url: "{{ _coreos_meta.location }}"
-        checksum: "sha256:{{ _coreos_meta['sha256'] }}"
-        dest: "{{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename }}"
+        url: "{{ coreos_meta_location | default(_coreos_meta.location) }}"
+        checksum: "sha256:{{ coreos_meta_sha256 | default(_coreos_meta['sha256']) }}"
+        dest: "{{ coreos_image_cache_directory }}/{{ coreos_meta_location | default(_coreos_meta.location) | basename }}"
         mode: '0644'
       environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
 
     - name: decompress gz image
       when:
         - not _coreos.stat.exists or
-          _coreos.stat.checksum != _coreos_meta['uncompressed-sha256']
-        - (_coreos_meta.location | basename | splitext | last) == '.gz'
+          _coreos.stat.checksum != coreos_meta_uncompressed_sha256 | default(_coreos_meta['uncompressed-sha256'])
+        - (coreos_meta_location | default(_coreos_meta.location) | basename | splitext | last) == '.gz'
       command: "gunzip --decompress {{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename }}"
       args:
-        creates: "{{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename | splitext | first }}"
+        creates: "{{ coreos_image_cache_directory }}/{{ coreos_meta_location | default(_coreos_meta.location) | basename | splitext | first }}"
 
     - name: decompress xz image
       when:
         - not _coreos.stat.exists or
-          _coreos.stat.checksum != _coreos_meta['uncompressed-sha256']
-        - (_coreos_meta.location | basename | splitext | last) == '.xz'
-      command: "xz --decompress {{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename }}"
+          _coreos.stat.checksum != coreos_meta_uncompressed_sha256 | default(_coreos_meta['uncompressed-sha256'])
+        - (coreos_meta_location | default(_coreos_meta.location) | basename | splitext | last) == '.xz'
+      command: "xz --decompress {{ coreos_image_cache_directory }}/{{ coreos_meta_location | default(_coreos_meta.location) | basename }}"
       args:
-        creates: "{{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename | splitext | first }}"
+        creates: "{{ coreos_image_cache_directory }}/{{ coreos_meta_location | default(_coreos_meta.location) | basename | splitext | first }}"
 
 - name: get mirror-registry cert
   when: mirror_registry_is_self_signed
@@ -75,6 +75,14 @@
   tags:
     - config
     - install-config.yaml
+
+- name: define bootstrap_os_image
+  when:
+    - coreos_meta_location is defined
+    - coreos_meta_sha256 is defined
+    - coreos_meta_uncompressed_sha256 is defined
+  set_fact:
+    bootstrap_os_image: "{{ coreos_meta_location }}?sha256={{ coreos_meta_sha256 }}"
 
 - name: "create {{ installation_directory }}/install-config.yaml"
   template:

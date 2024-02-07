@@ -40,6 +40,9 @@ controlPlane:
   replicas: 3
 platform:
   baremetal:
+{% if bootstrap_os_image is defined %}
+    bootstrapOSImage: "{{ bootstrap_os_image }}"
+{% endif %}
     apiVIP: {{ baremetal_network_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}
     ingressVIP: {{ baremetal_network_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('128') | ansible.utils.ipaddr('address') }}
     provisioningBridge: {{ provisioningBridge | default('provisioning') }}
