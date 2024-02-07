@@ -122,7 +122,7 @@
 
 - name: check health of mirror-registry
   uri:
-    ca_path: "{{ mirror_registry_is_self_signed | ternary(mirror_registry_quayroot ~ '/quay-rootCA/rootCA.pem', omit) }}"
+    ca_path: "{{ _mirror_registry_is_self_signed | ternary(mirror_registry_quayroot ~ '/quay-rootCA/rootCA.pem', omit) }}"
     url: "https://{{ mirror_registry_fqdn }}:8443/health/instance"
   register: _mirror_registry_health
   until: _mirror_registry_health.status == 200
@@ -141,4 +141,4 @@
     password: "{{ mirror_registry_password }}"
     registry: "{{ mirror_registry_fqdn }}:8443"
     #certdir: "{{ mirror_registry_quayroot }}/quay-rootCA" # certdir looks for (*.crt, *.cert, *.key)
-    tlsverify: "{{ not mirror_registry_is_self_signed }}"
+    tlsverify: "{{ not _mirror_registry_is_self_signed }}"

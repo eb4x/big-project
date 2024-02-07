@@ -1,0 +1,2 @@
+---
+_mirror_registry_is_self_signed: "{{ (mirror_registry_ssl_key is not defined) or (mirror_registry_ssl_crt is not defined) }}"

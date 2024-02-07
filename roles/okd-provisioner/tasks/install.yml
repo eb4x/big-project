@@ -68,7 +68,7 @@
         creates: "{{ coreos_image_cache_directory }}/{{ coreos_meta_location | default(_coreos_meta.location) | basename | splitext | first }}"
 
 - name: get mirror-registry cert
-  when: mirror_registry_is_self_signed
+  when: _mirror_registry_is_self_signed
   slurp:
     path: "{{ mirror_registry_quayroot }}/quay-rootCA/rootCA.pem"
   register: _mirror_registry_ca

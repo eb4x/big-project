@@ -68,7 +68,7 @@ platform:
 {% endfor %}
 pullSecret: {{ pullSecret | default(lookup('file', 'pull-secret-okd.json') | to_nice_json) }}
 {% if use_mirror_registry %}
-{%   if mirror_registry_is_self_signed %}
+{%   if _mirror_registry_is_self_signed %}
 additionalTrustBundle: |
   {{ mirror_registry_ca | indent(2) }}
 {%   endif %}
