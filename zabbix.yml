@@ -91,7 +91,9 @@
         dest: zabbix-mysql-pod.yaml
         mode: '0644'
       vars:
-        zabbix_version: 6.0-latest
+        zabbix_version: trunk
+        #zabbix_version: 6.4-latest
+        #zabbix_version: 6.0-latest
         zabbix_https_port: 10443
         mysql_version: 10.6
         mysql_password: "{{ lookup('password', '~/.ansible/.zabbix_mysql_password') }}"
@@ -114,15 +116,30 @@
         - port: 8080/tcp
         - port: 10051/tcp
         - port: 10443/tcp
-          enabled: "{{ (zabbix_web_ssl_key is defined and zabbix_web_ssl_cert is defined) | ternary('enabled', 'disabled') }}"
+          state: "{{ (zabbix_web_ssl_key is defined and zabbix_web_ssl_cert is defined) | ternary('enabled', 'disabled') }}"
 
     - name: wait_for zabbix
       uri:
-        url: "https://zabbix.openshift-utv.uio.no:10443"
+        url: "https://zabbix.openshift-utv.uio.no:10443/api_jsonrpc.php"
+        method: POST
+        headers:
+          Content-Type: application/json-rpc
+        body_format: json
+        body:
+          jsonrpc: "2.0"
+          method: apiinfo.version
+          params: []
+          id: 0
+        return_content: true
       register: _res
       retries: 10
       delay: 10
-      until: _res.status == 200
+      until:
+        - _res.status == 200
+        - _res.json.error is not defined
+
+    - debug:
+        var: _res
 
   handlers:
     - name: restart dnsmasq
@@ -185,6 +202,103 @@
               auth: "{{ ansible_zabbix_auth_key | default(_auth.json.result) }}"
               method: hostinterface.delete
               params:
-                - "{{ _zabbix_host | json_query(interface_id) }}"
+                - "{{ _zabbix_host | json_query(passive_interface_id) }}"
               id: 2
             return_content: true
+
+    - name: cert on zabbix-agent on Zabbix server
+      #when:
+      #  - zabbix_server_tls_key is defined
+      #  - zabbix_server_tls_cert is defined
+      #  - zabbix_server_tls_ca is defined
+      community.zabbix.zabbix_host:
+        host_name: Zabbix server
+        host_groups:
+          - Zabbix servers
+        link_templates:
+          - Linux by Zabbix agent active
+          - Zabbix server health
+        tls_accept: 4  # (certificate)
+        tls_issuer: "CN=GEANT OV ECC CA 4,O=GEANT Vereniging,C=NL"
+        tls_subject: "CN=zabbix-server.openshift-utv.uio.no,O=Universitetet i Oslo,ST=Oslo,C=NO"
+
+    - name: register proxy
+      community.zabbix.zabbix_proxy:
+        proxy_name: zabbix-proxy.openshift-utv.uio.no
+        tls_accept: certificate
+        tls_issuer: "CN=GEANT OV ECC CA 4,O=GEANT Vereniging,C=NL"
+        tls_subject: "CN=zabbix-proxy.openshift-utv.uio.no,O=Universitetet i Oslo,ST=Oslo,C=NO"
+
+    - name: create various host groups
+      community.zabbix.zabbix_group:
+        host_groups:
+          - OKD4 clusters
+
+    - name: add openshift-utv
+      community.zabbix.zabbix_host:
+        proxy: zabbix-proxy.openshift-utv.uio.no
+        host_name: openshift-utv.uio.no
+        host_groups:
+          - OKD4 clusters
+        link_templates:
+          - Kubernetes cluster state by HTTP
+        #  - Kubernetes nodes by HTTP
+        macros:
+          - { macro: '{$KUBE.CONTROL_PLANE.TAINT}', value: node-role.kubernetes.io/master }
+          - { macro: '{$KUBE.API.TOKEN}', value: eyJhbGciOiJSUzI1NiIsImtpZCI6Im1GT0tpendua3pzeEVLMWdKdnhWV2thU3NXTVBvX3JheGNuVnhIQ3ZvaGMifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJvcGVuc2hpZnQtbW9uaXRvcmluZyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJ6YWJiaXgtc2VydmljZS1hY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InphYmJpeC1zZXJ2aWNlLWFjY291bnQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1YjMxZTZlNS03MmNlLTRlY2MtOTQ1MS02ZGVlZDZhYmNiNGMiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6b3BlbnNoaWZ0LW1vbml0b3Jpbmc6emFiYml4LXNlcnZpY2UtYWNjb3VudCJ9.wuPyufg7D8weDXoyrDcV2L3Z7pGm3ajocSdlT5J5dPuaaB4rqFw4W-W6q2ZVqOmedByiX_SktSCXiWsYE3eDRh7IgafKFxiPPzSDhAZ82MtV7OOk4_k1Qc4gC2sJBNsUPKkyX0BSm78wxLA3yf2qz9xxQVz_Nsmj3EUrsNFlMpPaX5hGt3iZqDvo_qF4fkwghL_4L6X0k-yb0SzQdIRMPDVBpLFobmAK1yXsYznY1PFIOr_KM1T5cz9CerN47wfzirOuvjhP4uObn0yiBR0X-jfaqmMwH-A3qrRUjB9VTXT8Lnl9QwQAOCYtZJHphf8TnNrr-IxypHg0gaCwFNMbGNMz_cSA8gUdW93alRvjH-7VvMk6Qsparogzp4PcqDNvSbSVwttWyperW33d-M5YF1JP47gQcfdM6-XhEI21kFhM6WaM-8yyOMBroY_25pvoxnQ4N-Rtlf1caoEmq6iTdiMnrXM-T4vawX3eY81GN-M3VXGq2c7MZ8KfVMphl2w5eFzswxoGbmIqYKhpCe7DwmZ5cdPBRtChgD5jKSbxixGq-9E8cfje-zXsLP2bblNicWf9X1MtRDrCJbSnZsoG6KJ4zBvrwbN-wLWr0rQm3Dwj77jEsZNGVSXwyt7178M3hY0wADdIGTldRzqz77kcgPJOCHs_wryqR8lcRCO5pCA }
+          - { macro: '{$KUBE.API.URL}', value: "https://kubernetes.default.svc.cluster.local:443" }
+          - { macro: '{$KUBE.STATE.ENDPOINT.NAME}', value: kube-state-metrics }
+          - { macro: '{$KUBE.CONTROLLER_MANAGER.SCHEME}', value: https }
+          - { macro: '{$KUBE.CONTROLLER_MANAGER.PORT}', value: 10257 }
+          - { macro: '{$KUBE.SCHEDULER.SCHEME}', value: https }
+          - { macro: '{$KUBE.SCHEDULER.PORT}', value: 10259 }
+
+
+#    - debug:
+#        var: hostvars[item].bmc.address | urlsplit('hostname')
+#      loop: "{{ groups['uio_okd_masters'] }}"
+#
+#    - name: create various host groups
+#      community.zabbix.zabbix_group:
+#        host_groups:
+#          - Dell PowerEdge R820
+#          - HPE ProLiant DL380
+#
+#    - name: add dell boxes
+#      community.zabbix.zabbix_host:
+#        host_name: "{{ item }}"
+#        host_groups:
+#          - Linux servers
+#          - Dell PowerEdge R820
+#        link_templates:
+#          - Template of templates
+#        interfaces:
+#          - type: ipmi
+#            ip: "{{ hostvars[item].bmc.address | urlsplit('hostname') }}"
+#            useip: 1
+#            main: 1
+#        ipmi_username: "{{ hostvars[item].bmc.username }}"
+#        ipmi_password: "{{ hostvars[item].bmc.password }}"
+#        macros:
+#          - macro: '{$API.URL}'
+#            value: "https://{{ hostvars[item].bmc.address | urlsplit('hostname') }}"
+#          - macro: '{$API.USER}'
+#            value: "{{ hostvars[item].bmc.username }}"
+#          - macro: '{$API.PASSWORD}'
+#            value: "{{ hostvars[item].bmc.password }}"
+#          #- macro: '{$IFCONTROL}'
+#          #  value: "{{ }}"
+#      loop: "{{ groups['uio_okd_masters'] }}"
+#
+#    - name: add openshift-utv
+#      community.zabbix.zabbix_host:
+#        host_name: "{{ item.name }}.openshift-utv.uio.no"
+#        host_groups:
+#          - OKD4 Clusters
+#        link_templates: "{{ item.link_templates }}"
+#        macros:
+#      loop:
+#        - name: cluster
+#          link_templates:
+#        - name: nodes
+#          link_templates:
