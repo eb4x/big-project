@@ -38,9 +38,26 @@
         - port: "9311" # barbican
         - port: "9696" # neutron
 
-    - name: forward internal traffic out
+    - name: NAT internal traffic out
       iptables:
         table: nat
         chain: POSTROUTING
         out_interface: br-internet
         jump: MASQUERADE
+
+    - name: forward internal traffic out
+      iptables:
+        chain: FORWARD
+        in_interface: br-provision
+        out_interface: br-internet
+        jump: ACCEPT
+
+    - name: forward established connections in
+      iptables:
+        chain: FORWARD
+        in_interface: br-internet
+        out_interface: br-provision
+        ctstate:
+          - RELATED
+          - ESTABLISHED
+        jump: ACCEPT
