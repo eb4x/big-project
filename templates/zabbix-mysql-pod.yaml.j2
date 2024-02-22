@@ -1,3 +1,29 @@
+{%  if zabbix_server_tls_key is defined and
+       zabbix_server_tls_cert is defined and
+       zabbix_server_tls_ca is defined %}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: zabbix-server-tls
+type: Opaque
+data:
+  zabbix-ca.crt: {{ (zabbix_server_tls_intermediate | default('') ~ zabbix_server_tls_ca) | b64encode }}
+  zabbix-server.crt: {{ zabbix_server_tls_cert | b64encode }}
+  zabbix-server.key: {{ zabbix_server_tls_key | b64encode }}
+{% endif %}
+{%  if zabbix_web_ssl_key is defined and zabbix_web_ssl_cert is defined %}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: zabbix-web-ssl
+type: Opaque
+data:
+  ssl.crt: {{ zabbix_web_ssl_cert | b64encode }}
+  ssl.key: {{ zabbix_web_ssl_key | b64encode }}
+  dhparam.pem: {{ _dhparam_pem.dhparams | b64encode }}
+{% endif %}
 ---
 apiVersion: v1
 kind: Pod
