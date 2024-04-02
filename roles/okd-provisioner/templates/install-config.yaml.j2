@@ -75,7 +75,11 @@ pullSecret: {{ pullSecret | default(lookup('file', 'pull-secret-okd.json') | to_
 additionalTrustBundle: |
   {{ mirror_registry_ca | indent(2) }}
 {%   endif %}
+{%   if openshift_install_version is version('4.13', '>=') %}
+imageDigestSources:
+{%   else %}
 imageContentSources:
+{%   endif %}
 - source: {{ release_registry }}/{{ release_repo }}/{{ release_name }}
   mirrors:
   - {{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}
