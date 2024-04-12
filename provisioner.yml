@@ -1,0 +1,14 @@
+---
+- name: Configure provisioner
+  hosts: provisioner
+  become: true
+
+  pre_tasks:
+    - name: Install ansible-nmstate dependency
+      package:
+        name: python3-libnmstate
+
+  tasks:
+    - name: Configure network
+      nmstate_apply:
+        state: "{{ hostvars[inventory_hostname].nmstate }}"
