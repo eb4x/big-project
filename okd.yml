@@ -74,3 +74,20 @@
 
 # /var/lib/containers/storage/volumes/ironic/_data/html
 # console=tty1 console=ttyS0,115200n8
+
+# curl http://172.22.0.2:6385
+# /etc/containers/registries.conf.d/mirrors.conf
+# [[registry]]
+# prefix="quay.io"
+# location="mirror-registry.openshift-utv.uio.no:8443/mirrors/quay.io"
+
+# podman run -ti --rm --entrypoint /bin/bash -v /opt/metal3/auth/clouds.yaml:/clouds.yaml:Z -e OS_CLOUD=metal3-bootstrap quay.io/metal3-io/ironic-client
+
+# registry.access.redhat.com/redhat/community-operator-index:v4.13
+# podman build -t mirror-registry.openshift-utv.uio.no:8443/bundles/kubernetes-nmstate-operator-bundle:v0.79.0 -f bundle.Dockerfile .
+# podman push mirror-registry.openshift-utv.uio.no:8443/bundles/kubernetes-nmstate-operator-bundle:v0.79.0
+# opm alpha bundle validate --tag mirror-registry.openshift-utv.uio.no:8443/bundles/kubernetes-nmstate-operator-bundle:latest --image-builder podman
+
+# podman build . -f cool-catalog.Dockerfile -t
+
+# skopeo copy docker://quay.io/operatorhubio/catalog:latest docker://mirror-registry.openshift-utv.uio.no:8443/mirrors/registry.access.redhat.com/redhat/community-operator-index:v4.13
