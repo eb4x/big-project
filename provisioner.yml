@@ -8,7 +8,37 @@
       package:
         name: python3-libnmstate
 
+    - name: Disable zone drifting
+      lineinfile:
+        dest: /etc/firewalld/firewalld.conf
+        regexp: ^AllowZoneDrifting=
+        line: AllowZoneDrifting=no
+      notify:
+        - Restart firewalld
+
+    - name: Flush handlers
+      meta: flush_handlers
+
   tasks:
     - name: Configure network
       nmstate_apply:
         state: "{{ hostvars[inventory_hostname].nmstate }}"
+
+    - name: Configure NAT
+      community.general.nmcli:
+        state: present
+        conn_name: "{{ item.name }}"
+        stp: false
+        priority: 32768
+        zone: "{{ item.zone }}"
+      loop:
+        - name: br-internet
+          zone: external
+        - name: br-provision
+          zone: internal
+
+  handlers:
+    - name: Restart firewalld
+      service:
+        name: firewalld
+        state: restarted
