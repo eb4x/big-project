@@ -14,13 +14,24 @@ okd_package_requirements:
   - jq
   - ipmitool
 
-use_ocp: false
+# variants: [ ocp, fcos, scos ]
+release_variant: scos
+
 release_registry: quay.io
-release_repo: "{{ use_ocp | ternary('openshift-release-dev', 'openshift') }}"
-release_name: "{{ use_ocp | ternary('ocp-release', 'okd') }}"
+release_repo:
+  ocp: openshift-release-dev
+  fcos: openshift
+  scos: okd
+release_name:
+  ocp: ocp-release
+  fcos: okd
+  scos: scos-release
 #release_version:
-release_pull: "{{ release_registry }}/{{ release_repo }}/{{ release_name }}:{{ release_version }}"
-release_content_source: "{{ use_ocp | ternary('ocp-v4.0-art-dev', 'okd-content') }}"
+release_pull: "{{ release_registry }}/{{ release_repo[release_variant] }}/{{ release_name[release_variant] }}:{{ release_version }}"
+release_content_source:
+  ocp: ocp-v4.0-art-dev
+  fcos: okd-content
+  scos: scos-content
 
 use_mirror_registry: true
 mirror_registry_version: v1.3.10

@@ -80,11 +80,11 @@ imageDigestSources:
 {%   else %}
 imageContentSources:
 {%   endif %}
-- source: {{ release_registry }}/{{ release_repo }}/{{ release_name }}
+- source: {{ release_registry }}/{{ release_repo[release_variant] }}/{{ release_name[release_variant] }}
   mirrors:
-  - {{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}
-- source: {{ release_registry }}/{{ release_repo }}/{{ release_content_source }}
+  - {{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo[release_variant] }}/{{ release_name[release_variant] }}
+- source: {{ release_registry }}/{{ release_repo[release_variant] }}/{{ release_content_source[release_variant] }}
   mirrors:
-  - {{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}
+  - {{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo[release_variant] }}/{{ release_name[release_variant] }}
 {% endif %}
 sshKey: {{ ssh_key }}

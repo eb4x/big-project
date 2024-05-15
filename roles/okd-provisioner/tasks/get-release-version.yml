@@ -16,7 +16,7 @@
 
     - name: set_fact release_version
       when:
-        - use_ocp
+        - release_variant == 'ocp'
         - release_version is not defined
       set_fact:
         release_pull: "{{ _ocp_release.content | regex_search(q_pull_from, '\\1') | first }}"
@@ -27,15 +27,19 @@
 
 - name: get release_version for okd
   when:
-    - not use_ocp
+    - release_variant != 'ocp'
     - release_version is not defined
   block:
     - name: query origin-release api for latest 4-stable version
       uri:
-        url: https://amd64.origin.releases.ci.openshift.org/api/v1/releasestream/4-stable/latest
+        url: "{{ release_url[release_variant] }}"
         return_content: true
       register: _latest
       environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
+      vars:
+        release_url:
+          fcos: https://amd64.origin.releases.ci.openshift.org/api/v1/releasestream/4-stable/latest
+          scos: https://amd64.origin.releases.ci.openshift.org/api/v1/releasestream/4-scos-stable/latest
 
     - name: set_fact release_version
       set_fact:
