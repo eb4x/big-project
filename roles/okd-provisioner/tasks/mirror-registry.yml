@@ -108,6 +108,25 @@
     line: "CREATE_PRIVATE_REPO_ON_PUSH: false"
   notify: restart quay-app
 
+- name: update ssl certs
+  when:
+    - mirror_registry_ssl_key is defined
+    - mirror_registry_ssl_crt is defined
+  copy:
+    content: "{{ item.content }}"
+    dest: "~/mirror-registry/quay-install/quay-config/ssl.{{ item.ext }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - content: "{{ (mirror_registry_ssl_key | trim) ~ '\n'}}"
+      ext: key
+      mode: '0644' # I know, right!?
+    - content: "{{ (mirror_registry_ssl_crt | trim) ~ '\n'}}"
+      ext: cert
+      mode: '0644'
+  loop_control:
+    label: "ssl.{{ item.ext }}"
+  notify: restart quay-app
+
 - name: force restart of quay-app
   meta: flush_handlers
 
