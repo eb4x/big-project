@@ -118,7 +118,10 @@
           type: OVNKubernetes
           ovnKubernetesConfig:
             mtu: {{ 1500 - (ovnkubernetes_overhead + ipsec_overhead) }}
-            ipsecConfig: {}
+            ipsecConfig: {% if _openshift_install_version is version('4.15', '<') %}{}{% endif %}
+              {% if _openshift_install_version is version('4.15', '>=') +%}
+              mode: External
+              {% endif %}
     dest: "{{ installation_directory }}/manifests/cluster-network-03-config.yml"
     mode: '0644'
   vars:
