@@ -5,6 +5,8 @@ capabilities:
   baselineCapabilitySet: None
   additionalEnabledCapabilities:
     - baremetal
+    #- openshift-samples
+    - MachineAPI
     - marketplace
 {%   if openshift_install_version is version('4.12', '>=') %}
     - Console
@@ -16,12 +18,17 @@ capabilities:
     - NodeTuning
 {%   endif %}
 {%   if openshift_install_version is version('4.14', '>=') %}
-    - MachineAPI
     - Build
+    #- DeploymentConfig
     - ImageRegistry
 {%   endif %}
 {%   if openshift_install_version is version('4.15', '>=') %}
     - OperatorLifecycleManager
+    #- CloudCredential
+{%   endif %}
+{%   if openshift_install_version is version('4.16', '>=') %}
+    - Ingress
+    #- CloudControllerManager
 {%   endif %}
 {% endif %}
 baseDomain: {{ base_domain }}
