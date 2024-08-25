@@ -61,8 +61,11 @@ platform:
         address: {{ hostvars[host].bmc.address }}
       bootMACAddress: {{ hostvars[host].bootMACAddress }}
       bootMode: {{ hostvars[host].bootMode }}
+      {# https://docs.openshift.com/container-platform/4.15/installing/installing_bare_metal_ipi/ipi-install-installation-workflow.html#root-device-hints_ipi-install-installation-workflow #}
+      {# hctl: ls -l /sys/block/*/device/scsi_device #}
+      {# wwn: ls -l /dev/disk/by-id/wwn-*            +#}
       rootDeviceHints:
-        hctl: {{ hostvars[host].rootDevice }} # ls -l /sys/block/*/device/scsi_device
+        {{ hostvars[host].rootDeviceHints | to_nice_yaml }}
 {%   if experimental_networking | default(false) %}
       provisioningNetworkInterface: bond0
       networkConfig:
