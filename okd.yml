@@ -43,6 +43,14 @@
         - dhcp
         - dns
 
+    - name: Flush handlers
+      meta: flush_handlers
+
+    - name: ensure dnsmasq is running
+      service:
+        name: dnsmasq
+        state: started
+
   handlers:
     - name: restart dnsmasq
       service:
