@@ -5,6 +5,15 @@
     - uio-provisioner
   become: true
 
+  pre_tasks:
+    - name: install python packages
+      delegate_to: localhost
+      become: false
+      pip:
+        extra_args: '--user'
+        name:
+          - netaddr
+
   tasks:
     - name: install dnsmasq
       package:
