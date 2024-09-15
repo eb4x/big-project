@@ -4,6 +4,5 @@ all:
     betsy:
       ansible_host: 84.49.124.126
     provisioner:
-      ansible_user: stack
     uio-provisioner:
       ansible_user: kni

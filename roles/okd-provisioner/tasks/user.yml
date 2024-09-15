@@ -1,7 +1,7 @@
 ---
 - name: create user
   ansible.builtin.user:
-    name: "{{ ansible_user }}"
+    name: "{{ ansible_user | default(ansible_facts.user_id) }}"
     groups:
       - wheel
       - libvirt
@@ -30,7 +30,7 @@
   community.crypto.openssh_keypair:
     path: "~/.ssh/id_ed25519"
     type: "ed25519"
-    comment: "{{ ansible_user }}@{{ inventory_hostname }}"
+    comment: "{{ ansible_user | default(ansible_facts.user_id) }}@{{ inventory_hostname }}"
     regenerate: full_idempotence
   register: _ssh_key
   tags:

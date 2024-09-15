@@ -88,7 +88,7 @@
 
     - name: Patch quay-installer ssh-key in authorized_keys
       ansible.posix.authorized_key:
-        user: "{{ ansible_user }}"
+        user: "{{ ansible_user | default(ansible_facts.user_id) }}"
         key: "{{ _quay_installer_key.public_key }} {{ _quay_installer_key.comment | default('quay-installer@mirror-registry') }}"
 
 - name: mirror-registry upgrade
