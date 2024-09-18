@@ -12,7 +12,7 @@ dns_servers:
   - 129.240.2.27
   - 129.240.2.40
 
-use_coreos_image_cache: true
+#use_coreos_image_cache: true
 #coreos_meta_location: https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/39.20240104.3.0/x86_64/fedora-coreos-39.20240104.3.0-qemu.x86_64.qcow2.xz
 #coreos_meta_sha256: b2e4c07b8ac0e96b39af58f7daef9829536b534ce6e774dc14d54bcce000a81c
 #coreos_meta_uncompressed_sha256: 280ee50c8b3f932fbe2cd903adb592b83de6f66910152bcd092e483d8cc193fa
@@ -22,11 +22,13 @@ use_coreos_image_cache: true
 #release_version: 4.14.0-0.okd-2024-01-26-175629
 #release_version: 4.15.0-0.okd-2024-03-10-010116
 
-release_variant: scos
-release_version: 4.14.0-0.okd-scos-2024-01-30-032525
+#release_variant: scos
+#release_version: 4.14.0-0.okd-scos-2024-01-30-032525
 #release_version: 4.15.0-0.okd-scos-2024-01-18-223523
 #release_version: 4.16.0-0.okd-scos-2024-08-01-132038
 
-# Use Openshift Container Platform
-# use_ocp: true
-# pullSecret: "{{ lookup('file', 'pull-secret-ocp.json') | to_nice_json }}"
+release_variant: ocp
+#release_version: 4.16.13
+#release_pull: quay.io/openshift-release-dev/ocp-release@sha256:6078cb4ae197b5b0c526910363b8aff540343bfac62ecb1ead9e068d541da27b
+pullSecret: "{{ lookup('file', 'pull-secret-ocp.json') | to_nice_json }}"
+fix_ostree_auth: false
