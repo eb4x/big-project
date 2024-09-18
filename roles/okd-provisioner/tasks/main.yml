@@ -79,7 +79,7 @@
         loop_var: registry
 
     - name: check for release tag
-      command: "skopeo inspect docker://{{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo[release_variant] }}/{{ release_name[release_variant] }}:{{ release_version }}"
+      command: "skopeo inspect docker://{{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}:{{ release_version }}"
       changed_when: false
 
   rescue:
@@ -87,8 +87,8 @@
       command: >-
         oc adm release mirror -a {{ mirror_registry_authfile }}
           --from={{ release_pull }}
-          --to={{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo[release_variant] }}/{{ release_name[release_variant] }}
-          --to-release-image={{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo[release_variant] }}/{{ release_name[release_variant] }}:{{ release_version }}
+          --to={{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}
+          --to-release-image={{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}:{{ release_version }}
           {% if _openshift_install_version is version('4.13', '>=') %} --print-mirror-instructions=idms{% endif %}
           --keep-manifest-list=true
           --insecure
