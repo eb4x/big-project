@@ -27,8 +27,8 @@ dns_servers:
 #release_version: 4.15.0-0.okd-scos-2024-01-18-223523
 #release_version: 4.16.0-0.okd-scos-2024-08-01-132038
 
-release_variant: ocp
+#release_variant: ocp
 #release_version: 4.16.13
 #release_pull: quay.io/openshift-release-dev/ocp-release@sha256:6078cb4ae197b5b0c526910363b8aff540343bfac62ecb1ead9e068d541da27b
-pullSecret: "{{ lookup('file', 'pull-secret-ocp.json') | to_nice_json }}"
-fix_ostree_auth: false
+#pullSecret: "{{ lookup('file', 'pull-secret-ocp.json') | to_nice_json }}"
+#fix_ostree_auth: false
