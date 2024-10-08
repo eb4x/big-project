@@ -38,14 +38,13 @@
 
 - name: get openshift client/installer for {{ release_version }}
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
-  command: "oc adm release extract --tools {{ release_pull }}"
+  command: "oc adm release extract --to /tmp --tools {{ release_pull }}"
   args:
-    chdir: "~/"
-    creates: "~/openshift-client-linux-{{ release_version }}.tar.gz"
+    creates: "/tmp/openshift-client-linux-{{ release_version }}.tar.gz"
 
 - name: update openshift client/installer to {{ release_version }}
   unarchive:
-    src: "~/{{ item }}"
+    src: "/tmp/{{ item }}"
     remote_src: true
     dest: "~/.local/bin"
     exclude:
