@@ -98,7 +98,7 @@
       when: _oc_adm_release_mirror is defined
       debug:
         msg: "{{ _oc_adm_release_mirror[item].split('\n') }}"
-      loop: [stdout, stderr]
+      loop: [stderr, stdout]
 
 - name: import_tasks doesn't display the name section
   import_tasks: install.yml
