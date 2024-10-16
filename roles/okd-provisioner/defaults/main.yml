@@ -40,8 +40,8 @@ release_content_source: "{{ _release_content_source[release_variant] }}"
 release_pull: "{{ release_registry }}/{{ release_repo }}/{{ release_name }}:{{ release_version }}"
 
 use_mirror_registry: true
-mirror_registry_version: v1.3.10
-mirror_registry_checksum: sha256:c9e9865ec4bfec1aa4d42cc92914d624291b4525258c4f6ce854a756d65a5034
+mirror_registry_version: v2.0.0
+mirror_registry_checksum: sha256:935176ee501dc72c80741257a8849efd3a8e303ed2928e71f65ce7e4a184ed57
 mirror_registry_user: init
 mirror_registry_password: "{{ lookup('password', '~/.ansible/.mirror_registry_password') }}"
 mirror_registry_fqdn: "mirror-registry.{{ cluster_domain }}"
