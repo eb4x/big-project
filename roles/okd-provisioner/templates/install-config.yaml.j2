@@ -90,11 +90,11 @@ imageDigestSources:
 {%   else %}
 imageContentSources:
 {%   endif %}
-- source: {{ release_registry }}/{{ release_repo }}/{{ release_name }}
+- source: {{ release_registry }}/{{ release_image_repo }}
   mirrors:
-  - {{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}
-- source: {{ release_registry }}/{{ release_repo }}/{{ release_content_source }}
+  - {{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_image_repo }}
+- source: {{ release_registry }}/{{ release_content_repo }}
   mirrors:
-  - {{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}
+  - {{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_content_repo }}
 {% endif %}
 sshKey: {{ ssh_key }}

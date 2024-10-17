@@ -60,7 +60,7 @@
   tags:
     - install-config.yaml
 
-- name: "push {{ release_name }}:{{ release_version }} to mirror-registry"
+- name: "push {{ release_variant }}:{{ release_version }} to mirror-registry"
   when: use_mirror_registry
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
   block:
@@ -79,16 +79,16 @@
         loop_var: registry
 
     - name: check for release tag
-      command: "skopeo inspect docker://{{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}:{{ release_version }}"
+      command: "skopeo inspect docker://{{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_image_repo }}:{{ release_version }}"
       changed_when: false
 
   rescue:
-    - name: mirror {{ release_name }}:{{ release_version }}
+    - name: mirror {{ release_variant }}:{{ release_version }}
       command: >-
         oc adm release mirror -a {{ mirror_registry_authfile }}
           --from={{ release_pull }}
-          --to={{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}
-          --to-release-image={{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_repo }}/{{ release_name }}:{{ release_version }}
+          --to={{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_content_repo }}
+          --to-release-image={{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_image_repo }}:{{ release_version }}
           {% if _openshift_install_version is version('4.13', '>=') %} --print-mirror-instructions=idms{% endif %}
           --keep-manifest-list=true
           --insecure
