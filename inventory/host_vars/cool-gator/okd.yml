@@ -1,5 +1,5 @@
 ---
-okd_external_addr: 192.168.100.2
+okd_external_ipv4_addr: "192.168.100.2"
 
 bootMACAddress: "{{ interfaces.eno1 }}"
 bootMode: legacy
