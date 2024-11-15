@@ -38,6 +38,9 @@ networking:
   networkType: OVNKubernetes
   machineNetwork:
   - cidr: {{ baremetal_network_ipv4_cidr }}
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 20
 compute:
 - name: worker
   architecture: amd64
