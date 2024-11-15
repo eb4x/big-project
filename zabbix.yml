@@ -91,7 +91,8 @@
         dest: zabbix-mysql-pod.yaml
         mode: '0644'
       vars:
-        zabbix_version: trunk
+        #zabbix_version: trunk
+        zabbix_version: 7.0-latest
         #zabbix_version: 6.4-latest
         #zabbix_version: 6.0-latest
         zabbix_https_port: 10443
