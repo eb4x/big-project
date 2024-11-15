@@ -37,7 +37,7 @@ metadata:
 networking:
   networkType: OVNKubernetes
   machineNetwork:
-  - cidr: {{ baremetal_network_ipv4_cidr | default('10.0.0.0/16') }}
+  - cidr: {{ baremetal_network_ipv4_cidr }}
 compute:
 - name: worker
   architecture: amd64
@@ -53,8 +53,8 @@ platform:
 {% if bootstrap_os_image is defined %}
     bootstrapOSImage: "{{ bootstrap_os_image }}"
 {% endif %}
-    apiVIP: {{ baremetal_network_ipv4_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}
-    ingressVIP: {{ baremetal_network_ipv4_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('128') | ansible.utils.ipaddr('address') }}
+    apiVIP: {{ baremetal_network_ipv4_cidr | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}
+    ingressVIP: {{ baremetal_network_ipv4_cidr | ansible.utils.ipaddr('128') | ansible.utils.ipaddr('address') }}
     provisioningBridge: {{ provisioningBridge | default('provisioning') }}
     provisioningDHCPRange: 172.22.0.64,172.22.0.95
     externalBridge: {{ externalBridge | default('baremetal') }}
