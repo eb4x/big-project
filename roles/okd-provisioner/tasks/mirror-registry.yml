@@ -102,10 +102,13 @@
   args:
     chdir: "~/mirror-registry"
 
-- name: make mirror-registry repos public on push by default
+- name: patch mirror-registry config
   lineinfile:
     path: "{{ mirror_registry_quayroot }}/quay-config/config.yaml"
-    line: "CREATE_PRIVATE_REPO_ON_PUSH: false"
+    line: "{{ item }}"
+  loop:
+    - "CREATE_PRIVATE_REPO_ON_PUSH: false"                # make repos public on push
+    - "PROMETHEUS_PUSHGATEWAY_URL: http://localhost:9091" # fix quay metrics
   notify: restart quay-app
 
 - name: update ssl certs
@@ -135,9 +138,12 @@
   ansible.posix.firewalld:
     state: enabled
     zone: public
-    port: 8443/tcp
+    port: "{{ item }}"
     permanent: true
     immediate: true
+  loop:
+    - "8443/tcp"
+    - "9091/tcp"
 
 - name: check health of mirror-registry
   uri:

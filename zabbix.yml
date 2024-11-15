@@ -240,6 +240,12 @@
         host_groups:
           - OKD4 clusters
 
+    - name: add mirror-registry
+      community.zabbix.zabbix_host:
+        host_name: mirror-registry.openshift-utv.uio.no
+        host_groups:
+          - Applications
+
     - name: add openshift-utv
       community.zabbix.zabbix_host:
         proxy: zabbix-proxy.openshift-utv.uio.no
