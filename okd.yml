@@ -26,7 +26,7 @@
         line: "{{ item.address }} {{ item.name }}.{{ cluster_domain }}"
       loop:
         - name: api
-          address: "{{ baremetal_network_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}"
+          address: "{{ baremetal_network_ipv4_cidr | default('10.0.0.0/16') | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}"
         - name: mirror-registry
           address: 127.0.0.1
 
@@ -39,7 +39,7 @@
         interface_list: "{{ ansible_facts.interfaces | map('replace', '-', '_') | map('extract', ansible_facts) }}"
         interfaces_with_ipv4: "{{ interface_list | selectattr('ipv4', 'defined') }}"
         ipv4_addresses: "{{ interfaces_with_ipv4 | map(attribute='ipv4.address') }}"
-        listen_address: "{{ ipv4_addresses | ansible.utils.ipaddr(baremetal_network_cidr | default('10.0.0.0/16')) | first }}"
+        listen_address: "{{ ipv4_addresses | ansible.utils.ipaddr(baremetal_network_ipv4_cidr | default('10.0.0.0/16')) | first }}"
       notify: restart dnsmasq
 
     - name: Open for business

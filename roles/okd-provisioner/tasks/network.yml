@@ -52,17 +52,17 @@
             enabled: true
             address:
               - ip: "{{ listen_address }}"
-                prefix-length: "{{ baremetal_network_cidr | default('10.0.0.0/24') | ansible.utils.ipaddr('prefix') }}"
+                prefix-length: "{{ baremetal_network_ipv4_cidr | default('10.0.0.0/24') | ansible.utils.ipaddr('prefix') }}"
       routes:
         config:
           - destination: 0.0.0.0/0
             next-hop-interface: "{{ externalBridge | default('baremetal') }}"
-            next-hop-address: "{{ baremetal_network_cidr | default('10.0.0.0/24') | ansible.utils.ipaddr('1') | ansible.utils.ipaddr('address') }}"
+            next-hop-address: "{{ baremetal_network_ipv4_cidr | default('10.0.0.0/24') | ansible.utils.ipaddr('1') | ansible.utils.ipaddr('address') }}"
   vars:
     interface_list: "{{ ansible_facts.interfaces | map('replace', '-', '_') | map('extract', ansible_facts) }}"
     interfaces_with_ipv4: "{{ interface_list | selectattr('ipv4', 'defined') }}"
     ipv4_addresses: "{{ interfaces_with_ipv4 | map(attribute='ipv4.address') }}"
-    listen_address: "{{ ipv4_addresses | ansible.utils.ipaddr(baremetal_network_cidr | default('10.0.0.0/24')) | first }}"
+    listen_address: "{{ ipv4_addresses | ansible.utils.ipaddr(baremetal_network_ipv4_cidr | default('10.0.0.0/24')) | first }}"
 
 #- name: create baremetal
 #  community.general.nmcli:
