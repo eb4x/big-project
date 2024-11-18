@@ -134,6 +134,7 @@
   meta: flush_handlers
 
 - name: open the firewall for mirror-registry
+  when: firewalld_is_running | default(true)
   become: true
   ansible.posix.firewalld:
     state: enabled

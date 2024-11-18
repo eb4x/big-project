@@ -14,6 +14,11 @@
         name:
           - netaddr
 
+    - name: Get service facts
+      service_facts:
+    - set_fact:
+        firewalld_is_running: "{{ ansible_facts.services['firewalld.service'].state == 'running' }}"
+
   tasks:
     - name: install dnsmasq
       package:
@@ -43,6 +48,7 @@
       notify: restart dnsmasq
 
     - name: Open for business
+      when: firewalld_is_running | default(true)
       ansible.posix.firewalld:
         service: "{{ item }}"
         state: enabled
@@ -83,6 +89,12 @@
   hosts:
     - provisioner
     - uio-provisioner
+
+  pre_tasks:
+    - name: Get service facts
+      service_facts:
+    - set_fact:
+        firewalld_is_running: "{{ ansible_facts.services['firewalld.service'].state == 'running' }}"
 
   roles:
     - okd-provisioner

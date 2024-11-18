@@ -5,6 +5,11 @@
   become: true
 
   pre_tasks:
+    - name: Get service facts
+      service_facts:
+    - set_fact:
+        firewalld_is_running: "{{ ansible_facts.services['firewalld.service'].state == 'running' }}"
+
     - package:
         name: container-selinux
         state: latest # >= v2.219.0
@@ -113,6 +118,7 @@
       become: false
 
     - name: open zabbix ports
+      when: firewalld_is_running | default(true)
       ansible.posix.firewalld:
         port: "{{ item.port }}"
         immediate: true
