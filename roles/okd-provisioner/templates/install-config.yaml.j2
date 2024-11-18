@@ -56,8 +56,10 @@ platform:
 {% if bootstrap_os_image is defined %}
     bootstrapOSImage: "{{ bootstrap_os_image }}"
 {% endif %}
-    apiVIP: {{ baremetal_network_ipv4_cidr | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}
-    ingressVIP: {{ baremetal_network_ipv4_cidr | ansible.utils.ipaddr('128') | ansible.utils.ipaddr('address') }}
+    apiVIPs:
+    - {{ baremetal_network_ipv4_cidr | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}
+    ingressVIPs:
+    - {{ baremetal_network_ipv4_cidr | ansible.utils.ipaddr('128') | ansible.utils.ipaddr('address') }}
     provisioningBridge: {{ provisioningBridge | default('provisioning') }}
     provisioningDHCPRange: 172.22.0.64,172.22.0.95
     externalBridge: {{ externalBridge | default('baremetal') }}
