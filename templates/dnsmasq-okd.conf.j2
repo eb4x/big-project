@@ -22,10 +22,11 @@ dhcp-option=121,{% for route in routes %}{{ route }}{% if not loop.last %},{% en
 dhcp-range={{ baremetal_network_ipv4_cidr | default('10.0.0.0/24') | ansible.utils.ipaddr('64') | ansible.utils.ipaddr('address') }},{{ baremetal_network_ipv4_cidr | default('10.0.0.0/24') | ansible.utils.ipaddr('95') | ansible.utils.ipaddr('address') }},2m
 
 {% for host in groups[master_group]  %}
-dhcp-host={% for interface in hostvars[host].interfaces %}{{ hostvars[host].interfaces[interface] }}{% if not loop.last %},{% endif %}{% endfor %},{{ hostvars[host].okd_external_ipv4_addr }},master-{{ loop.index0 }},1h
+dhcp-host={% for interface in hostvars[host].interfaces %}{{ hostvars[host].interfaces[interface] }}{% if not loop.last %},{% endif %}{% endfor %},{{ hostvars[host].okd_external_ipv4_addr }},master-{{ loop.index0 }},infinite
 host-record=master-{{ loop.index0 }}.{{ cluster_domain }},{{ hostvars[host].okd_external_ipv4_addr }}
 {% endfor %}
+
 {% for host in groups[worker_group] %}
-dhcp-host={% for interface in hostvars[host].interfaces %}{{ hostvars[host].interfaces[interface] }}{% if not loop.last %},{% endif %}{% endfor %},{{ hostvars[host].okd_external_ipv4_addr }},worker-{{ loop.index0 }},1h
+dhcp-host={% for interface in hostvars[host].interfaces %}{{ hostvars[host].interfaces[interface] }}{% if not loop.last %},{% endif %}{% endfor %},{{ hostvars[host].okd_external_ipv4_addr }},worker-{{ loop.index0 }},infinite
 host-record=worker-{{ loop.index0 }}.{{ cluster_domain }},{{ hostvars[host].okd_external_ipv4_addr }}
 {% endfor %}
