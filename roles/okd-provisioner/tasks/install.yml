@@ -105,6 +105,8 @@
 # https://github.com/openshift/cluster-network-operator#configuring-ipsec-with-ovnkubernetes-at-runtime
 # https://docs.openshift.com/container-platform/4.11/networking/ovn_kubernetes_network_provider/configuring-ipsec-ovn.html
 # https://docs.openshift.com/container-platform/4.11/networking/changing-cluster-network-mtu.html#mtu-value-selection_changing-cluster-network-mtu
+# https://docs.mirantis.com/mke/3.7/ops/deploy-apps-k8s/kubernetes-network-encryption.html#configure-maximum-transmission-units
+# https://www.rfc-editor.org/rfc/rfc4303#section-2.3
 - name: enable ipsec
   copy:
     content: |
@@ -117,7 +119,7 @@
         defaultNetwork:
           type: OVNKubernetes
           ovnKubernetesConfig:
-            mtu: {{ 1500 - (ovnkubernetes_overhead + ipsec_overhead) }}
+            mtu: {{ 1500 - ovnkubernetes_overhead - ipsec_overhead - (1500 - ovnkubernetes_overhead - ipsec_overhead) % 8 }}
             ipsecConfig: {% if _openshift_install_version is version('4.15', '<') %}{}{% endif %}
               {% if _openshift_install_version is version('4.15', '>=') +%}
               mode: External
