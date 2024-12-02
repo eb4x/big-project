@@ -1,5 +1,6 @@
 ---
 okd_external_ipv4_addr: "172.28.4.10"
+okd_external_ipv6_addr: "2001:700:100:8492::10"
 
 bootMACAddress: "{{ interfaces.eno1 }}"
 bootMode: UEFI
