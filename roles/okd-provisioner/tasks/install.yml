@@ -206,6 +206,7 @@
       wait_for:
         host: 172.22.0.2
         port: 22
+        timeout: 600
     - name: patch rpm-ostree auth
       command: >-
         ssh -o StrictHostKeyChecking=no core@172.22.0.2 -t
