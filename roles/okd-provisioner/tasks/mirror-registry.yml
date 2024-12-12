@@ -19,6 +19,7 @@
     mode: '0755'
   loop:
     - "~/.config/containers"
+    - "~/.config/containers/certs.d/{{ mirror_registry_fqdn }}:8443"
     - "{{ mirror_registry_quayroot }}"
 
 - name: check for existing mirror-registry
@@ -43,9 +44,7 @@
     creates: "{{ _mirror_registry_download is changed | ternary(omit, '~/mirror-registry/mirror-registry') }}"
 
 - name: dump ssl certs
-  when:
-    - mirror_registry_ssl_key is defined
-    - mirror_registry_ssl_crt is defined
+  when: not _mirror_registry_is_self_signed
   copy:
     content: "{{ item.content }}"
     dest: "~/mirror-registry/{{ mirror_registry_fqdn | replace('.', '_') }}.{{ item.ext }}"
@@ -69,7 +68,7 @@
       --initPassword {{ mirror_registry_password }}
       --quayHostname {{ mirror_registry_fqdn }}
       --quayRoot {{ mirror_registry_quayroot }}
-      {% if mirror_registry_ssl_key is defined and mirror_registry_ssl_crt is defined %}
+      {% if not _mirror_registry_is_self_signed %}
       --sslKey {{ mirror_registry_fqdn | replace('.', '_') }}.key
       --sslCert {{ mirror_registry_fqdn | replace('.', '_') }}.crt
       {% endif %}
@@ -112,9 +111,7 @@
   notify: restart quay-app
 
 - name: update ssl certs
-  when:
-    - mirror_registry_ssl_key is defined
-    - mirror_registry_ssl_crt is defined
+  when: not _mirror_registry_is_self_signed
   copy:
     content: "{{ item.content }}"
     dest: "~/mirror-registry/quay-install/quay-config/ssl.{{ item.ext }}"
@@ -160,11 +157,21 @@
 #  loop_control:
 #    loop_var: name
 
+- name: add self-signed certificate to tooling
+  when: _mirror_registry_is_self_signed
+  copy:
+    remote_src: true
+    src: "{{ mirror_registry_quayroot }}/quay-rootCA/rootCA.pem"
+    dest: "~/.config/containers/certs.d/{{ mirror_registry_fqdn }}:8443/ca.crt"
+
+- name: assert self-signed certificate for tooling
+  file:
+    state: "{{ _mirror_registry_is_self_signed | ternary('file','absent') }}"
+    dest: "~/.config/containers/certs.d/{{ mirror_registry_fqdn }}:8443/ca.crt"
+
 - name: create registry login
   containers.podman.podman_login:
     authfile: "{{ mirror_registry_authfile }}"
     username: "{{ mirror_registry_user }}"
     password: "{{ mirror_registry_password }}"
     registry: "{{ mirror_registry_fqdn }}:8443"
-    #certdir: "{{ mirror_registry_quayroot }}/quay-rootCA" # certdir looks for (*.crt, *.cert, *.key)
-    tlsverify: "{{ not _mirror_registry_is_self_signed }}"
