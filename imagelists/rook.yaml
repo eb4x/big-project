@@ -1,0 +1,25 @@
+---
+docker.io:
+  images-by-semver:
+    rook/ceph: ">=v1.13.10"
+
+quay.io:
+  images-by-semver:
+    ceph/ceph: ">=v18"
+    cephcsi/cephcsi: ">=v3.10.2"
+    openshift/origin-cli: ">=4.7"
+
+  images:
+    ceph/ceph:
+      - v18
+      - v18.2.4
+      - v18.2.2
+
+registry.k8s.io:
+  images:
+  images-by-semver:
+    sig-storage/csi-attacher: ">=v4.5.0"
+    sig-storage/csi-node-driver-registrar: ">=v2.10.0"
+    sig-storage/csi-provisioner: ">=v4.0.0"
+    sig-storage/csi-resizer: ">=v1.10.0"
+    sig-storage/csi-snapshotter: ">=v7.0.1"

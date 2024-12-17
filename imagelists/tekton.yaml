@@ -1,0 +1,6 @@
+---
+gcr.io:
+  images-by-semver:
+    tekton-releases/github.com/tektoncd/pipeline/cmd/events: ">=v0.59.0"
+    tekton-releases/github.com/tektoncd/pipeline/cmd/controller: ">=v0.59.0"
+    tekton-releases/github.com/tektoncd/pipeline/cmd/webhook: ">=v0.59.0"

@@ -1,0 +1,5 @@
+---
+quay.io:
+  images-by-semver:
+     community-operator-pipeline-prod/argocd-operator: ">=0.12.0"
+     argoprojlabs/argocd-operator: ">=v0.12.0"

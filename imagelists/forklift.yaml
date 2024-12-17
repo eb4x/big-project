@@ -1,0 +1,21 @@
+---
+quay.io:
+  images:
+    community-operator-pipeline-prod/forklift-operator:
+      - 2.6.3
+    kubev2v/forklift-operator:
+      - release-v2.6.3
+    kubev2v/forklift-controller:
+      - release-v2.6.3
+    kubev2v/forklift-virt-v2v:
+      - release-v2.6.3
+    kubev2v/forklift-virt-v2v-warm:
+      - release-v2.6.3
+    kubev2v/forklift-api:
+      - release-v2.6.3
+    kubev2v/populator-controller:
+      - release-v2.6.3
+    kubev2v/forklift-console-plugin:
+      - release-v2.6.3
+    kubev2v/forklift-validation:
+      - release-v2.6.3

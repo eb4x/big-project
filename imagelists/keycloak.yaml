@@ -1,0 +1,5 @@
+---
+quay.io:
+  images-by-semver:
+    community-operator-pipeline-prod/keycloak-operator: ">=24.0.2"
+    keycloak/keycloak-operator: ">=24.0.2"

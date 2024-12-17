@@ -1,0 +1,20 @@
+---
+docker.io:
+  images:
+    redis:
+      - 7.0
+      - 6
+
+quay.io:
+  images-by-semver:
+    community-operator-pipeline-prod/project-quay: "^3.12.x"
+    projectquay/quay-operator: "^3.12.x"
+    projectquay/quay: "^3.12.x"
+    projectquay/clair: "^4.8.x"
+
+  images:
+    sclorg/postgresql-15-c9s:
+      - 20241106
+    sclorg/postgresql-13-c9s:
+      - 20241106
+      - 20240228

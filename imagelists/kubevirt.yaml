@@ -1,0 +1,47 @@
+---
+quay.io:
+  images-by-semver:
+    community-operator-pipeline-prod/community-kubevirt-hyperconverged: ">= 1.10.7"
+    kubevirt/hyperconverged-cluster-operator: ">= 1.10.7"
+    kubevirt/hyperconverged-cluster-webhook:  ">= 1.10.7"
+
+    kubevirt/cdi-apiserver:   ">= v1.57.0"
+    kubevirt/cdi-controller:  ">= v1.57.0"
+    kubevirt/cdi-importer:    ">= v1.57.0"
+    kubevirt/cdi-operator:    ">= v1.57.0"
+    kubevirt/cdi-uploadproxy: ">= v1.57.0"
+
+    kubevirt/aaq-operator: ">= v1.1.16"
+    kubevirt/bridge-marker: ">= 0.11.1"
+    kubevirt/cluster-network-addons-operator: ">= v0.89.2"
+    kubevirt/cni-default-plugins: ">= v1.3.0"
+    kubevirt/hostpath-provisioner-operator: ">= v0.17.0"
+    kubevirt/kubemacpool: ">= v0.41.2"
+    kubevirt/kubevirt-template-validator: ">= v0.18.3"
+    kubevirt/mtq-operator: ">= v1.1.11"
+    kubevirt/ssp-operator: ">= v0.18.3"
+
+    kubevirt/virt-api:         ">= v1.0.1"
+    kubevirt/virt-controller:  ">= v1.0.1"
+    kubevirt/virt-exportproxy: ">= v1.0.1"
+    kubevirt/virt-handler:     ">= v1.0.1"
+    kubevirt/virt-launcher:    ">= v1.0.1"
+    kubevirt/virt-operator:    ">= v1.0.1"
+    kubevirt/virt-artifacts-server: ">= 1.11.1"
+
+    kubevirt-ui/kubevirt-apiserver-proxy: ">= v0.0.9"
+    kubevirt-ui/kubevirt-plugin: ">= v4.14.0"
+    openshift/origin-kube-rbac-proxy: ">= 4.14.0"
+
+  images:
+    containerdisks/centos:
+      - 7-2009
+    containerdisks/centos-stream:
+      - 9
+      - 8
+    containerdisks/fedora:
+      - latest
+    kubevirt/cirros-container-disk-demo:
+      - latest
+    kubevirt/cni-default-plugins:
+      - v1.4.0-4-g14bdce59

@@ -1,0 +1,5 @@
+---
+ghcr.io:
+  images-by-semver:
+    actions/actions-runner-controller-charts/gha-runner-scale-set-controller: ">=0.9.3"
+    actions/actions-runner-controller-charts/gha-runner-scale-set: ">=0.9.3"

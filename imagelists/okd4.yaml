@@ -1,0 +1,11 @@
+---
+registry.access.redhat.com:
+  images-by-semver:
+    redhat/community-operator-index: ">=v4.16"
+
+registry.redhat.io:
+  images-by-semver:
+    redhat/certified-operator-index: ">=v4.16"
+    redhat/community-operator-index: ">=v4.16"
+    redhat/redhat-marketplace-index: ">=v4.16"
+    redhat/redhat-operator-index: ">=v4.16"

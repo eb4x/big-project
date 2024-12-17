@@ -1,0 +1,62 @@
+---
+quay.io:
+  images-by-semver:
+    community-operator-pipeline-prod/cert-manager: "^1.16.x"
+    jetstack/cert-manager-acmesolver: "^v1.16.x"
+    jetstack/cert-manager-cainjector: "^v1.16.x"
+    jetstack/cert-manager-controller: "^v1.16.x"
+    jetstack/cert-manager-webhook: "^v1.16.x"
+
+    nmstate/kubernetes-nmstate-operator: ">=v0.81.x"
+    nmstate/kubernetes-nmstate-handler: ">=v0.81.x"
+
+  images:
+    nmstate/nmstate-console-plugin:
+      - release-1.0.0
+    operatorhubio/catalog:
+      - latest
+
+    openstack-k8s-operators/barbican-operator:                   [ 18.0-fr1-latest ]
+    openstack-k8s-operators/barbican-operator-bundle:            [ 18.0-fr1-latest ]
+    openstack-k8s-operators/cinder-operator:                     [ 18.0-fr1-latest ]
+    openstack-k8s-operators/cinder-operator-bundle:              [ 18.0-fr1-latest ]
+    openstack-k8s-operators/designate-operator:                  [ 18.0-fr1-latest ]
+    openstack-k8s-operators/designate-operator-bundle:           [ 18.0-fr1-latest ]
+    openstack-k8s-operators/glance-operator:                     [ 18.0-fr1-latest ]
+    openstack-k8s-operators/glance-operator-bundle:              [ 18.0-fr1-latest ]
+    openstack-k8s-operators/heat-operator:                       [ 18.0-fr1-latest ]
+    openstack-k8s-operators/heat-operator-bundle:                [ 18.0-fr1-latest ]
+    openstack-k8s-operators/horizon-operator:                    [ 18.0-fr1-latest ]
+    openstack-k8s-operators/horizon-operator-bundle:             [ 18.0-fr1-latest ]
+    openstack-k8s-operators/infra-operator:                      [ 18.0-fr1-latest ]
+    openstack-k8s-operators/infra-operator-bundle:               [ 18.0-fr1-latest ]
+    openstack-k8s-operators/ironic-operator:                     [ 18.0-fr1-latest ]
+    openstack-k8s-operators/ironic-operator-bundle:              [ 18.0-fr1-latest ]
+    openstack-k8s-operators/keystone-operator:                   [ 18.0-fr1-latest ]
+    openstack-k8s-operators/keystone-operator-bundle:            [ 18.0-fr1-latest ]
+    openstack-k8s-operators/manila-operator:                     [ 18.0-fr1-latest ]
+    openstack-k8s-operators/manila-operator-bundle:              [ 18.0-fr1-latest ]
+    openstack-k8s-operators/mariadb-operator:                    [ 18.0-fr1-latest ]
+    openstack-k8s-operators/mariadb-operator-bundle:             [ 18.0-fr1-latest ]
+    openstack-k8s-operators/neutron-operator:                    [ 18.0-fr1-latest ]
+    openstack-k8s-operators/neutron-operator-bundle:             [ 18.0-fr1-latest ]
+    openstack-k8s-operators/nova-operator:                       [ 18.0-fr1-latest ]
+    openstack-k8s-operators/nova-operator-bundle:                [ 18.0-fr1-latest ]
+    openstack-k8s-operators/octavia-operator:                    [ 18.0-fr1-latest ]
+    openstack-k8s-operators/octavia-operator-bundle:             [ 18.0-fr1-latest ]
+    openstack-k8s-operators/openstack-ansibleee-operator:        [ 18.0.0-proposed-latest ]
+    openstack-k8s-operators/openstack-ansibleee-operator-bundle: [ 18.0.0-proposed-latest ]
+    openstack-k8s-operators/openstack-baremetal-operator:        [ 18.0-fr1-latest ]
+    openstack-k8s-operators/openstack-baremetal-operator-bundle: [ 18.0-fr1-latest ]
+    openstack-k8s-operators/openstack-operator-index:            [ 18.0-fr1-latest ]
+    openstack-k8s-operators/openstack-operator-bundle:           [ 18.0-fr1-latest ]
+    openstack-k8s-operators/ovn-operator:                        [ 18.0-fr1-latest ]
+    openstack-k8s-operators/ovn-operator-bundle:                 [ 18.0-fr1-latest ]
+    openstack-k8s-operators/placement-operator:                  [ 18.0-fr1-latest ]
+    openstack-k8s-operators/placement-operator-bundle:           [ 18.0-fr1-latest ]
+    openstack-k8s-operators/rabbitmq-cluster-operator:           [ latest ]
+    openstack-k8s-operators/rabbitmq-cluster-operator-bundle:    [ latest ]
+    openstack-k8s-operators/swift-operator:                      [ 18.0-fr1-latest ]
+    openstack-k8s-operators/swift-operator-bundle:               [ 18.0-fr1-latest ]
+    openstack-k8s-operators/telemetry-operator:                  [ 18.0-fr1-latest ]
+    openstack-k8s-operators/telemetry-operator-bundle:           [ 18.0-fr1-latest ]
