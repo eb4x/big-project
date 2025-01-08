@@ -41,22 +41,28 @@
         dest: /etc/dnsmasq.d/okd.conf
         mode: '0644'
       vars:
+        use_dhcpv6: "{{ enable_ipv6 | default(false) }}"
         interface_list: "{{ ansible_facts.interfaces | map('replace', '-', '_') | map('extract', ansible_facts) }}"
         interfaces_with_ipv4: "{{ interface_list | selectattr('ipv4', 'defined') }}"
+        interfaces_with_ipv6: "{{ interface_list | selectattr('ipv6', 'defined') }}"
         ipv4_addresses: "{{ interfaces_with_ipv4 | map(attribute='ipv4.address') }}"
+        ipv6_addresses: "{{ interfaces_with_ipv6 | map(attribute='ipv6') | flatten | map(attribute='address') }}"
         listen_ipv4_address: "{{ ipv4_addresses | ansible.utils.ipaddr(baremetal_network_ipv4_cidr | default('10.0.0.0/16')) | first }}"
+        listen_ipv6_address: "{{ ipv6_addresses | ansible.utils.ipaddr(baremetal_network_ipv6_cidr | default('fd00::/64')) | first }}"
       notify: restart dnsmasq
 
     - name: Open for business
       when: firewalld_is_running | default(true)
       ansible.posix.firewalld:
-        service: "{{ item }}"
-        state: enabled
+        service: "{{ item.service }}"
+        state: "{{ item.state | default('enabled') }}"
         immediate: true
         permanent: true
       loop:
-        - dhcp
-        - dns
+        - service: dhcp
+        - service: dhcpv6
+          state: "{{ enable_ipv6 | default(false) | ternary('enabled', 'disabled') }}"
+        - service: dns
 
     - name: Flush handlers
       meta: flush_handlers

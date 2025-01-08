@@ -8,6 +8,7 @@ worker_group: uio_okd_workers
 
 baremetal_network_ipv4_cidr: "172.28.4.0/24"
 baremetal_network_ipv6_cidr: "2001:700:100:8492::/64"
+enable_ipv6: true
 
 dns_servers:
   - 129.240.2.27

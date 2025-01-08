@@ -53,6 +53,10 @@
             address:
               - ip: "{{ listen_address }}"
                 prefix-length: "{{ baremetal_network_ipv4_cidr | ansible.utils.ipaddr('prefix') }}"
+              {% if enable_ipv6 %}
+              - ip: "{{ listen_address }}"
+                prefix-length: "{{ baremetal_network_ipv6_cidr | ansible.utils.ipaddr('prefix') }}"
+              {% endif %}
       routes:
         config:
           - destination: 0.0.0.0/0
