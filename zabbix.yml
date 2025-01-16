@@ -18,6 +18,11 @@
         state: true
         persistent: true
 
+    - name: enable lingering for systemd user processes
+      command: loginctl enable-linger
+      args:
+        creates: "/var/lib/systemd/linger/{{ ansible_user }}"
+
   tasks:
     - name: Create dns entries needed by provisioner
       lineinfile:
@@ -68,6 +73,7 @@
       when:
         - zabbix_web_ssl_key is defined
         - zabbix_web_ssl_cert is defined
+      become: false
       block:
         - community.crypto.openssl_dhparam:
             path: dhparam.pem
@@ -88,31 +94,23 @@
                 ssl.crt: {{ zabbix_web_ssl_cert | b64encode }}
                 ssl.key: {{ zabbix_web_ssl_key | b64encode }}
                 dhparam.pem: {{ _dhparam_pem.dhparams | b64encode }}
-          become: false
 
     - name: copy zabbix kubeplay
+      become: false
       template:
-        src: zabbix-mysql-pod.yaml.j2
-        dest: zabbix-mysql-pod.yaml
+        src: zabbix-pod.yaml.j2
+        dest: zabbix-pod.yaml
         mode: '0644'
       vars:
-        #zabbix_version: trunk
         zabbix_version: 7.0-latest
-        #zabbix_version: 6.4-latest
-        #zabbix_version: 6.0-latest
         zabbix_https_port: 10443
-        mysql_version: 10.6
-        mysql_password: "{{ lookup('password', '~/.ansible/.zabbix_mysql_password') }}"
+        db_type: pgsql
+        enable_timescaledb: true
       register: _zabbix_pod_config
-
-    - name: enable lingering for systemd user processes
-      command: loginctl enable-linger
-      args:
-        creates: "/var/lib/systemd/linger/{{ ansible_user }}"
 
     - name: prop up zabbix pod
       containers.podman.podman_play:
-        kube_file: zabbix-mysql-pod.yaml
+        kube_file: zabbix-pod.yaml
         state: started
         recreate: "{{ _zabbix_pod_config is changed | ternary(true, false) }}"
       become: false
@@ -254,6 +252,7 @@
 
     - name: add openshift-utv
       community.zabbix.zabbix_host:
+        monitored_by: proxy
         proxy: zabbix-proxy.openshift-utv.uio.no
         host_name: openshift-utv.uio.no
         host_groups:
@@ -263,7 +262,7 @@
         #  - Kubernetes nodes by HTTP
         macros:
           - { macro: '{$KUBE.CONTROL_PLANE.TAINT}', value: node-role.kubernetes.io/master }
-          - { macro: '{$KUBE.API.TOKEN}', value: eyJhbGciOiJSUzI1NiIsImtpZCI6Im1GT0tpendua3pzeEVLMWdKdnhWV2thU3NXTVBvX3JheGNuVnhIQ3ZvaGMifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJvcGVuc2hpZnQtbW9uaXRvcmluZyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJ6YWJiaXgtc2VydmljZS1hY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InphYmJpeC1zZXJ2aWNlLWFjY291bnQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1YjMxZTZlNS03MmNlLTRlY2MtOTQ1MS02ZGVlZDZhYmNiNGMiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6b3BlbnNoaWZ0LW1vbml0b3Jpbmc6emFiYml4LXNlcnZpY2UtYWNjb3VudCJ9.wuPyufg7D8weDXoyrDcV2L3Z7pGm3ajocSdlT5J5dPuaaB4rqFw4W-W6q2ZVqOmedByiX_SktSCXiWsYE3eDRh7IgafKFxiPPzSDhAZ82MtV7OOk4_k1Qc4gC2sJBNsUPKkyX0BSm78wxLA3yf2qz9xxQVz_Nsmj3EUrsNFlMpPaX5hGt3iZqDvo_qF4fkwghL_4L6X0k-yb0SzQdIRMPDVBpLFobmAK1yXsYznY1PFIOr_KM1T5cz9CerN47wfzirOuvjhP4uObn0yiBR0X-jfaqmMwH-A3qrRUjB9VTXT8Lnl9QwQAOCYtZJHphf8TnNrr-IxypHg0gaCwFNMbGNMz_cSA8gUdW93alRvjH-7VvMk6Qsparogzp4PcqDNvSbSVwttWyperW33d-M5YF1JP47gQcfdM6-XhEI21kFhM6WaM-8yyOMBroY_25pvoxnQ4N-Rtlf1caoEmq6iTdiMnrXM-T4vawX3eY81GN-M3VXGq2c7MZ8KfVMphl2w5eFzswxoGbmIqYKhpCe7DwmZ5cdPBRtChgD5jKSbxixGq-9E8cfje-zXsLP2bblNicWf9X1MtRDrCJbSnZsoG6KJ4zBvrwbN-wLWr0rQm3Dwj77jEsZNGVSXwyt7178M3hY0wADdIGTldRzqz77kcgPJOCHs_wryqR8lcRCO5pCA }
+          - { macro: '{$KUBE.API.TOKEN}', value: eyJhbGciOiJSUzI1NiIsImtpZCI6IlEzeEpjYXpHTW01MEZZdXp3amoyYVpCeXMtMHc4Nm1UUWIzZ3RrTUcwR1UifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJvcGVuc2hpZnQtbW9uaXRvcmluZyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJ6YWJiaXgtc2VydmljZS1hY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InphYmJpeC1zZXJ2aWNlLWFjY291bnQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI4YjliYWJiMC00ZmI1LTRhNzAtOTQwNy0wNDJmY2FkNDA0NTQiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6b3BlbnNoaWZ0LW1vbml0b3Jpbmc6emFiYml4LXNlcnZpY2UtYWNjb3VudCJ9.Becc46L8DrxZgoYgCPjHN17xu4mm37DaAKJPxVO7ErdaNB0dMjgpDww5MPVCThlIkpH9z6xeCETGytFqYV3v7WlNYQDW3o744shAuwZsMXDVKjECKFhbht9tQlnTDAAjNIAsUDTTKQ6GCFODHuIrC-sQkTzWqW-irg1lgbmOBZKJRZVgETlygAE-KvGmCc-iI7Fgrpt0KKxqFxU2kVOKZk8OcsA_E7Poe6jEX_SsewRt5pok6fj_1mgaAwiXOWShwO_l35d_ECqfoxKLZ72Uv_M-bdhzGOfujBMfyruQbJrWt_LhndSE9jeBEX7XWgHF9rOl4u5o7BAndHFBkeENWG6V03zBRhj7XXfqjltxb2TtD5t0cP_rw5WLX9KWj2ws71J4dBFwGDtYb85m6RlwwG1a0vZPlcAcNLzqoM6sjD1z8_9d-LXeshgYDK70t3OhhQauGVNRt0FPsZ9Fbz9vhSAiXMVKDJJaLUgNV2Js1VPX8lPkmz6Nng7VPfdQctY7P2UyJrG3heut7xiwkyBiYlLdIl6ar8Btpb_tQnuf4rVBOPoCdALfRLl56Y_2-e0ARtU7FGPx6SIYu03nuKDK2LHAIG5adApsiQS5pTHmJeqHvX2WsxCLJEvE8Z1WtHbIofMAt3YBb_6zYOEM3bHfRiWsaKe05Qsrf3XE21jE9Z0 }
           - { macro: '{$KUBE.API.URL}', value: "https://kubernetes.default.svc.cluster.local:443" }
           - { macro: '{$KUBE.STATE.ENDPOINT.NAME}', value: kube-state-metrics }
           - { macro: '{$KUBE.CONTROLLER_MANAGER.SCHEME}', value: https }

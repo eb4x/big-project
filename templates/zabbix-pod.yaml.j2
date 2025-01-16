@@ -1,3 +1,25 @@
+{% set _db_info = {
+  'mysql': {
+    'image': "docker.io/mariadb:" ~ mysql_version | default('10.6'),
+    'env': [
+      { 'MYSQL_ROOT_PASSWORD': lookup('password', '~/.ansible/.zabbix_mysql_password') },
+    ],
+    'port': 3306,
+    'mountPath': "/var/lib/mysql",
+  },
+  'pgsql': {
+    'image': enable_timescaledb | default(false) | ternary(
+        "docker.io/timescale/timescaledb:" ~ tsdb_version | default('latest-pg16'),
+        "docker.io/postgres:" ~ pgsql_version | default('16')
+    ),
+    'env': [
+      { 'POSTGRES_USER': "zabbix" },
+      { 'POSTGRES_PASSWORD': lookup('password', '~/.ansible/.zabbix_pgsql_password') },
+    ],
+    'port': 5432,
+    'mountPath': "/var/lib/postgresql/data",
+  },
+} %}
 ---
 apiVersion: v1
 kind: Pod
@@ -5,20 +27,30 @@ metadata:
   name: zabbix
 spec:
   containers:
-  - name: mysql
-    image: docker.io/mariadb:{{ mysql_version | default('10.6.15') }}
+  - name: db
+    image: "{{ _db_info[db_type].image }}"
     env:
-    - { name: MYSQL_ROOT_PASSWORD, value: {{ mysql_password }} }
+{% for env in _db_info[db_type].env %}
+{%   for key, value in env.items() %}
+    - { name: {{ key }}, value: {{ value }} }
+{%   endfor %}
+{% endfor %}
     ports:
-    - { hostPort: 3306, containerPort: 3306, protocol: TCP }
+    - { hostPort: {{ _db_info[db_type].port }}, containerPort: {{ _db_info[db_type].port }}, protocol: TCP }
     volumeMounts:
-    - { name: zabbix-mysql-data, mountPath: "/var/lib/mysql" }
+    - { name: zabbix-sql-data, mountPath: "{{ _db_info[db_type].mountPath }}" }
 
   - name: server
-    image: docker.io/zabbix/zabbix-server-mysql:alpine-{{ zabbix_version | default('latest') }}
+    image: docker.io/zabbix/zabbix-server-{{ db_type }}:alpine-{{ zabbix_version | default('latest') }}
     env:
-    - { name: MYSQL_ROOT_PASSWORD, value: {{ mysql_password }} }
-    - { name: MYSQL_USER, value: zabbix }
+{% for env in _db_info[db_type].env %}
+{%   for key, value in env.items() %}
+    - { name: {{ key }}, value: {{ value }} }
+{%   endfor %}
+{% endfor %}
+{% if enable_timescaledb %}
+    - { name: ENABLE_TIMESCALEDB, value: true }
+{% endif %}
     - { name: ZBX_CACHESIZE, value: 64M }
 {%  if zabbix_server_tls_key is defined and
        zabbix_server_tls_cert is defined and
@@ -37,10 +69,13 @@ spec:
 {% endif %}
 
   - name: web
-    image: docker.io/zabbix/zabbix-web-nginx-mysql:alpine-{{ zabbix_version | default('latest') }}
+    image: docker.io/zabbix/zabbix-web-nginx-{{ db_type }}:alpine-{{ zabbix_version | default('latest') }}
     env:
-    - { name: MYSQL_ROOT_PASSWORD, value: {{ mysql_password }} }
-    - { name: MYSQL_USER, value: zabbix }
+{% for env in _db_info[db_type].env %}
+{%   for key, value in env.items() %}
+    - { name: {{ key }}, value: {{ value }} }
+{%   endfor %}
+{% endfor %}
     - { name: PHP_TZ, value: "Europe/Oslo" }
     ports:
     - { hostPort: {{ zabbix_http_port | default('8080') }}, containerPort: 8080, protocol: TCP }
@@ -54,7 +89,7 @@ spec:
     image: docker.io/zabbix/zabbix-agent2:alpine-{{ zabbix_version | default('latest') }}
     env:
     - { name: ZBX_HOSTNAME, value: "Zabbix server" }
-    - { name: ZBX_PASSIVE_ALLOW, value: false }
+    #- { name: ZBX_PASSIVE_ALLOW, value: false }
     - { name: ZBX_ACTIVE_ALLOW, value: true }
 {% if zabbix_server_tls_key is defined and
       zabbix_server_tls_cert is defined and
@@ -63,6 +98,8 @@ spec:
     - { name: ZBX_TLSCAFILE, value: zabbix-ca.crt }
     - { name: ZBX_TLSCERTFILE, value: zabbix-server.crt }
     - { name: ZBX_TLSKEYFILE, value: zabbix-server.key }
+    ports:
+    - { hostPort: 10050, containerPort: 10050, protocol: TCP }
 {% endif %}
     securityContext:
       allowPrivilegeEscalation: true
@@ -77,15 +114,16 @@ spec:
   - ip: 127.0.0.1
     hostnames:
     - mysql-server
+    - postgres-server
     - zabbix-server
   - ip: 172.28.4.5
     hostnames:
     - mirror-registry.openshift-utv.uio.no
 
   volumes:
-  - name: zabbix-mysql-data
+  - name: zabbix-sql-data
     persistentVolumeClaim:
-      claimName: zabbix-mysql-pvc
+      claimName: zabbix-sql-pvc
 {%  if zabbix_server_tls_key is defined and
        zabbix_server_tls_cert is defined and
        zabbix_server_tls_ca is defined %}
