@@ -6,6 +6,7 @@ quay.io:
     kubevirt/hyperconverged-cluster-webhook:  ">= 1.10.7"
 
     kubevirt/cdi-apiserver:   ">= v1.57.0"
+    kubevirt/cdi-cloner:      ">= v1.57.0"
     kubevirt/cdi-controller:  ">= v1.57.0"
     kubevirt/cdi-importer:    ">= v1.57.0"
     kubevirt/cdi-operator:    ">= v1.57.0"
@@ -41,6 +42,8 @@ quay.io:
       - 8
     containerdisks/fedora:
       - latest
+    kiagnose/kubevirt-storage-checkup:
+      - main
     kubevirt/cirros-container-disk-demo:
       - latest
     kubevirt/cni-default-plugins:
