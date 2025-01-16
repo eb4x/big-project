@@ -14,7 +14,8 @@ quay.io:
 
   images:
     sclorg/postgresql-15-c9s:
+      - 20241218
       - 20241106
     sclorg/postgresql-13-c9s:
+      - 20241218
       - 20241106
-      - 20240228
