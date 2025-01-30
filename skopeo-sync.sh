@@ -7,7 +7,7 @@ for imagelist in imagelists/*.yaml; do
     continue
   fi
 
-  skopeo sync --tls-verify=false --keep-going --all --preserve-digests --src yaml $imagelist --scoped --dest docker ${mirror_registry}/mirrors &
+  skopeo sync --dest-tls-verify=false --keep-going --all --preserve-digests --src yaml $imagelist --scoped --dest docker ${mirror_registry}/mirrors &
 done
 
 # Sometimes there aren't any tags, just sha256 digests,
