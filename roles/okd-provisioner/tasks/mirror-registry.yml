@@ -50,10 +50,10 @@
     dest: "~/mirror-registry/{{ mirror_registry_fqdn | replace('.', '_') }}.{{ item.ext }}"
     mode: "{{ item.mode }}"
   loop:
-    - content: "{{ (mirror_registry_ssl_key | trim) ~ '\n'}}"
+    - content: "{{ (mirror_registry_ssl_key | trim) ~ '\n' }}"
       ext: key
       mode: '0600'
-    - content: "{{ (mirror_registry_ssl_crt | trim) ~ '\n'}}"
+    - content: "{{ (mirror_registry_ssl_crt | trim) ~ '\n' }}"
       ext: crt
       mode: '0644'
   loop_control:
@@ -62,8 +62,10 @@
 - name: mirror-registry install {{ mirror_registry_fqdn }}
   when:
     - not _quay_installer.stat.exists
-  command: >-
-    ./mirror-registry install
+  command: 
+    chdir: "~/mirror-registry"
+    cmd: >-
+      ./mirror-registry install
       --initUser {{ mirror_registry_user }}
       --initPassword {{ mirror_registry_password }}
       --quayHostname {{ mirror_registry_fqdn }}
@@ -72,8 +74,6 @@
       --sslKey {{ mirror_registry_fqdn | replace('.', '_') }}.key
       --sslCert {{ mirror_registry_fqdn | replace('.', '_') }}.crt
       {% endif %}
-  args:
-    chdir: "~/mirror-registry"
     creates: "~/.ssh/quay_installer"
 
 - name: fix ssh-key in authorized_keys if missing
@@ -94,12 +94,12 @@
   when:
     - _quay_installer.stat.exists
     - _mirror_registry_download is changed
-  command: >-
-    ./mirror-registry upgrade -v
+  command:
+    chdir: "~/mirror-registry"
+    cmd: >-
+      ./mirror-registry upgrade -v
       --quayHostname {{ mirror_registry_fqdn }}
       --quayRoot {{ mirror_registry_quayroot }}
-  args:
-    chdir: "~/mirror-registry"
 
 - name: patch mirror-registry config
   lineinfile:
@@ -117,10 +117,10 @@
     dest: "~/mirror-registry/quay-install/quay-config/ssl.{{ item.ext }}"
     mode: "{{ item.mode }}"
   loop:
-    - content: "{{ (mirror_registry_ssl_key | trim) ~ '\n'}}"
+    - content: "{{ (mirror_registry_ssl_key | trim) ~ '\n' }}"
       ext: key
       mode: '0644' # I know, right!?
-    - content: "{{ (mirror_registry_ssl_crt | trim) ~ '\n'}}"
+    - content: "{{ (mirror_registry_ssl_crt | trim) ~ '\n' }}"
       ext: cert
       mode: '0644'
   loop_control:
@@ -167,7 +167,7 @@
 - name: assert self-signed certificate for tooling
   file:
     state: "{{ _mirror_registry_is_self_signed | ternary('file','absent') }}"
-    dest: "~/.config/containers/certs.d/{{ mirror_registry_fqdn }}:8443/ca.crt"
+    path: "~/.config/containers/certs.d/{{ mirror_registry_fqdn }}:8443/ca.crt"
 
 - name: create registry login
   containers.podman.podman_login:

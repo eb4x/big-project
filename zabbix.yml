@@ -26,7 +26,7 @@
   tasks:
     - name: Create dns entries needed by provisioner
       lineinfile:
-        dest: /etc/hosts
+        path: /etc/hosts
         regexp: "{{ item.regexp | default(omit) }}"
         line: "{{ item.address }} {{ item.name }}"
       loop:

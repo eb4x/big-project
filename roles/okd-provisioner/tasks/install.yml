@@ -4,7 +4,7 @@
     state: directory
     path: "{{ item.path }}"
     mode: "{{ item.mode | default(omit) }}"
-  with_items:
+  loop:
     - path: "{{ coreos_image_cache_directory }}"
     - path: "{{ installation_directory }}"
   tags:
@@ -20,7 +20,8 @@
     - coreos_image_cache
   block:
     - name: coreos print-stream-json
-      command: openshift-baremetal-install coreos print-stream-json
+      command:
+        cmd: openshift-baremetal-install coreos print-stream-json
       changed_when: false
       register: _coreos
       tags:
@@ -35,7 +36,7 @@
     - name: Check for decompressed qcow2 image in image cache directory
       stat:
         path: "{{ coreos_image_cache_directory }}/{{ coreos_meta_location | default(_coreos_meta.location) | basename | splitext | first }}"
-        checksum: sha256
+        checksum_algorithm: sha256
       register: _coreos
 
     - name: download qemu image for bootstrap
@@ -54,8 +55,11 @@
         - not _coreos.stat.exists or
           _coreos.stat.checksum != coreos_meta_uncompressed_sha256 | default(_coreos_meta['uncompressed-sha256'])
         - (coreos_meta_location | default(_coreos_meta.location) | basename | splitext | last) == '.gz'
-      command: "gunzip --decompress {{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename }}"
-      args:
+      command:
+        argv:
+          - gunzip
+          - --decompress
+          - "{{ coreos_image_cache_directory }}/{{ _coreos_meta.location | basename }}"
         creates: "{{ coreos_image_cache_directory }}/{{ coreos_meta_location | default(_coreos_meta.location) | basename | splitext | first }}"
 
     - name: decompress xz image
@@ -63,14 +67,14 @@
         - not _coreos.stat.exists or
           _coreos.stat.checksum != coreos_meta_uncompressed_sha256 | default(_coreos_meta['uncompressed-sha256'])
         - (coreos_meta_location | default(_coreos_meta.location) | basename | splitext | last) == '.xz'
-      command: "xz --decompress {{ coreos_image_cache_directory }}/{{ coreos_meta_location | default(_coreos_meta.location) | basename }}"
-      args:
+      command:
+        cmd: "xz --decompress {{ coreos_image_cache_directory }}/{{ coreos_meta_location | default(_coreos_meta.location) | basename }}"
         creates: "{{ coreos_image_cache_directory }}/{{ coreos_meta_location | default(_coreos_meta.location) | basename | splitext | first }}"
 
 - name: get mirror-registry cert
   when: _mirror_registry_is_self_signed
   slurp:
-    path: "{{ mirror_registry_quayroot }}/quay-rootCA/rootCA.pem"
+    src: "{{ mirror_registry_quayroot }}/quay-rootCA/rootCA.pem"
   register: _mirror_registry_ca
   tags:
     - config
@@ -98,7 +102,9 @@
     - install-config.yaml
 
 - name: openshift-install create manifests
-  command: openshift-baremetal-install --dir {{ installation_directory }} create manifests
+  command:
+    cmd: openshift-baremetal-install --dir {{ installation_directory }} create manifests
+    removes: "{{ installation_directory }}/install-config.yaml"
   tags:
     - config
 
@@ -189,7 +195,9 @@
     - config
 
 - name: openshift-baremetal-install create cluster
-  command: openshift-baremetal-install --dir {{ installation_directory }} create cluster
+  command:
+    cmd: openshift-baremetal-install --dir {{ installation_directory }} create cluster
+    creates: "{{ installation_directory }}/auth/kubeconfig"
   environment:
     TF_LOG: trace
   async: 7200
@@ -208,9 +216,10 @@
         port: 22
         timeout: 600
     - name: patch rpm-ostree auth
-      command: >-
-        ssh -o StrictHostKeyChecking=no core@172.22.0.2 -t
-        sudo cp /root/.docker/config.json /etc/ostree/auth.json
+      command:
+        cmd: >-
+          ssh -o StrictHostKeyChecking=no core@172.22.0.2 -t
+          sudo cp /root/.docker/config.json /etc/ostree/auth.json
 
 - name: get results of openshift-baremetal-install create cluster
   block:

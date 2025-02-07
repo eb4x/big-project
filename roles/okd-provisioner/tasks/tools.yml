@@ -38,8 +38,8 @@
 
 - name: get openshift client/installer for {{ release_version }}
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
-  command: "oc adm release extract --to /tmp --tools {{ release_pull }}"
-  args:
+  command:
+    cmd: "oc adm release extract --to /tmp --tools {{ release_pull }}"
     creates: "/tmp/openshift-client-linux-{{ release_version }}.tar.gz"
 
 - name: update openshift client/installer to {{ release_version }}
@@ -55,11 +55,10 @@
 
 - name: get openshift-baremetal-install for {{ release_version }}
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
-  command: >-
-    oc adm release extract --command=openshift-baremetal-install
+  command:
+    cmd: >-
+      oc adm release extract --command=openshift-baremetal-install
       --to ~/.local/bin {{ release_pull }}
-#  args:
-#    creates: "~/.local/bin/openshift-baremetal-install"
   tags:
     - baremetal
 
@@ -76,7 +75,8 @@
     - opm
 
 - name: get bash-completion script for openshift commands
-  command: "{{ command }} completion bash"
+  command:
+    cmd: "{{ command }} completion bash"
   changed_when: false
   loop:
     - oc
