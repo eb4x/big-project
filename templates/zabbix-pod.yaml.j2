@@ -103,10 +103,13 @@ spec:
 {% endif %}
     securityContext:
       allowPrivilegeEscalation: true
+    volumeMounts:
+    - { name: proc, mountPath: /hostfs/proc, readOnly: true }
+    - { name: sys, mountPath: /hostfs/sys, readOnly: true }
+    - { name: root, mountPath: /hostfs/root, readOnly: true, mountPropagation: HostToContainer }
 {%  if zabbix_server_tls_key is defined and
        zabbix_server_tls_cert is defined and
        zabbix_server_tls_ca is defined %}
-    volumeMounts:
     - { name: zabbix-server-tls, mountPath: "/var/lib/zabbix/enc:ro" }
 {% endif %}
 
@@ -139,3 +142,12 @@ spec:
       secretName: zabbix-web-ssl
       optional: false
 {% endif %}
+  - name: proc
+    hostPath:
+      path: /proc
+  - name: sys
+    hostPath:
+      path: /sys
+  - name: root
+    hostPath:
+      path: /
