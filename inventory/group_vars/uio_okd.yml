@@ -10,10 +10,6 @@ baremetal_network_ipv4_cidr: "172.28.4.0/24"
 baremetal_network_ipv6_cidr: "2001:700:100:8492::/64"
 enable_ipv6: true
 
-dns_servers:
-  - 129.240.2.27
-  - 129.240.2.40
-
 #use_coreos_image_cache: true
 #coreos_meta_location: https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/39.20240104.3.0/x86_64/fedora-coreos-39.20240104.3.0-qemu.x86_64.qcow2.xz
 #coreos_meta_sha256: b2e4c07b8ac0e96b39af58f7daef9829536b534ce6e774dc14d54bcce000a81c
