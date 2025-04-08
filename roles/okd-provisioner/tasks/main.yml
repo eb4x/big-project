@@ -6,6 +6,12 @@
               okd_package_requirements }}"
   become: true
 
+- name: Verfiy virtual_media_address for masters
+  when: not enable_provisioning_network
+  assert:
+    that:
+      - groups[master_group] | map('extract', hostvars) | selectattr('bmc.virtual_media_address', 'undefined') | length == 0
+
 # TODO: EL9 (almalinux) removes /var/run/libvirt/libvirt-sock when
 # "not in use" under /usr/lib/systemd/system/libvirtd.socket
 #- block:

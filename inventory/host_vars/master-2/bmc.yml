@@ -9,3 +9,4 @@ bmc:
     3334306661373233360a356231613030323739353635353964356161393164643633666138306439
     3062
   address: ipmi://172.28.5.11
+  virtual_media_address: "idrac-virtualmedia://172.28.5.11/redfish/v1/Systems/System.Embedded.1"
