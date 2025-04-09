@@ -52,7 +52,7 @@ spec:
     - { name: ENABLE_TIMESCALEDB, value: true }
 {% endif %}
     - { name: ZBX_CACHESIZE, value: 64M }
-{%  if zabbix_server_tls_key is defined and
+{% if zabbix_server_tls_key is defined and
        zabbix_server_tls_cert is defined and
        zabbix_server_tls_ca is defined %}
     - { name: ZBX_TLSCAFILE, value: zabbix-ca.crt }
@@ -61,7 +61,7 @@ spec:
 {% endif %}
     ports:
     - { hostPort: 10051, containerPort: 10051, protocol: TCP }
-{%  if zabbix_server_tls_key is defined and
+{% if zabbix_server_tls_key is defined and
        zabbix_server_tls_cert is defined and
        zabbix_server_tls_ca is defined %}
     volumeMounts:
@@ -85,32 +85,34 @@ spec:
     - { name: zabbix-web-ssl, mountPath: "/etc/ssl/nginx" }
 {% endif %}
 
+{% if not zabbix_agent_daemonset | default(false) %}
   - name: agent
     image: docker.io/zabbix/zabbix-agent2:alpine-{{ zabbix_version | default('latest') }}
     env:
     - { name: ZBX_HOSTNAME, value: "Zabbix server" }
     #- { name: ZBX_PASSIVE_ALLOW, value: false }
     - { name: ZBX_ACTIVE_ALLOW, value: true }
-{% if zabbix_server_tls_key is defined and
-      zabbix_server_tls_cert is defined and
-      zabbix_server_tls_ca is defined %}
+{%   if zabbix_server_tls_key is defined and
+        zabbix_server_tls_cert is defined and
+        zabbix_server_tls_ca is defined %}
     - { name: ZBX_TLSCONNECT, value: cert }
     - { name: ZBX_TLSCAFILE, value: zabbix-ca.crt }
     - { name: ZBX_TLSCERTFILE, value: zabbix-server.crt }
     - { name: ZBX_TLSKEYFILE, value: zabbix-server.key }
     ports:
     - { hostPort: 10050, containerPort: 10050, protocol: TCP }
-{% endif %}
+{%   endif %}
     securityContext:
       allowPrivilegeEscalation: true
     volumeMounts:
     - { name: proc, mountPath: /hostfs/proc, readOnly: true }
     - { name: sys, mountPath: /hostfs/sys, readOnly: true }
     - { name: root, mountPath: /hostfs/root, readOnly: true, mountPropagation: HostToContainer }
-{%  if zabbix_server_tls_key is defined and
-       zabbix_server_tls_cert is defined and
-       zabbix_server_tls_ca is defined %}
+{%   if zabbix_server_tls_key is defined and
+        zabbix_server_tls_cert is defined and
+        zabbix_server_tls_ca is defined %}
     - { name: zabbix-server-tls, mountPath: "/var/lib/zabbix/enc:ro" }
+{%   endif %}
 {% endif %}
 
   hostAliases:
@@ -135,13 +137,14 @@ spec:
       secretName: zabbix-server-tls
       optional: false
 {% endif %}
-{%  if zabbix_web_ssl_key is defined and
-       zabbix_web_ssl_cert is defined %}
+{% if zabbix_web_ssl_key is defined and
+      zabbix_web_ssl_cert is defined %}
   - name: zabbix-web-ssl
     secret:
       secretName: zabbix-web-ssl
       optional: false
 {% endif %}
+{% if not zabbix_agent_daemonset | default(false) %}
   - name: proc
     hostPath:
       path: /proc
@@ -151,3 +154,4 @@ spec:
   - name: root
     hostPath:
       path: /
+{% endif %}
