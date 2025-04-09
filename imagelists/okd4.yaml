@@ -1,4 +1,9 @@
 ---
+quay.io:
+  images:
+    metal3-io/ironic-client:
+      - latest
+
 registry.access.redhat.com:
   images-by-semver:
     redhat/community-operator-index: ">=v4.16"
