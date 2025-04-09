@@ -12,6 +12,12 @@
     that:
       - groups[master_group] | map('extract', hostvars) | selectattr('bmc.virtual_media_address', 'undefined') | length == 0
 
+- name: Verify that IPv6 is disabled for static IP feature
+  assert:
+    that:
+      - not enable_ipv6
+  when: enable_static_ip
+
 # TODO: EL9 (almalinux) removes /var/run/libvirt/libvirt-sock when
 # "not in use" under /usr/lib/systemd/system/libvirtd.socket
 #- block:

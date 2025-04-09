@@ -66,6 +66,12 @@ platform:
 {% if bootstrap_os_image is defined %}
     bootstrapOSImage: "{{ bootstrap_os_image }}"
 {% endif %}
+{% if enable_static_ip | default(false) %}
+    bootstrapExternalStaticIP: {{ baremetal_network_ipv4_cidr | ansible.utils.ipaddr('63') | ansible.utils.ipaddr('address') }}
+    bootstrapExternalStaticGateway: {{ baremetal_network_ipv4_cidr | ansible.utils.ipaddr('1') | ansible.utils.ipaddr('address') }}
+    bootstrapExternalStaticDNS: 172.28.4.5
+{% endif %}
+
     apiVIPs:
     - {{ baremetal_network_ipv4_cidr | ansible.utils.ipaddr('127') | ansible.utils.ipaddr('address') }}
 {%   if enable_ipv6 %}
@@ -100,6 +106,10 @@ platform:
       {#- wwn: ls -l /dev/disk/by-id/wwn-*            +#}
       rootDeviceHints:
         {{ hostvars[host].rootDeviceHints | to_nice_yaml }}
+{%   if enable_static_ip and hostvars[host].nmstate_static is defined %}
+      networkConfig:
+        {{ hostvars[host].nmstate_static | to_nice_yaml(2) | indent(8) }}
+{%   endif %}
 {%   if experimental_networking | default(false) %}
 {%     if enable_provisioning_network %}
       provisioningNetworkInterface: bond0

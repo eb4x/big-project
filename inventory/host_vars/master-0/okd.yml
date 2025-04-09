@@ -9,3 +9,24 @@ rootDeviceHints:
   wwnWithExtension: "0x6c81f660d39042002c7a3a360eea492b"
   #hctl: "6:2:0:0"
   #hctl: "0:2:0:0"
+
+nmstate_static:
+  interfaces:
+  - name: eno2
+    type: ethernet
+    state: up
+    ipv4:
+      address:
+      - ip: "{{ okd_external_ipv4_addr }}"
+        prefix-length: "{{ baremetal_network_ipv4_cidr | ansible.utils.ipaddr('prefix') }}"
+      enabled: true
+  dns-resolver:
+    config:
+      server:
+      - 129.240.2.27
+      - 129.240.2.40
+  routes:
+    config:
+    - destination: 0.0.0.0/0
+      next-hop-address: "{{ baremetal_network_ipv4_cidr | ansible.utils.ipaddr('1') | ansible.utils.ipaddr('address') }}"
+      next-hop-interface: eno2
