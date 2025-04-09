@@ -23,8 +23,7 @@ nmstate_static:
   dns-resolver:
     config:
       server:
-      - 129.240.2.27
-      - 129.240.2.40
+      - 172.28.4.5
   routes:
     config:
     - destination: 0.0.0.0/0
