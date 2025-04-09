@@ -98,11 +98,15 @@
     - name: copy zabbix kubeplay
       become: false
       template:
-        src: zabbix-pod.yaml.j2
-        dest: zabbix-pod.yaml
+        src: "{{ item }}.j2"
+        dest: "{{ item }}"
         mode: '0644'
+      loop:
+        - "zabbix-pod.yaml"
+        - "zabbix-agent-daemonset.yaml"
       vars:
         zabbix_version: 7.0-latest
+        zabbix_agent_daemonset: true
         zabbix_https_port: 10443
         db_type: pgsql
         enable_timescaledb: true

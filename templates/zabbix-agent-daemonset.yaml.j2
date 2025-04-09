@@ -1,0 +1,60 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: zabbix
+spec:
+  template:
+    spec:
+      hostNetwork: true
+      hostIPC: true
+      hostPID: true
+      containers:
+      - name: agent
+        image: docker.io/zabbix/zabbix-agent2:alpine-{{ zabbix_version | default('latest') }}
+        env:
+        - { name: ZBX_HOSTNAME, value: "Zabbix server" }
+        - { name: ZBX_SERVER_HOST, value: "127.0.0.1,localhost" }
+        #- { name: ZBX_PASSIVE_ALLOW, value: false }
+        - { name: ZBX_ACTIVE_ALLOW, value: true }
+{% if zabbix_server_tls_key is defined and
+      zabbix_server_tls_cert is defined and
+      zabbix_server_tls_ca is defined %}
+        - { name: ZBX_TLSCONNECT, value: cert }
+        - { name: ZBX_TLSCAFILE, value: zabbix-ca.crt }
+        - { name: ZBX_TLSCERTFILE, value: zabbix-server.crt }
+        - { name: ZBX_TLSKEYFILE, value: zabbix-server.key }
+{% endif %}
+        securityContext:
+          capabilities: {}
+          privileged: true
+          readOnlyFilesystem: false
+          runAsNonRoot: true
+          #allowPrivilegeEscalation: true
+        volumeMounts:
+        #- { name: proc, mountPath: /hostfs/proc, readOnly: true }
+        #- { name: sys, mountPath: /hostfs/sys, readOnly: true }
+        #- { name: root, mountPath: /hostfs/root, readOnly: true, mountPropagation: HostToContainer }
+{% if zabbix_server_tls_key is defined and
+      zabbix_server_tls_cert is defined and
+      zabbix_server_tls_ca is defined %}
+        - { name: zabbix-server-tls, mountPath: "/var/lib/zabbix/enc:ro" }
+{% endif %}
+      volumes:
+{% if zabbix_server_tls_key is defined and
+      zabbix_server_tls_cert is defined and
+      zabbix_server_tls_ca is defined %}
+      - name: zabbix-server-tls
+        secret:
+          secretName: zabbix-server-tls
+          optional: false
+{% endif %}
+      #- name: proc
+      #  hostPath:
+      #    path: /proc
+      #- name: sys
+      #  hostPath:
+      #    path: /sys
+      #- name: root
+      #  hostPath:
+      #    path: /
