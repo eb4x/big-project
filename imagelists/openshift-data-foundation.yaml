@@ -1,0 +1,27 @@
+---
+registry.redhat.io:
+  images-by-tag-regex:
+    odf4/cephcsi-operator-bundle:          '^v4\.18.*$'
+    odf4/cephcsi-rhel9-operator:           '^v4\.18.*$'
+    odf4/mcg-operator-bundle:              '^v4\.18.*$'
+    odf4/mcg-rhel9-operator:               '^v4\.18.*$'
+    odf4/ocs-client-operator-bundle:       '^v4\.18.*$'
+    odf4/ocs-client-rhel9-operator:        '^v4\.18.*$'
+    odf4/ocs-operator-bundle:              '^v4\.18.*$'
+    odf4/ocs-rhel9-operator:               '^v4\.18.*$'
+    odf4/odf-console-rhel9:                '^v4\.18.*$'
+    odf4/odf-csi-addons-operator-bundle:   '^v4\.18.*$'
+    odf4/odf-csi-addons-rhel9-operator:    '^v4\.18.*$'
+    odf4/odf-dependencies-operator-bundle: '^v4\.18.*$'
+    odf4/odf-operator-bundle:              '^v4\.18.*$'
+    odf4/odf-prometheus-operator-bundle:   '^v4\.18.*$'
+    odf4/odf-rhel9-operator:               '^v4\.18.*$'
+    odf4/odr-recipe-operator-bundle:       '^v4\.18.*$'
+    odf4/rook-ceph-operator-bundle:        '^v4\.18.*$'
+    odf4/rook-ceph-rhel9-operator:         '^v4\.18.*$'
+
+    openshift4/ose-kube-rbac-proxy-rhel9:         '^v4\.18.*$'
+    openshift4/ose-local-storage-diskmaker-rhel9: '^v4\.18.*$'
+    openshift4/ose-local-storage-operator-bundle: '^v4\.18.*$'
+    openshift4/ose-local-storage-rhel9-operator:  '^v4\.18.*$'
+    openshift4/ose-oauth-proxy-rhel9:             '^v4\.18.*$'
