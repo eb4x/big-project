@@ -1,31 +1,42 @@
 ---
-- name: get release_version for ocp
+- name: Set ocp_stable_version
+  when: ocp_stable_version is not defined
   block:
-    - name: query ocp/stable/release.txt for latest stable version
+    - name: Query ocp/stable/release.txt for latest stable version
       uri:
-        url: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ ocp_version | default('stable') }}/release.txt
+        url: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/release.txt
+        return_content: true
+      environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
+      register: _ocp_stable_release
+
+    - name: set_fact ocp_stable_version
+      set_fact:
+        ocp_stable_version: "{{ _ocp_stable_release.content | regex_search(q_release_version, '\\1') | first }}"
+      vars:
+        q_release_version: "Name:\\s+(.*)"
+
+- name: Get release_pull for OCP
+  when:
+    - release_variant == 'ocp'
+    - release_pull is not search('@sha256')
+  block:
+    - name: "Query ocp/{{ release_version | default(ocp_stable_version) }}/release.txt"
+      uri:
+        url: "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{ release_version | default(ocp_stable_version) }}/release.txt"
         return_content: true
       environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
       register: _ocp_release
 
-    - name: set_fact ocp_version
-      set_fact:
-        ocp_version: "{{ _ocp_release.content | regex_search(q_release_version, '\\1') | first }}"
-      vars:
-        q_release_version: "Name:\\s+(.*)"
-
-    - name: set_fact release_version
+    - name: Set release_pull
       when:
-        - release_variant == 'ocp'
-        - release_version is not defined
       set_fact:
-        release_pull: "{{ _ocp_release.content | regex_search(q_pull_from, '\\1') | first }}"
         release_version: "{{ _ocp_release.content | regex_search(q_release_version, '\\1') | first }}"
+        release_pull: "{{ _ocp_release.content | regex_search(q_pull_from, '\\1') | first }}"
       vars:
         q_pull_from: "Pull [Ff]rom:\\s+(.*)"
         q_release_version: "Name:\\s+(.*)"
 
-- name: get release_version for okd
+- name: Get release_version for okd
   when:
     - release_variant != 'ocp'
     - release_version is not defined
@@ -38,10 +49,10 @@
       environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
       vars:
         release_url:
-          fcos: https://amd64.origin.releases.ci.openshift.org/api/v1/releasestream/4-stable/latest
-          scos: https://amd64.origin.releases.ci.openshift.org/api/v1/releasestream/4-scos-stable/latest
+          fcos: "https://amd64.origin.releases.ci.openshift.org/api/v1/releasestream/4-stable/latest"
+          scos: "https://amd64.origin.releases.ci.openshift.org/api/v1/releasestream/4-scos-stable/latest"
 
-    - name: set_fact release_version
+    - name: Set release_version
       set_fact:
         release_version: "{{ _latest.json.name }}"
 

@@ -2,12 +2,12 @@
 - name: get latest official openshift-tools
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
   get_url:
-    url: "{{ tool.url | default('https://mirror.openshift.com/pub/openshift-v4/clients/ocp/' ~ ocp_version ~ '/' ~ tool.name ~ '.tar.gz') }}"
-    checksum: "{{ tool.checksum | default('sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/' ~ ocp_version ~ '/sha256sum.txt') }}"
+    url: "{{ tool.url | default('https://mirror.openshift.com/pub/openshift-v4/clients/ocp/' ~ ocp_stable_version ~ '/' ~ tool.name ~ '.tar.gz') }}"
+    checksum: "{{ tool.checksum | default('sha256:https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/' ~ ocp_stable_version ~ '/sha256sum.txt') }}"
     dest: "{{ tool.dest | default('~/' ~ tool.name ~ '.tar.gz') }}"
     mode: "{{ tool.mode | default('0644') }}"
   loop:
-    - name: "openshift-client-linux-{{ ocp_version }}"
+    - name: "openshift-client-linux-{{ ocp_stable_version }}"
     - name: opm
       url: https://github.com/operator-framework/operator-registry/releases/download/v1.28.0/linux-amd64-opm
       checksum: sha256:https://github.com/operator-framework/operator-registry/releases/download/v1.28.0/checksums.txt
@@ -32,7 +32,7 @@
       - README.md
     creates: "{{ item.creates | default(omit) }}"
   loop:
-    - src: "openshift-client-linux-{{ ocp_version }}"
+    - src: "openshift-client-linux-{{ ocp_stable_version }}"
       creates: "~/.local/bin/oc"
     - src: oc-mirror
 
