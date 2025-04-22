@@ -138,6 +138,54 @@
   tags:
     - config
 
+- name: Enable features for virtualization
+  when: enable_virtualization | default(true)
+  tags:
+    - config
+  block:
+    # These are "crazy" numbers
+    - name: Enable hugepages for virtualization
+      copy:
+        content: |
+          ---
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: MachineConfig
+          metadata:
+            name: 05-{{ role }}-kernelarg-hugepages
+            labels:
+              machineconfiguration.openshift.io/role: {{ role }}
+          spec:
+            kernelArguments:
+            - default_hugepagesz=1G
+            - hugepagesz=1G
+            - hugepages=250
+            - hugepagesz=2M
+            - hugepages=3072
+        dest: "{{ installation_directory }}/manifests/05-{{ role }}-kernelarg-hugepages.yaml"
+      loop: [master, worker]
+      loop_control:
+        loop_var: role
+
+    - name: Enable cpuManagerPolicy for virtualization
+      copy:
+        content: |
+          ---
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: KubeletConfig
+          metadata:
+            name: {{ role }}-cpumanagerpolicy
+          spec:
+            machineConfigPoolSelector:
+              matchLabels:
+                machineconfiguration.openshift.io/role: {{ role }}
+            kubeletConfig:
+              cpuManagerPolicy: static
+              cpuManagerReconcilePeriod: 5s
+        dest: "{{ installation_directory }}/manifests/99-{{ role }}-cpumanagerpolicy.yaml"
+      loop: [master, worker]
+      loop_control:
+        loop_var: role
+
 - name: override ntp
   copy:
     content: |
