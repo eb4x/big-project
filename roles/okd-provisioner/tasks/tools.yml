@@ -57,8 +57,9 @@
   environment: "{{ hostvars[inventory_hostname].environment | default({}) }}"
   command:
     cmd: >-
-      oc adm release extract --command=openshift-baremetal-install
-      --to ~/.local/bin {{ release_pull }}
+      oc adm release extract
+      --command=openshift-baremetal-install --to ~/.local/bin
+      {{ release_pull }}
   tags:
     - baremetal
 
