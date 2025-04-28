@@ -126,3 +126,6 @@
 # podman build . -f cool-catalog.Dockerfile -t
 
 # skopeo copy docker://quay.io/operatorhubio/catalog:latest docker://mirror-registry.openshift-utv.uio.no:8443/mirrors/registry.access.redhat.com/redhat/community-operator-index:v4.13
+
+# oc annotate -n openstack-operators operatorgroups.operators.coreos.com openstack-operators-qhng7 operatorframework.io/bundle-unpack-min-retry-interval=1m
+# oc patch -n openshift-storage storagecluster ocs-storagecluster --type json --patch '[{ "op": "replace", "path": "/spec/enableCephTools", "value": true }]'
