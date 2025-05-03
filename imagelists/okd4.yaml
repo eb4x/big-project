@@ -1,4 +1,9 @@
 ---
+docker.io:
+  images-by-semver:
+    haproxytech/kubernetes-ingress: ">=3.0.4"
+    haproxytech/haproxy-alpine: ">=3.0.4"
+
 quay.io:
   images:
     metal3-io/ironic-client:
