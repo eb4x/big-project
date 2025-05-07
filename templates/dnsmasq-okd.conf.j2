@@ -37,12 +37,12 @@ dhcp-range={{ baremetal_network_ipv6_cidr | default('fd00::/64') | ansible.utils
 
 {% for host in groups[master_group]  %}
 {%   if not enable_static_ip %}
-dhcp-host={% for interface in hostvars[host].interfaces %}{{ hostvars[host].interfaces[interface] }}{% if not loop.last %},{% endif %}{% endfor %},{{ hostvars[host].okd_external_ipv4_addr }},master-{{ loop.index0 }},infinite
+dhcp-host={% for interface in hostvars[host].interfaces %}{{ hostvars[host].interfaces[interface] }}{% if not loop.last %},{% endif %}{% endfor %},{{ hostvars[host].okd_external_ipv4_addr }},control-plane-{{ loop.index0 }},infinite
 {%     if use_dhcpv6 %}
-dhcp-host={% for interface in hostvars[host].interfaces %}{{ hostvars[host].interfaces[interface] }}{% if not loop.last %},{% endif %}{% endfor %},[{{ hostvars[host].okd_external_ipv6_addr }}],master-{{ loop.index0 }},infinite
+dhcp-host={% for interface in hostvars[host].interfaces %}{{ hostvars[host].interfaces[interface] }}{% if not loop.last %},{% endif %}{% endfor %},[{{ hostvars[host].okd_external_ipv6_addr }}],control-plane-{{ loop.index0 }},infinite
 {%     endif %}
 {%   endif %}
-host-record=master-{{ loop.index0 }}.{{ cluster_domain }},{{ hostvars[host].okd_external_ipv4_addr }}{% if use_dhcpv6 %},[{{ hostvars[host].okd_external_ipv6_addr }}]{% endif %}
+host-record=control-plane-{{ loop.index0 }}.{{ cluster_domain }},{{ hostvars[host].okd_external_ipv4_addr }}{% if use_dhcpv6 %},[{{ hostvars[host].okd_external_ipv6_addr }}]{% endif %}
 
 {% endfor %}
 
