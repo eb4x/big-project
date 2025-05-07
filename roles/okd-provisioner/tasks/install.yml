@@ -125,7 +125,7 @@
         defaultNetwork:
           type: OVNKubernetes
           ovnKubernetesConfig:
-            mtu: {{ 1500 - ovnkubernetes_overhead - ipsec_overhead - (1500 - ovnkubernetes_overhead - ipsec_overhead) % 8 }}
+            mtu: {{ 1500 - (ovnkubernetes_overhead + ipsec_overhead) }}
             ipsecConfig: {% if _openshift_install_version is version('4.15', '<') %}{}{% endif %}
               {% if _openshift_install_version is version('4.15', '>=') +%}
               mode: External
