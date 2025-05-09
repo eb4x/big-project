@@ -1,5 +1,13 @@
 ---
+docker.io:
+  images-by-semver:
+    bitnami/sealed-secrets-controller: ">= 0.29.0"
+  images-by-tag-regex:
+    redis: '^6\.\d+$'
+
 quay.io:
   images-by-semver:
-     community-operator-pipeline-prod/argocd-operator: ">=0.12.0"
-     argoprojlabs/argocd-operator: ">=v0.12.0"
+    argoproj/argocd: ">= v2.13.1"
+    argoprojlabs/argocd-operator: ">=v0.12.0"
+    community-operator-pipeline-prod/argocd-operator: ">=0.12.0"
+    openshift/origin-cli: ">=4.15"

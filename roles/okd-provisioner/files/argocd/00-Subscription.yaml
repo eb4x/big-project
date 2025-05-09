@@ -1,0 +1,18 @@
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  namespace: openshift-operators
+  name: argocd-operator
+  labels:
+    operators.coreos.com/argocd-operator.openshift-operators: ""
+spec:
+  config:
+    env:
+    - name: ARGOCD_CLUSTER_CONFIG_NAMESPACES
+      value: argocd
+  sourceNamespace: openshift-marketplace
+  source: community-operators
+  name: argocd-operator
+  channel: alpha
+  installPlanApproval: Automatic

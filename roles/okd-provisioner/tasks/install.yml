@@ -242,6 +242,29 @@
   tags:
     - config
 
+- name: enable argocd for cluster configuration
+  when: enable_argocd | default(true)
+  block:
+    - name: copy bootstrapper manifests
+      copy:
+        src: "argocd/{{ item }}"
+        dest: "{{ installation_directory }}/openshift/argo-bootstrap-{{ item }}"
+      loop:
+        - 00-Subscription.yaml
+        - 01-Namespace.yaml
+        - 02-ServiceAccount.yaml
+        - 03-ClusterRoleBinding.yaml
+    - name: template the custom bits
+      template:
+        src: "argocd/{{ item }}.j2"
+        dest: "{{ installation_directory }}/openshift/argo-bootstrap-{{ item }}"
+      loop:
+        - 04-ConfigMap.yaml
+        - 05-Pod.yaml
+      vars:
+        cluster_config_repo: "https://{% if github_auth is defined %}{{ github_auth }}@{% endif %}github.uio.no/erikberg/openshift-utv.uio.no"
+        openshift_install_version: "{{ _openshift_install_version }}"
+
 - name: openshift-baremetal-install create cluster
   command:
     cmd: openshift-baremetal-install --dir {{ installation_directory }} create cluster

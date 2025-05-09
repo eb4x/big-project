@@ -1,0 +1,48 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: argocd
+  name: argocd-bootstrap-manifests
+data:
+  01-argocd-controller.yaml: |
+    ---
+    apiVersion: argoproj.io/v1alpha1
+    kind: ArgoCD
+    metadata:
+      name: argocd
+    spec:
+      redis:
+        version: "6.2"
+  02-app.yaml: |
+    ---
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      namespace: argocd
+      name: argocd
+    spec:
+      project: default
+      source:
+        repoURL: "{{ cluster_config_repo }}"
+        targetRevision: HEAD
+        path: argocd-config
+      destination:
+        server: "https://kubernetes.default.svc"
+        namespace: argocd
+      syncPolicy:
+        automated: {}
+  03-rbac.yaml: |
+    ---
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: argocd-controller-clusteradmin
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: cluster-admin
+    subjects:
+      - kind: ServiceAccount
+        namespace: argocd
+        name: argocd-argocd-application-controller
