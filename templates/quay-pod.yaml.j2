@@ -4,6 +4,7 @@ kind: Pod
 metadata:
   name: quay
 spec:
+  hostNetwork: {{ quay_use_host_network | default(false) | lower }}
   containers:
   - name: postgres
     image: "docker.io/postgres:15"
@@ -19,6 +20,10 @@ spec:
     image: "docker.io/redis:6"
     args:
     - --requirepass {{ quay_redis_password }}
+{% if not quay_use_host_network | default(false) %}
+    ports:
+    - { hostPort: 6379, containerPort: 6379, protocol: TCP }
+{% endif %}
 
   - name: app
     image: "{{ quay_repository | default('quay.io/projectquay/quay') }}:{{ quay_tag | default('3.14.0') }}"
@@ -27,9 +32,14 @@ spec:
     #  - { name: net.core.somaxconn, value: "4096" }
     volumeMounts:
     - { name: quay-config, mountPath: "/conf/stack:Z" }
+{% if not quay_enable_s3 | default(false) %}
+    - { name: quay-storage, mountPath: "/datastorage:Z" }
+{% endif %}
+{% if not quay_use_host_network | default(false) %}
     ports:
     - { hostPort: 8080, containerPort: 8080, protocol: TCP }
     - { hostPort: 9091, containerPort: 9091, protocol: TCP }
+{% endif %}
 
   volumes:
   - name: pg-storage
@@ -43,12 +53,17 @@ spec:
     hostPath:
       type: Directory
       path: {{ home_dir }}/quay-config
+{% if not quay_enable_s3 | default(false) %}
+  - name: quay-storage
+    persistentVolumeClaim:
+      claimName: quay-storage-pvc
+{% endif %}
 
   hostAliases:
   - ip: 127.0.0.1
     hostnames:
-      - quay
-      - redis
+    - quay
+    - redis
   - ip: 192.168.141.3
     hostnames:
-      - clair.judy.slips.pl
+    - clair.judy.slips.pl

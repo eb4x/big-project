@@ -130,6 +130,8 @@
         src: quay-pod.yaml.j2
         dest: "{{ home_dir }}/quay-pod.yaml"
       vars:
+        quay_use_host_network: true
+        quay_feature_proxy_protocol: false
         database:
           user: quayuser
           password: "{{ quay_database_password }}"
@@ -153,6 +155,19 @@
         state: started
         name: quay-pod
         enabled: true
+
+    - name: Create initial user
+      uri:
+        url: "https://{{ quay_hostname }}/api/v1/user/initialize"
+        method: POST
+        body_format: json
+        body:
+          username: "{{ quay_init_username | default('admin') }}"
+          password: "{{ quay_init_password | default('password') }}"
+          email: init@quay.io
+          access_token: true
+        return_content: true
+      register: _res
 
   handlers:
     - name: Restart quay-pod

@@ -24,13 +24,13 @@ DB_CONNECTION_ARGS:
 {% endif %}
 DB_URI: postgresql://{{ database.user }}:{{ database.password }}@{{ database.host }}/{{ database.name }}
 
-FEATURE_PROXY_STORAGE: {{ quay_enable_s3 | default(false) | ternary(true, false) | lower }}
+FEATURE_PROXY_STORAGE: {{ quay_enable_s3 | default(false) | lower }}
 FEATURE_STORAGE_REPLICATION: false
 DISTRIBUTED_STORAGE_CONFIG:
 {% if not quay_enable_s3 | default(false) %}
   default:
     - LocalStorage
-    - storage_path: /datastorage
+    - storage_path: /datastorage/registry
 {% else %}
   s3Storage:
     - RadosGWStorage
@@ -60,10 +60,8 @@ FEATURE_INVITE_ONLY_USER_CREATION: false
 FEATURE_PARTIAL_USER_AUTOCOMPLETE: true
 FEATURE_PROXY_CACHE: true
 FEATURE_QUOTA_MANAGEMENT: true
-FEATURE_REPO_MIRROR: true
 FEATURE_REQUIRE_TEAM_INVITE: true
 FEATURE_RESTRICTED_V1_PUSH: true
-FEATURE_SECURITY_NOTIFICATIONS: false
 FEATURE_USER_LAST_ACCESSED: true
 FEATURE_USER_LOG_ACCESS: false
 FEATURE_USER_METADATA: false
@@ -119,7 +117,7 @@ LDAP_SECONDARY_USER_RDNS:
 LDAP_SUPERUSER_FILTER: (memberOf=cn=superusers,dc=example,dc=com)
 {% endif %}
 SUPER_USERS:
-  - erikberg
+  - {{ quay_init_username }}
 
 FEATURE_TEAM_SYNCING: true
 FEATURE_NONSUPERUSER_TEAM_SYNCING_SETUP: false
@@ -146,9 +144,13 @@ REGISTRY_TITLE_SHORT: Quay
 EXTERNAL_TLS_TERMINATION: true
 PREFERRED_URL_SCHEME: https
 SERVER_HOSTNAME: {{ config.server_hostname }}
+FEATURE_PROXY_PROTOCOL: {{ quay_feature_proxy_protocol | default(false) | lower }}
 
+FEATURE_REPO_MIRROR: true
 REPO_MIRROR_INTERVAL: 30
+REPO_MIRROR_SERVER_HOSTNAME: null
 REPO_MIRROR_TLS_VERIFY: true
+
 SEARCH_MAX_RESULT_PAGE_COUNT: 10
 SEARCH_RESULTS_PER_PAGE: 10
 
@@ -160,9 +162,10 @@ SEARCH_RESULTS_PER_PAGE: 10
 SECRET_KEY: {{ config.secret_key }}
 
 FEATURE_SECURITY_SCANNER: true
-SECURITY_SCANNER_INDEXING_INTERVAL: 30
+FEATURE_SECURITY_NOTIFICATIONS: true
 SECURITY_SCANNER_V4_ENDPOINT: {{ config.security_scanner_v4_endpoint }}
 SECURITY_SCANNER_V4_PSK: {{ config.security_scanner_v4_psk }}
+SECURITY_SCANNER_INDEXING_INTERVAL: 30
 
 TAG_EXPIRATION_OPTIONS:
   - 0s
@@ -191,6 +194,7 @@ USER_EVENTS_REDIS:
 
 USER_RECOVERY_TOKEN_LIFETIME: 30m
 USERFILES_LOCATION: {{ quay_enable_s3 | default(false) | ternary('s3Storage', 'default') }}
+USERFILES_PATH: userfiles/
 
 CREATE_NAMESPACE_ON_PUSH: true
 CREATE_PRIVATE_REPO_ON_PUSH: true
