@@ -1,0 +1,203 @@
+{% if quay_auth_type is not defined  %}
+{%   set quay_auth_type = "Database" %}
+{% endif                             %}
+---
+SETUP_COMPLETE: true
+
+FEATURE_UI_V2: true
+FEATURE_UI_V2_REPO_SETTINGS: true
+FEATURE_LISTEN_IP_VERSION: dual-stack
+
+#ALLOWED_OCI_ARTIFACT_TYPES:
+#  application/vnd.oci.image.config.v1+json:
+#      - application/vnd.oci.image.layer.v1.tar+zstd
+#  application/vnd.sylabs.sif.config.v1+json:
+#      - application/vnd.sylabs.sif.layer.v1+tar
+AVATAR_KIND: local
+
+DATABASE_SECRET_KEY: {{ database.secret_key }}
+DB_CONNECTION_POOLING: true
+{% if quay_enable_postgres_ssl | default(false) %}
+DB_CONNECTION_ARGS:
+  max_connections: 30
+  sslmode: require
+{% endif %}
+DB_URI: postgresql://{{ database.user }}:{{ database.password }}@{{ database.host }}/{{ database.name }}
+
+FEATURE_PROXY_STORAGE: {{ quay_enable_s3 | default(false) | ternary(true, false) | lower }}
+FEATURE_STORAGE_REPLICATION: false
+DISTRIBUTED_STORAGE_CONFIG:
+{% if not quay_enable_s3 | default(false) %}
+  default:
+    - LocalStorage
+    - storage_path: /datastorage
+{% else %}
+  s3Storage:
+    - RadosGWStorage
+    - is_secure: {{ s3.is_secure | default(true) | lower }}
+      access_key: {{ s3.access_key }}
+      secret_key: {{ s3.secret_key }}
+      hostname: {{ s3.host }}
+      bucket_name: {{ s3.bucket }}
+      storage_path: /datastorage/registry
+{% endif %}
+DISTRIBUTED_STORAGE_DEFAULT_LOCATIONS: []
+DISTRIBUTED_STORAGE_PREFERENCE:
+  - {{ quay_enable_s3 | default(false) | ternary('s3Storage', 'default') }}
+
+FEATURE_ACI_CONVERSION: false
+FEATURE_ANONYMOUS_ACCESS: true
+FEATURE_APP_REGISTRY: true
+FEATURE_APP_SPECIFIC_TOKENS: true
+FEATURE_ASSIGN_OAUTH_TOKEN: true
+FEATURE_BLACKLISTED_EMAILS: false
+FEATURE_BUILD_SUPPORT: false
+FEATURE_DIRECT_LOGIN: true
+FEATURE_EXTENDED_REPOSITORY_NAMES: true
+FEATURE_FIPS: false
+
+FEATURE_INVITE_ONLY_USER_CREATION: false
+FEATURE_PARTIAL_USER_AUTOCOMPLETE: true
+FEATURE_PROXY_CACHE: true
+FEATURE_QUOTA_MANAGEMENT: true
+FEATURE_REPO_MIRROR: true
+FEATURE_REQUIRE_TEAM_INVITE: true
+FEATURE_RESTRICTED_V1_PUSH: true
+FEATURE_SECURITY_NOTIFICATIONS: false
+FEATURE_USER_LAST_ACCESSED: true
+FEATURE_USER_LOG_ACCESS: false
+FEATURE_USER_METADATA: false
+FEATURE_USERNAME_CONFIRMATION: false
+FEATURE_USER_RENAME: false
+
+FRESH_LOGIN_TIMEOUT: 10m
+
+FEATURE_GITHUB_LOGIN: false
+GITHUB_LOGIN_CONFIG: {}
+FEATURE_GOOGLE_LOGIN: false
+GOOGLE_LOGIN_CONFIG: {}
+
+FEATURE_BITBUCKET_BUILD: false
+BITBUCKET_TRIGGER_CONFIG: {}
+FEATURE_GITHUB_BUILD: false
+GITHUB_TRIGGER_CONFIG: {}
+FEATURE_GITLAB_BUILD: false
+GITLAB_TRIGGER_KIND: {}
+
+FEATURE_USER_INITIALIZE: {{ (quay_auth_type == 'Database') | lower }}
+FEATURE_USER_CREATION: false
+
+AUTHENTICATION_TYPE: {{ quay_auth_type }}
+{% if quay_auth_type == 'OIDC' %}
+OIDC_LOGIN_CONFIG:
+  SERVICE_NAME: Weblogin2
+  CLIENT_ID: {{ oidc.client_id }}
+  CLIENT_SECRET: {{ oidc.client_secret }}
+  OIDC_SERVER: {{ oidc.server }}
+  LOGIN_SCOPES:
+    - openid
+    - email
+    - profile
+  PREFERRED_GROUP_CLAIM_NAME: groupNames
+{% elif quay_auth_type == 'LDAP' %}
+LDAP_ADMIN_DN: {{ config.ldap_admin_dn }}
+LDAP_ADMIN_PASSWD: {{ config.ldap_admin_passwd }}
+LDAP_ALLOW_INSECURE_FALLBACK: false
+LDAP_BASE_DN:
+  - dc=example
+  - dc=com
+LDAP_EMAIL_ATTR: mail
+LDAP_MEMBEROF_ATTR:
+LDAP_UID_ATTR: uid
+LDAP_URI: ldaps://...
+LDAP_USER_FILTER: (objectClass=posixAccount)
+LDAP_USER_RDN:
+  - cn=users
+LDAP_SECONDARY_USER_RDNS:
+  - cn=people
+  - cn=users,cn=system
+LDAP_SUPERUSER_FILTER: (memberOf=cn=superusers,dc=example,dc=com)
+{% endif %}
+SUPER_USERS:
+  - erikberg
+
+FEATURE_TEAM_SYNCING: true
+FEATURE_NONSUPERUSER_TEAM_SYNCING_SETUP: false
+TEAM_RESYNC_STALE_TIME: 30m
+
+LOGS_MODEL: database
+LOGS_MODEL_CONFIG: {}
+LOG_ARCHIVE_LOCATION: default
+FEATURE_ACTION_LOG_ROTATION: true
+ACTION_LOG_ARCHIVE_LOCATION: {{ quay_enable_s3 | default(false) | ternary('s3Storage', 'default') }}
+ACTION_LOG_ARCHIVE_PATH: /datastorage/action-logs
+ACTION_LOG_ROTATION_THRESHOLD: 2w
+
+
+FEATURE_MAILING: false
+MAIL_DEFAULT_SENDER: quay@example.com
+MAIL_SERVER: smtp.example.com
+MAIL_PORT: 25
+MAIL_USE_AUTH: false
+MAIL_USE_TLS: true
+
+REGISTRY_TITLE: Project Quay
+REGISTRY_TITLE_SHORT: Quay
+EXTERNAL_TLS_TERMINATION: true
+PREFERRED_URL_SCHEME: https
+SERVER_HOSTNAME: {{ config.server_hostname }}
+
+REPO_MIRROR_INTERVAL: 30
+REPO_MIRROR_TLS_VERIFY: true
+SEARCH_MAX_RESULT_PAGE_COUNT: 10
+SEARCH_RESULTS_PER_PAGE: 10
+
+# Key used to encrypt the session cookie and the CSRF token needed for correct
+# interpretation of the user session. The value should not be changed when
+# set. Should be persistent across all Quay instances. If not persestent across
+# all instances, login failures and other errors related to session persistence
+# might occur.
+SECRET_KEY: {{ config.secret_key }}
+
+FEATURE_SECURITY_SCANNER: true
+SECURITY_SCANNER_INDEXING_INTERVAL: 30
+SECURITY_SCANNER_V4_ENDPOINT: {{ config.security_scanner_v4_endpoint }}
+SECURITY_SCANNER_V4_PSK: {{ config.security_scanner_v4_psk }}
+
+TAG_EXPIRATION_OPTIONS:
+  - 0s
+  - 1d
+  - 1w
+  - 2w
+  - 4w
+DEFAULT_TAG_EXPIRATION: 2w
+FEATURE_CHANGE_TAG_EXPIRATION: true
+FEATURE_AUTO_PRUNE: true
+
+TESTING: false
+USE_CDN: false
+
+BUILDLOGS_REDIS:
+#  ssl: true
+  host: localhost
+  password: {{ config.redis_password }}
+  port: 6379
+
+USER_EVENTS_REDIS:
+#  ssl: true
+  host: localhost
+  password: {{ config.redis_password }}
+  port: 6379
+
+USER_RECOVERY_TOKEN_LIFETIME: 30m
+USERFILES_LOCATION: {{ quay_enable_s3 | default(false) | ternary('s3Storage', 'default') }}
+
+CREATE_NAMESPACE_ON_PUSH: true
+CREATE_PRIVATE_REPO_ON_PUSH: true
+FEATURE_SUPERUSERS_FULL_ACCESS: true
+FEATURE_SUPERUSERS_ORG_CREATION_ONLY: true
+
+BROWSER_API_CALLS_XHR_ONLY: false
+
+#GLOBAL_PROMETHEUS_STATS_FREQUENCY: 5
+PROMETHEUS_PUSHGATEWAY_URL: http://localhost:9091

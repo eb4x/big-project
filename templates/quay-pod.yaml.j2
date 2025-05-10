@@ -1,0 +1,54 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: quay
+spec:
+  containers:
+  - name: postgres
+    image: "docker.io/postgres:15"
+    env:
+    - { name: POSTGRES_USER, value: {{ database.user }} }
+    - { name: POSTGRES_PASSWORD, value: {{ database.password }} }
+    - { name: POSTGRES_DB, value: quay }
+    volumeMounts:
+    - { name: pg-storage, mountPath: "/var/lib/postgresql/data:Z" }
+    - { name: pg-extension-trgm, mountPath: "/docker-entrypoint-initdb.d/pg_trgm.sql:Z" }
+
+  - name: redis
+    image: "docker.io/redis:6"
+    args:
+    - --requirepass {{ quay_redis_password }}
+
+  - name: app
+    image: "{{ quay_repository | default('quay.io/projectquay/quay') }}:{{ quay_tag | default('3.14.0') }}"
+    #securityContext:
+    #  sysctls:
+    #  - { name: net.core.somaxconn, value: "4096" }
+    volumeMounts:
+    - { name: quay-config, mountPath: "/conf/stack:Z" }
+    ports:
+    - { hostPort: 8080, containerPort: 8080, protocol: TCP }
+    - { hostPort: 9091, containerPort: 9091, protocol: TCP }
+
+  volumes:
+  - name: pg-storage
+    persistentVolumeClaim:
+      claimName: quay-db-pvc
+  - name: pg-extension-trgm
+    hostPath:
+      type: File
+      path: {{ home_dir }}/sql/pg-extension-trgm.sql
+  - name: quay-config
+    hostPath:
+      type: Directory
+      path: {{ home_dir }}/quay-config
+
+  hostAliases:
+  - ip: 127.0.0.1
+    hostnames:
+      - quay
+      - redis
+  - ip: 192.168.141.3
+    hostnames:
+      - clair.judy.slips.pl

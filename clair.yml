@@ -1,0 +1,168 @@
+---
+- name: Prepare clair hosts
+  hosts: clair
+
+  vars:
+    ansible_user: root
+
+  tasks:
+    - include_tasks: tasks-podman-user.yml
+      vars:
+        user_account: clair
+
+    - name: Install packages
+      package:
+        name:
+          - podman
+          - skopeo
+
+    - name: Configure nginx
+      copy:
+        src: nginx-clair.conf
+        dest: /etc/nginx/conf.d/clair.conf
+      notify: Restart nginx
+
+    - name: SElinux nginx proxy
+      ansible.posix.seboolean:
+        name: httpd_can_network_connect
+        state: true
+
+    - meta: flush_handlers
+
+    - name: Verify nginx running
+      service:
+        state: started
+        name: nginx
+
+#    - name: Open for clair-pod
+#      ansible.posix.firewalld:
+#        port: "{{ item }}"
+#        state: enabled
+#        immediate: true
+#        permanent: true
+#      loop:
+#        - 6060/tcp  # clair functionality
+#        - 6069/tcp  # metrics and health endpoints
+
+  handlers:
+    - name: Restart nginx
+      service:
+        state: restarted
+        name: nginx
+
+- name: Install clair
+  hosts: clair
+  vars:
+    ansible_user: clair
+    home_dir: "/home/{{ ansible_user }}"
+    clair_config_dir: "{{ home_dir }}/clair-config"
+
+  pre_tasks:
+    - file:
+        state: directory
+        path: "{{ item }}"
+      loop:
+        - "{{ home_dir }}/.config/containers/systemd"
+        - "{{ home_dir }}/sql"
+        - "{{ clair_config_dir }}"
+
+#    - name: Fix podman
+#      when: _sub_ids is changed
+#      command: podman system migrate
+
+    - name: Enable linger
+      command: loginctl enable-linger
+      args:
+        creates: "/var/lib/systemd/linger/{{ ansible_user }}"
+
+  tasks:
+   # - name: Copy certificates
+   #   copy:
+   #     content: "{{ item.content }}"
+   #     dest: "{{ clair_config_dir }}/{{ item.dest }}"
+   #   no_log: "{{ no_log | default(true) }}"
+   #   loop:
+   #     - content: "{{ (cert.key | trim) ~ '\n' }}"
+   #       dest: ssl.key
+   #     - content: "{{ (cert.crt | trim) ~ '\n' ~ (cert.interca | trim) ~ '\n' ~ (ca | trim) ~ '\n' }}"
+   #       dest: ssl.cert
+   #   vars:
+   #     cert:
+   #       crt:
+   #       interca:
+   #     ca: |
+   #       -----BEGIN CERTIFICATE-----
+   #       MIICjzCCAhWgAwIBAgIQXIuZxVqUxdJxVt7NiYDMJjAKBggqhkjOPQQDAzCBiDEL
+   #       MAkGA1UEBhMCVVMxEzARBgNVBAgTCk5ldyBKZXJzZXkxFDASBgNVBAcTC0plcnNl
+   #       eSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxLjAsBgNVBAMT
+   #       JVVTRVJUcnVzdCBFQ0MgQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkwHhcNMTAwMjAx
+   #       MDAwMDAwWhcNMzgwMTE4MjM1OTU5WjCBiDELMAkGA1UEBhMCVVMxEzARBgNVBAgT
+   #       Ck5ldyBKZXJzZXkxFDASBgNVBAcTC0plcnNleSBDaXR5MR4wHAYDVQQKExVUaGUg
+   #       VVNFUlRSVVNUIE5ldHdvcmsxLjAsBgNVBAMTJVVTRVJUcnVzdCBFQ0MgQ2VydGlm
+   #       aWNhdGlvbiBBdXRob3JpdHkwdjAQBgcqhkjOPQIBBgUrgQQAIgNiAAQarFRaqflo
+   #       I+d61SRvU8Za2EurxtW20eZzca7dnNYMYf3boIkDuAUU7FfO7l0/4iGzzvfUinng
+   #       o4N+LZfQYcTxmdwlkWOrfzCjtHDix6EznPO/LlxTsV+zfTJ/ijTjeXmjQjBAMB0G
+   #       A1UdDgQWBBQ64QmG1M8ZwpZ2dEl23OA1xmNjmjAOBgNVHQ8BAf8EBAMCAQYwDwYD
+   #       VR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAwNoADBlAjA2Z6EWCNzklwBBHU6+4WMB
+   #       zzuqQhFkoJ2UOQIReVx7Hfpkue4WQrO/isIJxOzksU0CMQDpKmFHjFJKS04YcPbW
+   #       RNZu9YO6bVi9JNlWSOrvxKJGgYhqOkbRqZtNyWHa0V1Xahg=
+   #       -----END CERTIFICATE-----
+   #   notify: Restart clair-pod
+
+    - name: Dump clair configuration
+      template:
+        src: config/clair.yaml.j2
+        dest: "{{ clair_config_dir }}/config.yaml"
+      vars:
+        config:
+          security_scanner_v4_psk: "{{ quay_security_scanner_v4_psk }}"
+        database:
+          user: clairuser
+          password: "{{ clair_database_password }}"
+          host: localhost
+          name: clair
+      notify: Restart clair-pod
+
+    - name: Create pg-extension fix
+      copy:
+        content: |
+          CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+        dest: "{{ home_dir }}/sql/pg-extension-uuid-ossp.sql"
+
+    - name: Dump clair-pod.yml
+      template:
+        src: clair-pod.yaml.j2
+        dest: "{{ home_dir }}/clair-pod.yaml"
+      vars:
+        database:
+          user: clairuser
+          password: "{{ clair_database_password }}"
+          host: localhost
+          name: clair
+        config:
+      notify: Restart clair-pod
+
+    - name: Install podman quadlet
+      copy:
+        content: |
+          [Kube]
+          Yaml=%h/clair-pod.yaml
+        dest: "{{ home_dir }}/.config/containers/systemd/clair-pod.kube"
+      notify: Restart clair-pod
+
+    - meta: flush_handlers
+
+    - name: Ensure clair-pod is running
+      systemd_service:
+        scope: user
+        state: started
+        name: clair-pod
+        enabled: true
+
+  handlers:
+    - name: Restart clair-pod
+      systemd:
+        scope: user
+        state: restarted
+        name: clair-pod
+        daemon_reload: true

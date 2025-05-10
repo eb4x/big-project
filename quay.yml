@@ -1,0 +1,163 @@
+---
+- name: Prepare quay hosts
+  hosts:
+    - quay
+
+  vars:
+    ansible_user: root
+
+  tasks:
+    - include_tasks: tasks-podman-user.yml
+      vars:
+        user_account: quay
+
+    - name: Install packages
+      package:
+        name:
+          - "@nginx:1.24/common"
+          - podman
+          - skopeo
+    # XXX for redis
+    # sysctl vm.overcommit_memory=1
+
+    - name: Configure nginx
+      copy:
+        src: nginx-quay.conf
+        dest: /etc/nginx/conf.d/quay.conf
+      notify: Restart nginx
+
+    - name: SElinux nginx proxy
+      ansible.posix.seboolean:
+        name: httpd_can_network_connect
+        state: true
+
+    - meta: flush_handlers
+
+    - name: Verify nginx running
+      service:
+        state: started
+        name: nginx
+
+#    - name: Open for nginx-https
+#      ansible.posix.firewalld:
+#        service: https
+#        state: enabled
+#        immediate: true
+#        permanent: true
+#
+#    - name: Open for quay-pod
+#      ansible.posix.firewalld:
+#        port: "{{ item }}"
+#        state: enabled
+#        immediate: true
+#        permanent: true
+#      loop:
+#        - 8443/tcp
+#        - 9091/tcp
+
+#    - name: forward https
+#      ansible.posix.firewalld:
+#        port_forward:
+#          - port: 443
+#            proto: tcp
+#            toport: 8443
+#        state: enabled
+#        immediate: true
+#        permanent: true
+
+  handlers:
+    - name: Restart nginx
+      service:
+        state: restarted
+        name: nginx
+
+- name: Install quay
+  hosts:
+    - quay
+
+  vars:
+    ansible_user: quay
+    home_dir: "/home/{{ ansible_user }}"
+    quay_config_dir: "{{ home_dir }}/quay-config"
+    #quay_repository: "quay.io/ebbex/quay"
+    quay_tag: "3.14.0"
+
+  pre_tasks:
+    - file:
+        state: directory
+        path: "{{ item }}"
+      loop:
+        - "{{ home_dir }}/.config/containers/systemd"
+        - "{{ quay_config_dir }}"
+
+#    - name: Fix podman
+#      when: _sub_ids is changed
+#      command: podman system migrate
+
+    - name: Enable linger
+      command: loginctl enable-linger
+      args:
+        creates: "/var/lib/systemd/linger/{{ ansible_user }}"
+
+  tasks:
+    - name: Dump quay configuration
+      template:
+        src: config/quay.yaml.j2
+        dest: "{{ quay_config_dir }}/config.yaml"
+      vars:
+        config:
+          server_hostname: "{{ quay_hostname }}"
+          redis_password: "{{ quay_redis_password }}"
+          secret_key: "{{ quay_secret_key }}"
+          security_scanner_v4_endpoint: "https://{{ clair_hostname }}"
+          security_scanner_v4_psk: "{{ quay_security_scanner_v4_psk }}"
+        database:
+          user: quayuser
+          password: "{{ quay_database_password }}"
+          host: localhost
+          name: quay
+          secret_key: "{{ quay_database_secret_key }}"
+      notify: Restart quay-pod
+
+    - name: Create pg-extension fix
+      copy:
+        content: |
+          CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+        dest: "{{ home_dir }}/sql/pg-extension-trgm.sql"
+
+    - name: Dump quay-pod.yaml
+      template:
+        src: quay-pod.yaml.j2
+        dest: "{{ home_dir }}/quay-pod.yaml"
+      vars:
+        database:
+          user: quayuser
+          password: "{{ quay_database_password }}"
+          host: localhost
+          name: quay
+      notify: Restart quay-pod
+
+    - name: Install podman quadlet
+      copy:
+        content: |
+          [Kube]
+          Yaml=%h/quay-pod.yaml
+        dest: "{{ home_dir }}/.config/containers/systemd/quay-pod.kube"
+      notify: Restart quay-pod
+
+    - meta: flush_handlers
+
+    - name: Ensure quay-pod is running
+      systemd_service:
+        scope: user
+        state: started
+        name: quay-pod
+        enabled: true
+
+  handlers:
+    - name: Restart quay-pod
+      systemd:
+        scope: user
+        state: restarted
+        name: quay-pod
+        daemon_reload: true

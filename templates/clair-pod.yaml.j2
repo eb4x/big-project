@@ -1,0 +1,65 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: clair
+spec:
+#  initContainers:
+#  - name: permissions-fix
+#    image: busybox:latest
+#    command:
+#    - "/bin/chmod"
+#    - "-R"
+#    - "777"
+#    - "/var/local"
+#    volumeMounts:
+#    - { name: clair-var-local, mountPath: "/var/local:rw,Z" }
+
+  containers:
+  - name: db
+    image: docker.io/postgres:15
+    env:
+    - { name: POSTGRES_USER, value: {{ database.user }} }
+    - { name: POSTGRES_PASSWORD, value: {{ database.password }} }
+    - { name: POSTGRES_DB, value: {{ database.name }} }
+    volumeMounts:
+    - { name: pg-storage, mountPath: "/var/lib/postgresql/data:Z" }
+    - { name: pg-extension-uuid-ossp, mountPath: "/docker-entrypoint-initdb.d/pg_uuid-ossp.sql:Z" }
+    args:
+    - -cmax_wal_size=2GB
+
+  - name: combo
+    image: quay.io/projectquay/clair:4.8.0
+    env:
+    - { name: CLAIR_MODE, value: combo }
+#    - { name: TMPDIR, value: /var/local }
+    volumeMounts:
+    - { name: clair-config, mountPath: "/config:Z" }
+#    - { name: clair-var-local, mountPath: "/var/local:rw,Z" }
+    ports:
+    - { hostPort: 6060, containerPort: 6060, protocol: TCP }
+    - { hostPort: 6069, containerPort: 6069, protocol: TCP }
+
+  hostAliases:
+  - ip: 127.0.0.1
+    hostnames:
+    - clair-db
+    - clair-indexer
+    - clair-matcher
+    - clair-notifier
+
+  volumes:
+  - name: pg-storage
+    persistentVolumeClaim:
+      claimName: clair-db-pvc
+  - name: pg-extension-uuid-ossp
+    hostPath:
+      type: File
+      path: {{ home_dir }}/sql/pg-extension-uuid-ossp.sql
+  - name: clair-config
+    hostPath:
+      type: Directory
+      path: {{ home_dir }}/clair-config
+  - name: clair-var-local
+    persistentVolumeClaim:
+      claimName: clair-var-local-pvc

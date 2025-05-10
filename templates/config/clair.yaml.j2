@@ -1,0 +1,52 @@
+---
+#http_listen_addr: localhost:6060
+introspection_addr: ":6069"
+#log_level: warn
+log_level: info
+#log_level: debug-color
+#tls:
+#  cert: /config/ssl.cert
+#  key: /config/ssl.key
+indexer:
+  connstring: sslmode=disable user={{ database.user }} password={{ database.password }} host={{ database.host }} port=5432 dbname={{ database.name }}
+  scanlock_retry: 10
+  layer_scan_concurrency: 5
+  migrations: true
+matcher:
+  connstring: sslmode=disable user={{ database.user }} password={{ database.password }} host={{ database.host }} port=5432 dbname={{ database.name }}
+  indexer_addr: "localhost:6060"
+  migrations: true
+matchers:
+  names: null
+  config: {}
+updaters:
+  sets: null
+  config: {}
+notifier:
+  connstring: sslmode=disable user={{ database.user }} password={{ database.password }} host={{ database.host }} port=5432 dbname={{ database.name }}
+  migrations: true
+  indexer_addr: http://localhost:6060/
+  matcher_addr: http://localhost:6060/
+  poll_interval: 5m
+  delivery_interval: 1m
+  # if multiple delivery methods are defined the only one will be selected.
+  # preference order:
+  # webhook, amqp, stomp
+  webhook:
+    target: "http://webhook/"
+    callback: "http://localhost:6060/notifier/api/v1/notification/"
+auth:
+  psk:
+    key: {{ config.security_scanner_v4_psk }}
+    iss:
+    - "quay"
+trace:
+  name: "otlp"
+  probability: 0
+#  otlp:
+#    http:
+#      endpoint: "localhost:4318"
+metrics:
+  name: "metrics"
+  prometheus:
+    endpoint: "/metricsz"

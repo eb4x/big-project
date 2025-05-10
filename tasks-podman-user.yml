@@ -1,0 +1,25 @@
+---
+- name: Create user
+  user:
+    name: "{{ user_account }}"
+    local: true
+
+- name: Populate authorized_keys
+  ansible.posix.authorized_key:
+    user: "{{ user_account }}"
+    #key_options: "from=\"{{ lookup('pipe', 'hostname') }}\""
+    key: "{{ lookup('file', item) }}"
+  with_first_found:
+    - "~/.ssh/id_ed25519.pub"
+    - "~/.ssh/id_ecdsa.pub"
+    - "~/.ssh/id_rsa.pub"
+
+# XXX FIX ME
+#- copy:
+#    content: |
+#      {{ user_account }}:100000:65536
+#    dest: "{{ item }}"
+#  loop:
+#    - /etc/subuid
+#    - /etc/subgid
+#  register: _sub_ids
