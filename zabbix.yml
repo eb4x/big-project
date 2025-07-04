@@ -3,35 +3,50 @@
   hosts:
     - uio-provisioner
     - zabbix-bgo
-  become: true
   vars:
     firewalld_is_running: false
     zabbix_http_port: 10080
     zabbix_https_port: 10443
 
   pre_tasks:
-    - name: Get service facts
-      service_facts:
-    - when: "'firewalld.service' in ansible_facts.services"
-      set_fact:
-        firewalld_is_running: "{{ ansible_facts.services['firewalld.service'].state == 'running' }}"
+    - name: Run privileged tasks
+      become: true
+      block:
+        - name: Get service facts
+          service_facts:
+        - name: Set firewalld state
+          when: "'firewalld.service' in ansible_facts.services"
+          set_fact:
+            firewalld_is_running: "{{ ansible_facts.services['firewalld.service'].state == 'running' }}"
+        - name: Open zabbix ports
+          when: firewalld_is_running
+          ansible.posix.firewalld:
+            port: "{{ item.port }}"
+            immediate: true
+            permanent: true
+            state: "{{ item.state | default('enabled') }}"
+          loop:
+            - port: 10051/tcp
+            - port: "{{ zabbix_http_port }}/tcp"
+            - port: "{{ zabbix_https_port }}/tcp"
+              state: "{{ (zabbix_web_ssl_key is defined and zabbix_web_ssl_cert is defined) | ternary('enabled', 'disabled') }}"
 
-    - package:
-        name: "{{ item.name }}"
-        state: "{{ item.state | default('installed') }}"
-      loop:
-        - name: podman
-        - name: container-selinux
-          state: latest # >= v2.219.0
-    - ansible.posix.seboolean:
-        name: container_read_certs
-        state: true
-        persistent: true
+        - package:
+            name: "{{ item.name }}"
+            state: "{{ item.state | default('installed') }}"
+          loop:
+            - name: podman
+            - name: container-selinux
+              state: latest # >= v2.219.0
+        - ansible.posix.seboolean:
+            name: container_read_certs
+            state: true
+            persistent: true
 
-    - name: enable lingering for systemd user processes
-      command: loginctl enable-linger
-      args:
-        creates: "/var/lib/systemd/linger/{{ ansible_user }}"
+        - name: enable lingering for systemd user processes
+          command: loginctl enable-linger
+          args:
+            creates: "/var/lib/systemd/linger/{{ ansible_user }}"
 
   tasks:
     - name: handle server-secrets
@@ -104,19 +119,6 @@
         state: started
         recreate: "{{ _zabbix_pod_config is changed | ternary(true, false) }}"
       become: false
-
-    - name: open zabbix ports
-      when: firewalld_is_running
-      ansible.posix.firewalld:
-        port: "{{ item.port }}"
-        immediate: true
-        permanent: true
-        state: "{{ item.state | default('enabled') }}"
-      loop:
-        - port: 10051/tcp
-        - port: "{{ zabbix_http_port }}/tcp"
-        - port: "{{ zabbix_https_port }}/tcp"
-          state: "{{ (zabbix_web_ssl_key is defined and zabbix_web_ssl_cert is defined) | ternary('enabled', 'disabled') }}"
 
     - name: wait_for zabbix
       uri:
