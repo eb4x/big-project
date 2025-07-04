@@ -15,8 +15,12 @@
         firewalld_is_running: "{{ ansible_facts.services['firewalld.service'].state == 'running' }}"
 
     - package:
-        name: container-selinux
-        state: latest # >= v2.219.0
+        name: "{{ item.name }}"
+        state: "{{ item.state | default('installed') }}"
+      loop:
+        - name: podman
+        - name: container-selinux
+          state: latest # >= v2.219.0
     - ansible.posix.seboolean:
         name: container_read_certs
         state: true
