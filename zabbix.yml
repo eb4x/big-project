@@ -6,6 +6,8 @@
   become: true
   vars:
     firewalld_is_running: false
+    zabbix_http_port: 10080
+    zabbix_https_port: 10443
 
   pre_tasks:
     - name: Get service facts
@@ -92,7 +94,6 @@
       vars:
         zabbix_version: 7.0-latest
         zabbix_agent_daemonset: true
-        zabbix_https_port: 10443
         db_type: pgsql
         enable_timescaledb: true
       register: _zabbix_pod_config
@@ -112,14 +113,14 @@
         permanent: true
         state: "{{ item.state | default('enabled') }}"
       loop:
-        - port: 8080/tcp
         - port: 10051/tcp
-        - port: 10443/tcp
+        - port: "{{ zabbix_http_port }}/tcp"
+        - port: "{{ zabbix_https_port }}/tcp"
           state: "{{ (zabbix_web_ssl_key is defined and zabbix_web_ssl_cert is defined) | ternary('enabled', 'disabled') }}"
 
     - name: wait_for zabbix
       uri:
-        url: "https://zabbix.openshift-utv.uio.no:10443/api_jsonrpc.php"
+        url: "{{ _scheme }}://zabbix.openshift-utv.uio.no:{{ _port }}/api_jsonrpc.php"
         method: POST
         headers:
           Content-Type: application/json-rpc
@@ -136,6 +137,9 @@
       until:
         - _res.status == 200
         - _res.json.error is not defined
+      vars:
+        _scheme: "{{ (zabbix_web_ssl_key is defined and zabbix_web_ssl_cert is defined) | ternary('https', 'http') }}"
+        _port: "{{ (zabbix_web_ssl_key is defined and zabbix_web_ssl_cert is defined) | ternary(zabbix_https_port, zabbix_http_port) }}"
 
     - debug:
         var: _res
