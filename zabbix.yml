@@ -28,29 +28,6 @@
         creates: "/var/lib/systemd/linger/{{ ansible_user }}"
 
   tasks:
-    - name: Create dns entries needed by provisioner
-      lineinfile:
-        path: /etc/hosts
-        regexp: "{{ item.regexp | default(omit) }}"
-        line: "{{ item.address }} {{ item.name }}"
-      loop:
-        - name: "zabbix.{{ cluster_domain }} zabbix-server.{{ cluster_domain }}"
-          address: 127.0.0.1
-          regexp: ".*zabbix-server.*"
-
-    - name: Dump specialized zabbix configuration for dnsmasq
-      copy:
-        content: |
-          address=/zabbix-server.{{ cluster_domain }}/{{ listen_address }}
-        dest: /etc/dnsmasq.d/zabbix.conf
-        mode: '0644'
-      vars:
-        interface_list: "{{ ansible_facts.interfaces | map('replace', '-', '_') | map('extract', ansible_facts) }}"
-        interfaces_with_ipv4: "{{ interface_list | selectattr('ipv4', 'defined') }}"
-        ipv4_addresses: "{{ interfaces_with_ipv4 | map(attribute='ipv4.address') }}"
-        listen_address: "{{ ipv4_addresses | ansible.utils.ipaddr(baremetal_network_ipv4_cidr | default('10.0.0.0/16')) | first }}"
-      notify: restart dnsmasq
-
     - name: handle server-secrets
       when:
         - zabbix_server_tls_key is defined
@@ -158,12 +135,6 @@
 
     - debug:
         var: _res
-
-  handlers:
-    - name: restart dnsmasq
-      service:
-        name: dnsmasq
-        state: restarted
 
 - name: configure zabbix-server
   hosts:
