@@ -1,6 +1,15 @@
 ---
 zabbix:
   hosts:
+    zabbix.erikberg.uiocloud.no:
+      ansible_network_os: community.zabbix.zabbix
+      ansible_connection: httpapi
+      ansible_httpapi_use_ssl: false
+      ansible_user: Admin
+      ansible_httpapi_pass: zabbix
+      ansible_host: zabbix.erikberg.uiocloud.no
+      ansible_httpapi_port: 10080
+      ansible_zabbix_url_path: ''
     zabbix.openshift-utv.uio.no:
       ansible_network_os: community.zabbix.zabbix
       ansible_connection: httpapi

@@ -2,12 +2,16 @@
 - name: install zabbix-server
   hosts:
     - uio-provisioner
+    - zabbix-bgo
   become: true
+  vars:
+    firewalld_is_running: false
 
   pre_tasks:
     - name: Get service facts
       service_facts:
-    - set_fact:
+    - when: "'firewalld.service' in ansible_facts.services"
+      set_fact:
         firewalld_is_running: "{{ ansible_facts.services['firewalld.service'].state == 'running' }}"
 
     - package:
@@ -120,7 +124,7 @@
       become: false
 
     - name: open zabbix ports
-      when: firewalld_is_running | default(true)
+      when: firewalld_is_running
       ansible.posix.firewalld:
         port: "{{ item.port }}"
         immediate: true
@@ -164,6 +168,7 @@
 - name: configure zabbix-server
   hosts:
     - zabbix.openshift-utv.uio.no
+    - zabbix.erikberg.uiocloud.no
 
   tasks:
     - name: configure Zabbix server agent as active

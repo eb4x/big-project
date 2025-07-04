@@ -6,6 +6,9 @@ all:
     provisioner:
     uio-provisioner:
       ansible_user: kni
+    zabbix-bgo:
+      ansible_user: almalinux
+      ansible_host: zabbix-server.erikberg.uiocloud.no
 registry:
   children:
     quay:
