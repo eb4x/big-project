@@ -80,7 +80,7 @@
     home_dir: "/home/{{ ansible_user }}"
     quay_config_dir: "{{ home_dir }}/quay-config"
     #quay_repository: "quay.io/ebbex/quay"
-    quay_tag: "3.14.0"
+    quay_tag: "3.14.2"
 
   pre_tasks:
     - file:
@@ -156,18 +156,38 @@
         name: quay-pod
         enabled: true
 
-    - name: Create initial user
+    - name: Wait for healthy quay-pod
       uri:
-        url: "https://{{ quay_hostname }}/api/v1/user/initialize"
-        method: POST
-        body_format: json
-        body:
-          username: "{{ quay_init_username | default('admin') }}"
-          password: "{{ quay_init_password | default('password') }}"
-          email: init@quay.io
-          access_token: true
-        return_content: true
-      register: _res
+        url: "https://{{ quay_hostname }}/health/instance"
+      register: _quay_pod_health
+      until: _quay_pod_health.status == 200
+      retries: 10
+
+    - name: Login or create
+      block:
+        - name: Create registry login
+          containers.podman.podman_login:
+            username: "{{ quay_init_username | default('admin') }}"
+            password: "{{ quay_init_password | default('password') }}"
+            registry: "{{ quay_hostname }}"
+      rescue:
+        - name: Create initial user
+          uri:
+            url: "https://{{ quay_hostname }}/api/v1/user/initialize"
+            method: POST
+            body_format: json
+            body:
+              username: "{{ quay_init_username | default('admin') }}"
+              password: "{{ quay_init_password | default('password') }}"
+              email: "{{ quay_init_email | default('init@quay.io') }}"
+              access_token: true
+            return_content: true
+          register: _initial_user
+        - debug:
+            var: _initial_user
+        - copy:
+            content: "{{ _initial_user.json.access_token }}"
+            dest: "{{ quay_hostname }}.token"
 
   handlers:
     - name: Restart quay-pod
@@ -176,3 +196,5 @@
         state: restarted
         name: quay-pod
         daemon_reload: true
+
+- import_playbook: quay-configure.yml
