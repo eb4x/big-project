@@ -38,12 +38,13 @@ release_image_repo: "{{ _release_image_repo[release_variant] }}"
 release_content_repo: "{{ _release_content_repo[release_variant] }}"
 release_pull: "{{ release_registry }}/{{ release_image_repo }}:{{ release_version }}"
 
-use_mirror_registry: true
+install_mirror_registry: true
+enable_mirror_registry: "{{ install_mirror_registry }}"
 mirror_registry_version: v2.0.3
 mirror_registry_checksum: sha256:68314762b596075807d51c9bafc529469113be68146d318a39066a77a1b7c973
 mirror_registry_user: init
 mirror_registry_password: "{{ lookup('password', '~/.ansible/.mirror_registry_password') }}"
-mirror_registry_fqdn: "mirror-registry.{{ cluster_domain }}"
+mirror_registry_fqdn: "mirror-registry.{{ cluster_domain }}:8443"
 mirror_registry_quayroot: "~/mirror-registry/quay-install"
 mirror_registry_authfile: "~/.config/containers/auth.json"
 
@@ -51,45 +52,45 @@ image_mirror_sets:
   - source: public.ecr.aws
     mirrorSourcePolicy: NeverContactSource
     mirrors:
-    - "{{ mirror_registry_fqdn }}:8443/mirrors/public.ecr.aws"
+    - "{{ mirror_registry_fqdn }}/mirrors/public.ecr.aws"
   - source: docker.elastic.co
     mirrorSourcePolicy: NeverContactSource
     mirrors:
-    - "{{ mirror_registry_fqdn }}:8443/mirrors/docker.elastic.co"
+    - "{{ mirror_registry_fqdn }}/mirrors/docker.elastic.co"
   - source: registry.access.redhat.com
     mirrorSourcePolicy: NeverContactSource
     mirrors:
-    - "{{ mirror_registry_fqdn }}:8443/mirrors/registry.access.redhat.com"
+    - "{{ mirror_registry_fqdn }}/mirrors/registry.access.redhat.com"
   - source: docker.io/library
     mirrorSourcePolicy: NeverContactSource
     mirrors:
-    - "{{ mirror_registry_fqdn }}:8443/mirrors/docker.io/library"
+    - "{{ mirror_registry_fqdn }}/mirrors/docker.io/library"
   - source: docker.io
     mirrorSourcePolicy: NeverContactSource
     mirrors:
-    - "{{ mirror_registry_fqdn }}:8443/mirrors/docker.io"
+    - "{{ mirror_registry_fqdn }}/mirrors/docker.io"
   - source: gcr.io
     mirrorSourcePolicy: NeverContactSource
     mirrors:
-    - "{{ mirror_registry_fqdn }}:8443/mirrors/gcr.io"
+    - "{{ mirror_registry_fqdn }}/mirrors/gcr.io"
   - source: ghcr.io
     mirrorSourcePolicy: NeverContactSource
     mirrors:
-    - "{{ mirror_registry_fqdn }}:8443/mirrors/ghcr.io"
+    - "{{ mirror_registry_fqdn }}/mirrors/ghcr.io"
   # 2023-03-20 k8s.gcr.io => registry.k8s.io
   - source: k8s.gcr.io
     mirrorSourcePolicy: NeverContactSource
     mirrors:
-    - "{{ mirror_registry_fqdn }}:8443/mirrors/registry.k8s.io"
+    - "{{ mirror_registry_fqdn }}/mirrors/registry.k8s.io"
   - source: registry.k8s.io
     mirrorSourcePolicy: NeverContactSource
     mirrors:
-    - "{{ mirror_registry_fqdn }}:8443/mirrors/registry.k8s.io"
+    - "{{ mirror_registry_fqdn }}/mirrors/registry.k8s.io"
   - source: quay.io
     mirrorSourcePolicy: NeverContactSource
     mirrors:
-    - "{{ mirror_registry_fqdn }}:8443/mirrors/quay.io"
+    - "{{ mirror_registry_fqdn }}/mirrors/quay.io"
   - source: registry.redhat.io
     mirrorSourcePolicy: NeverContactSource
     mirrors:
-    - "{{ mirror_registry_fqdn }}:8443/mirrors/registry.redhat.io"
+    - "{{ mirror_registry_fqdn }}/mirrors/registry.redhat.io"

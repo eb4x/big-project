@@ -219,26 +219,26 @@
     - config
 
 - name: enable mirror registries
-  when: use_mirror_registry
+  when: enable_mirror_registry
   copy:
     content: |
       ---
       apiVersion: config.openshift.io/v1
       kind: {{ item.kind }}
       metadata:
-        name: mirror-set
+        name: {{ item.name }}
       spec:
         {{ item.spec }}:
         {{ image_mirror_sets | to_yaml | indent(2) }}
-    dest: "{{ installation_directory }}/manifests/{{ item.dest }}"
+    dest: "{{ installation_directory }}/manifests/{{ item.name }}-set.yaml"
     mode: '0644'
   loop:
     - kind: ImageDigestMirrorSet
+      name: image-digest-mirror
       spec: imageDigestMirrors
-      dest: 99-image-digest-mirror-set.yaml
     - kind: ImageTagMirrorSet
+      name: image-tag-mirror
       spec: imageTagMirrors
-      dest: 99-image-tag-mirror-set.yaml
   tags:
     - config
 

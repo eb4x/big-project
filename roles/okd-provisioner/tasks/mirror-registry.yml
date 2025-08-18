@@ -19,7 +19,7 @@
     mode: '0755'
   loop:
     - "~/.config/containers"
-    - "~/.config/containers/certs.d/{{ mirror_registry_fqdn }}:8443"
+    - "~/.config/containers/certs.d/{{ mirror_registry_fqdn }}"
     - "{{ mirror_registry_quayroot }}"
 
 - name: check for existing mirror-registry
@@ -47,7 +47,7 @@
   when: not _mirror_registry_is_self_signed
   copy:
     content: "{{ item.content }}"
-    dest: "~/mirror-registry/{{ mirror_registry_fqdn | replace('.', '_') }}.{{ item.ext }}"
+    dest: "~/mirror-registry/{{ mirror_registry_fqdn | split(':') | first | replace('.', '_') }}.{{ item.ext }}"
     mode: "{{ item.mode }}"
   loop:
     - content: "{{ (mirror_registry_ssl_key | trim) ~ '\n' }}"
@@ -57,7 +57,7 @@
       ext: crt
       mode: '0644'
   loop_control:
-    label: "{{ mirror_registry_fqdn | replace('.', '_') }}.{{ item.ext }}"
+    label: "{{ mirror_registry_fqdn | split(':') | first | replace('.', '_') }}.{{ item.ext }}"
 
 - name: mirror-registry install {{ mirror_registry_fqdn }}
   when:
@@ -68,11 +68,11 @@
       ./mirror-registry install
       --initUser {{ mirror_registry_user }}
       --initPassword {{ mirror_registry_password }}
-      --quayHostname {{ mirror_registry_fqdn }}
+      --quayHostname {{ mirror_registry_fqdn | split(':') | first }}
       --quayRoot {{ mirror_registry_quayroot }}
       {% if not _mirror_registry_is_self_signed %}
-      --sslKey {{ mirror_registry_fqdn | replace('.', '_') }}.key
-      --sslCert {{ mirror_registry_fqdn | replace('.', '_') }}.crt
+      --sslKey {{ mirror_registry_fqdn | split(':') | first | replace('.', '_') }}.key
+      --sslCert {{ mirror_registry_fqdn | split(':') | first | replace('.', '_') }}.crt
       {% endif %}
     creates: "~/.ssh/quay_installer"
 
@@ -98,7 +98,7 @@
     chdir: "~/mirror-registry"
     cmd: >-
       ./mirror-registry upgrade -v
-      --quayHostname {{ mirror_registry_fqdn }}
+      --quayHostname {{ mirror_registry_fqdn | split(':') | first }}
       --quayRoot {{ mirror_registry_quayroot }}
 
 - name: patch mirror-registry config
@@ -146,7 +146,7 @@
 - name: check health of mirror-registry
   uri:
     ca_path: "{{ _mirror_registry_is_self_signed | ternary(mirror_registry_quayroot ~ '/quay-rootCA/rootCA.pem', omit) }}"
-    url: "https://{{ mirror_registry_fqdn }}:8443/health/instance"
+    url: "https://{{ mirror_registry_fqdn }}/health/instance"
   register: _mirror_registry_health
   until: _mirror_registry_health.status == 200
   retries: 10
@@ -162,16 +162,16 @@
   copy:
     remote_src: true
     src: "{{ mirror_registry_quayroot }}/quay-rootCA/rootCA.pem"
-    dest: "~/.config/containers/certs.d/{{ mirror_registry_fqdn }}:8443/ca.crt"
+    dest: "~/.config/containers/certs.d/{{ mirror_registry_fqdn }}/ca.crt"
 
 - name: assert self-signed certificate for tooling
   file:
     state: "{{ _mirror_registry_is_self_signed | ternary('file','absent') }}"
-    path: "~/.config/containers/certs.d/{{ mirror_registry_fqdn }}:8443/ca.crt"
+    path: "~/.config/containers/certs.d/{{ mirror_registry_fqdn }}/ca.crt"
 
 - name: create registry login
   containers.podman.podman_login:
     authfile: "{{ mirror_registry_authfile }}"
     username: "{{ mirror_registry_user }}"
     password: "{{ mirror_registry_password }}"
-    registry: "{{ mirror_registry_fqdn }}:8443"
+    registry: "{{ mirror_registry_fqdn }}"

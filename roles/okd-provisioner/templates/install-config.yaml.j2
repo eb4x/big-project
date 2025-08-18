@@ -119,7 +119,7 @@ platform:
 {%   endif %}
 {% endfor %}
 pullSecret: {{ pullSecret | default(lookup('file', 'pull-secret-okd.json') | to_nice_json) }}
-{% if use_mirror_registry %}
+{% if enable_mirror_registry %}
 {%   if _mirror_registry_is_self_signed %}
 additionalTrustBundle: |
   {{ mirror_registry_ca | indent(2) }}
@@ -131,9 +131,9 @@ imageContentSources:
 {%   endif %}
 - source: {{ release_registry }}/{{ release_image_repo }}
   mirrors:
-  - {{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_image_repo }}
+  - {{ mirror_registry_fqdn }}/mirrors/{{ release_registry }}/{{ release_image_repo }}
 - source: {{ release_registry }}/{{ release_content_repo }}
   mirrors:
-  - {{ mirror_registry_fqdn }}:8443/mirrors/{{ release_registry }}/{{ release_content_repo }}
+  - {{ mirror_registry_fqdn }}/mirrors/{{ release_registry }}/{{ release_content_repo }}
 {% endif %}
 sshKey: {{ ssh_key }}
