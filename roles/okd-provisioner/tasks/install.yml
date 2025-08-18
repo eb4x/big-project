@@ -242,6 +242,24 @@
   tags:
     - config
 
+- name: Inject sealed-secrets certificate
+  copy:
+    content: |
+      ---
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        namespace: kube-system
+        name: {{ cluster_name }}
+        labels:
+          sealedsecrets.bitnami.com/sealed-secrets-key: active
+      type: kubernetes.io/tls
+      data:
+        tls.key: {{ sealed_secret_key | b64encode }}
+        tls.crt: {{ sealed_secret_crt | b64encode }}
+    dest: "{{ installation_directory }}/manifests/sealed-secrets.yaml"
+    mode: '0644'
+
 - name: enable argocd for cluster configuration
   when: enable_argocd | default(true)
   block:
