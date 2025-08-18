@@ -12,15 +12,16 @@ quay.io:
     kubevirt/cdi-operator:    ">= v1.57.0"
     kubevirt/cdi-uploadproxy: ">= v1.57.0"
 
-    kubevirt/aaq-operator: ">= v1.1.16"
-    kubevirt/bridge-marker: ">= 0.11.1"
+    kubevirt/aaq-operator:                    ">= v1.1.16"
     kubevirt/cluster-network-addons-operator: ">= v0.89.2"
+    kubevirt/hostpath-provisioner-operator:   ">= v0.17.0"
+    kubevirt/mtq-operator:                    ">= v1.1.11"
+    kubevirt/ssp-operator:                    ">= v0.18.3"
+
+    kubevirt/bridge-marker: ">= 0.11.1"
     kubevirt/cni-default-plugins: ">= v1.3.0"
-    kubevirt/hostpath-provisioner-operator: ">= v0.17.0"
     kubevirt/kubemacpool: ">= v0.41.2"
     kubevirt/kubevirt-template-validator: ">= v0.18.3"
-    kubevirt/mtq-operator: ">= v1.1.11"
-    kubevirt/ssp-operator: ">= v0.18.3"
 
     kubevirt/virt-api:         ">= v1.0.1"
     kubevirt/virt-controller:  ">= v1.0.1"
