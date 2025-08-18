@@ -1,7 +1,7 @@
 ---
 docker.io:
   images-by-semver:
-    rook/ceph: ">=v1.13.10"
+    rook/ceph: ">=v1.17.7"
 
 quay.io:
   images-by-semver:
