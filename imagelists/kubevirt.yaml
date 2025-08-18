@@ -1,4 +1,8 @@
 ---
+ghcr.io:
+  images-by-semver:
+    kubevirt/ipam-controller: ">= v0.2.0"
+
 quay.io:
   images-by-semver:
     community-operator-pipeline-prod/community-kubevirt-hyperconverged: ">= 1.10.7"
@@ -33,12 +37,14 @@ quay.io:
 
     kubevirt-ui/kubevirt-apiserver-proxy: ">= v0.0.9"
     kubevirt-ui/kubevirt-plugin: ">= v4.14.0"
+
     openshift/origin-kube-rbac-proxy: ">= 4.14.0"
 
   images:
     containerdisks/centos:
       - 7-2009
     containerdisks/centos-stream:
+      - 10
       - 9
       - 8
     containerdisks/fedora:
@@ -49,3 +55,5 @@ quay.io:
       - latest
     kubevirt/cni-default-plugins:
       - v1.4.0-4-g14bdce59
+    kubevirt/kubemacpool:
+      - v0.46.0-12-g6c9ce397
