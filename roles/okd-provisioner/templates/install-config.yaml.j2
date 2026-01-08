@@ -1,5 +1,9 @@
 ---
 apiVersion: v1
+baseDomain: {{ base_domain }}
+metadata:
+  name: {{ cluster_name }}
+
 {% if openshift_install_version is version('4.11', '>=') %}
 capabilities:
   baselineCapabilitySet: None
@@ -31,36 +35,7 @@ capabilities:
     #- CloudControllerManager
 {%   endif %}
 {% endif %}
-baseDomain: {{ base_domain }}
-metadata:
-  name: {{ cluster_name }}
-networking:
-  networkType: OVNKubernetes
-  machineNetwork:
-  - cidr: {{ baremetal_network_ipv4_cidr }}
-{%   if enable_ipv6 %}
-  - cidr: {{ baremetal_network_ipv6_cidr }}
-{%   endif %}
-  clusterNetwork:
-  - cidr: 10.128.0.0/14
-    hostPrefix: 20
-{%   if enable_ipv6 %}
-  - cidr: fd00:10:128::/56
-    hostPrefix: 64
-  serviceNetwork:
-  - 172.30.0.0/16
-  - fd00:172:30::/112
-{%   endif %}
-compute:
-- name: worker
-  architecture: amd64
-  replicas: 0
-controlPlane:
-  name: control-plane
-  platform:
-    baremetal: {}
-  architecture: amd64
-  replicas: 3
+
 platform:
   baremetal:
 {% if bootstrap_os_image is defined %}
@@ -118,6 +93,38 @@ platform:
         {{ lookup('template', 'nmstate.yaml.j2', template_vars={ 'bootMACAddress': hostvars[host].bootMACAddress }) | from_yaml | to_nice_yaml(2) | indent(8) }}
 {%   endif %}
 {% endfor %}
+
+networking:
+  networkType: OVNKubernetes
+  machineNetwork:
+  - cidr: {{ baremetal_network_ipv4_cidr }}
+{%   if enable_ipv6 %}
+  - cidr: {{ baremetal_network_ipv6_cidr }}
+{%   endif %}
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 20
+{%   if enable_ipv6 %}
+  - cidr: fd00:10:128::/56
+    hostPrefix: 64
+  serviceNetwork:
+  - 172.30.0.0/16
+  - fd00:172:30::/112
+{%   endif %}
+
+controlPlane:
+  name: control-plane
+  platform:
+    baremetal: {}
+  architecture: amd64
+  replicas: 3
+
+compute:
+- name: worker
+  architecture: amd64
+  replicas: 0
+
+sshKey: {{ ssh_key }}
 pullSecret: {{ pullSecret | default(lookup('file', 'pull-secret-okd.json') | to_nice_json) }}
 {% if enable_mirror_registry %}
 {%   if _mirror_registry_is_self_signed %}
@@ -136,4 +143,3 @@ imageContentSources:
   mirrors:
   - {{ mirror_registry_fqdn }}/mirrors/{{ release_registry }}/{{ release_content_repo }}
 {% endif %}
-sshKey: {{ ssh_key }}
