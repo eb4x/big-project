@@ -17,7 +17,8 @@
     - name: Get service facts
       service_facts:
     - set_fact:
-        firewalld_is_running: "{{ ansible_facts.services['firewalld.service'].state == 'running' }}"
+        firewalld_is_running: "{{ 'firewalld.service' in ansible_facts.services and
+          ansible_facts.services['firewalld.service'].state == 'running' }}"
 
   tasks:
     - name: install dnsmasq
@@ -28,7 +29,7 @@
     - include_tasks: dnsmasq-tasks-zabbix.yml
 
     - name: Open for business
-      when: firewalld_is_running | default(true)
+      when: firewalld_is_running
       ansible.posix.firewalld:
         service: "{{ item.service }}"
         state: "{{ item.state | default('enabled') }}"
@@ -76,7 +77,8 @@
     - name: Get service facts
       service_facts:
     - set_fact:
-        firewalld_is_running: "{{ ansible_facts.services['firewalld.service'].state == 'running' }}"
+        firewalld_is_running: "{{ 'firewalld.service' in ansible_facts.services and
+          ansible_facts.services['firewalld.service'].state == 'running' }}"
 
   roles:
     - okd-provisioner
