@@ -283,6 +283,49 @@
         cluster_config_repo: "https://{% if github_auth is defined %}{{ github_auth }}@{% endif %}github.uio.no/erikberg/openshift-utv.uio.no"
         openshift_install_version: "{{ _openshift_install_version }}"
 
+- name: create ignitions
+  command:
+    cmd: openshift-baremetal-install --dir {{ installation_directory }} create ignition-configs
+
+- name: patch bootstrap.ign
+  vars:
+    _bootstrap_ign: "{{ lookup('file', installation_directory ~ '/bootstrap.ign') | from_json }}"
+  block:
+    # https://github.com/okd-project/okd/discussions/1500
+    - name: fix release-image-pivot.service
+      when:
+        - release_variant != "ocp"
+        - _openshift_install_version is version('4.13', '>=')
+        - _openshift_install_version is version('4.19', '<')
+      copy:
+        content: |
+          {{ _bootstrap_ign | combine(_release_image_pivot_fix, recursive=true) }}
+        dest: "{{ installation_directory }}/bootstrap.ign"
+      vars:
+        _release_image_pivot_fix:
+          storage:
+            links:
+              - path: /etc/ostree/auth.json
+                target: /root/.docker/config.json
+                user:
+                  name: root
+                mode: 365
+                hard: false
+
+    - name: Password for core@bootstrap
+      when: enable_bootstrap_password | default(false)
+      copy:
+        content: |
+          {{ _bootstrap_ign | combine(_patch_core_user_passwd, recursive=true) }}
+        dest: "{{ installation_directory }}/bootstrap.ign"
+      vars:
+        _original_user: "{{ _bootstrap_ign.passwd.users | first }}"
+        _patched_user: "{{ _original_user | combine({'passwordHash': bootstrap_password_hash}) }}"
+        _patch_core_user_passwd:
+          passwd:
+            users:
+              - "{{ _patched_user }}"
+
 - name: openshift-baremetal-install create cluster
   command:
     cmd: openshift-baremetal-install --dir {{ installation_directory }} create cluster
@@ -292,23 +335,6 @@
   async: 7200
   poll: 0
   register: _create_cluster
-
-# https://github.com/okd-project/okd/discussions/1500
-- name: fix release-image-pivot.service
-  when:
-    - _openshift_install_version is version('4.13', '>=')
-    - fix_ostree_auth | default(true) | bool
-  block:
-    - name: Wait for bootstrap
-      wait_for:
-        host: 172.22.0.2
-        port: 22
-        timeout: 600
-    - name: patch rpm-ostree auth
-      command:
-        cmd: >-
-          ssh -o StrictHostKeyChecking=no core@172.22.0.2 -t
-          sudo cp /root/.docker/config.json /etc/ostree/auth.json
 
 - name: get results of openshift-baremetal-install create cluster
   block:

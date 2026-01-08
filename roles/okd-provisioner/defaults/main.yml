@@ -48,6 +48,9 @@ mirror_registry_fqdn: "mirror-registry.{{ cluster_domain }}:8443"
 mirror_registry_quayroot: "~/mirror-registry/quay-install"
 mirror_registry_authfile: "~/.config/containers/auth.json"
 
+enable_bootstrap_password: false
+bootstrap_password_hash: "$6$PB9mJEfbF0DspMvS$fTrhgUrvJg2jz6uOGqyVeKt36UiBsrlQ7vYRxwia/tI/XpuQgJlPL1E5SU8xPOTVy0VOUzbCGwOWcUB4mBw2P/"  # redhat
+
 image_mirror_sets:
   - source: public.ecr.aws
     mirrorSourcePolicy: NeverContactSource
