@@ -90,9 +90,9 @@
         - "{{ home_dir }}/.config/containers/systemd"
         - "{{ quay_config_dir }}"
 
-#    - name: Fix podman
-#      when: _sub_ids is changed
-#      command: podman system migrate
+    - name: Fix podman
+      when: _sub_ids is changed
+      command: podman system migrate
 
     - name: Enable linger
       command: loginctl enable-linger

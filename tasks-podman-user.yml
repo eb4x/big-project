@@ -14,12 +14,38 @@
     - "~/.ssh/id_ecdsa.pub"
     - "~/.ssh/id_rsa.pub"
 
-# XXX FIX ME
-#- copy:
-#    content: |
-#      {{ user_account }}:100000:65536
-#    dest: "{{ item }}"
-#  loop:
-#    - /etc/subuid
-#    - /etc/subgid
-#  register: _sub_ids
+- name: Create sub(uid|gid)
+  block:
+    - name: Read sub(uid|gid) files
+      slurp:
+        src: "{{ item }}"
+      loop:
+        - /etc/subuid
+        - /etc/subgid
+      register: _slurp
+
+    # This takes the naive approach that sub_ids can just be
+    # incremented by 65536 for each additional user_account
+    - name: Create sub(uid|gid)s
+      when: _user_line | length == 0
+      lineinfile:
+        path: "{{ item }}"
+        line: "{{ user_account }}:{{ 100000 + 65536 * (_lines | length) }}:65536"
+      vars:
+        _q: "[?item=='{{ item }}'].content | [0]"
+        _lines: "{{ (_slurp.results | json_query(_q) | b64decode).splitlines() }}"
+        _user_line: "{{ _lines | select('match', '^' ~ user_account ~ ':') }}"
+      loop:
+        - /etc/subuid
+        - /etc/subgid
+      register: _sub_ids
+  rescue:
+    - name: Create initial sub(uid|gid)s
+      copy:
+        content: |
+          {{ user_account }}:100000:65536
+        dest: "{{ item }}"
+      loop:
+        - /etc/subuid
+        - /etc/subgid
+      register: _sub_ids
