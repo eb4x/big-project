@@ -163,32 +163,6 @@
       until: _quay_pod_health.status == 200
       retries: 10
 
-    - name: Login or create
-      block:
-        - name: Create registry login
-          containers.podman.podman_login:
-            username: "{{ quay_init_username | default('admin') }}"
-            password: "{{ quay_init_password | default('password') }}"
-            registry: "{{ quay_hostname }}"
-      rescue:
-        - name: Create initial user
-          uri:
-            url: "https://{{ quay_hostname }}/api/v1/user/initialize"
-            method: POST
-            body_format: json
-            body:
-              username: "{{ quay_init_username | default('admin') }}"
-              password: "{{ quay_init_password | default('password') }}"
-              email: "{{ quay_init_email | default('init@quay.io') }}"
-              access_token: true
-            return_content: true
-          register: _initial_user
-        - debug:
-            var: _initial_user
-        - copy:
-            content: "{{ _initial_user.json.access_token }}"
-            dest: "{{ quay_hostname }}.token"
-
   handlers:
     - name: Restart quay-pod
       systemd:

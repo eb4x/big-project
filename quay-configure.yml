@@ -6,7 +6,39 @@
     quay_token: "{{ lookup('file', quay_hostname ~ '.token') }}"
 
   tasks:
+    - name: Login or create
+      block:
+        - name: Create registry login
+          containers.podman.podman_login:
+            username: "{{ quay_init_username | default('admin') }}"
+            password: "{{ quay_init_password | default('password') }}"
+            registry: "{{ quay_hostname }}"
+      rescue:
+        - name: Create initial user
+          uri:
+            url: "https://{{ quay_hostname }}/api/v1/user/initialize"
+            method: POST
+            body_format: json
+            body:
+              username: "{{ quay_init_username | default('admin') }}"
+              password: "{{ quay_init_password | default('password') }}"
+              email: "{{ quay_init_email | default('init@quay.io') }}"
+              access_token: true
+            return_content: true
+          register: _initial_user  # The token we receive here is valid for 1-2 hours
+
+        - name: Set quay_token
+          set_fact:
+            quay_token: "{{ _initial_user.json.access_token }}"
+
+        - name: Create registry login
+          containers.podman.podman_login:
+            username: "{{ quay_init_username | default('admin') }}"
+            password: "{{ quay_init_password | default('password') }}"
+            registry: "{{ quay_hostname }}"
+
     - name: Initial configuration
+      when: _initial_user is defined
       block:
         - name: Get organizations
           uri:
