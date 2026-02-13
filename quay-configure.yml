@@ -6,56 +6,58 @@
     quay_token: "{{ lookup('file', quay_hostname ~ '.token') }}"
 
   tasks:
-    - name: Get organizations
-      uri:
-        url: "https://{{ quay_hostname }}/api/v1/superuser/organizations/"
-        headers:
-          Authorization: "Bearer {{ quay_token }}"
-        return_content: true
-      register: _orgs
+    - name: Initial configuration
+      block:
+        - name: Get organizations
+          uri:
+            url: "https://{{ quay_hostname }}/api/v1/superuser/organizations/"
+            headers:
+              Authorization: "Bearer {{ quay_token }}"
+            return_content: true
+          register: _orgs
 
-    - name: Create (missing) organizations
-      when: "organization not in _orgs.json.organizations | map(attribute='name')"
-      uri:
-        url: "https://{{ quay_hostname }}/api/v1/organization/"
-        headers:
-          Authorization: "Bearer {{ quay_token }}"
-        method: POST
-        body_format: json
-        body:
-          name: "{{ organization }}"
-        return_content: true
-        status_code: 201
-      changed_when: true
-      loop_control:
-        loop_var: organization
-      loop:
-        - mirrors
-        - proxy-quay.io
+        - name: Create (missing) organizations
+          when: "organization not in _orgs.json.organizations | map(attribute='name')"
+          uri:
+            url: "https://{{ quay_hostname }}/api/v1/organization/"
+            headers:
+              Authorization: "Bearer {{ quay_token }}"
+            method: POST
+            body_format: json
+            body:
+              name: "{{ organization }}"
+            return_content: true
+            status_code: 201
+          changed_when: true
+          loop_control:
+            loop_var: organization
+          loop:
+            - mirrors
+            - proxy-quay.io
 
-    - name: Get proxycache for proxy-quay.io
-      uri:
-        url: "https://{{ quay_hostname }}/api/v1/organization/proxy-quay.io/proxycache"
-        headers:
-          Authorization: "Bearer {{ quay_token }}"
-        return_content: true
-      register: _proxy_cache
+        - name: Get proxycache for proxy-quay.io
+          uri:
+            url: "https://{{ quay_hostname }}/api/v1/organization/proxy-quay.io/proxycache"
+            headers:
+              Authorization: "Bearer {{ quay_token }}"
+            return_content: true
+          register: _proxy_cache
 
-    - name: Create proxycache for proxy-quay.io
-      when: _proxy_cache.json.upstream_registry != 'quay.io'
-      uri:
-        url: "https://{{ quay_hostname }}/api/v1/organization/proxy-quay.io/proxycache"
-        headers:
-          Authorization: "Bearer {{ quay_token }}"
-          Content-Type: "application/json"
-        method: POST
-        body_format: json
-        body:
-          org_name: "proxy-quay.io"  # https://issues.redhat.com/browse/PROJQUAY-9042
-          upstream_registry: "quay.io"
-        return_content: true
-        status_code: 201
-      changed_when: true
-      register: _res
-    - debug:
-        var: _res
+        - name: Create proxycache for proxy-quay.io
+          when: _proxy_cache.json.upstream_registry != 'quay.io'
+          uri:
+            url: "https://{{ quay_hostname }}/api/v1/organization/proxy-quay.io/proxycache"
+            headers:
+              Authorization: "Bearer {{ quay_token }}"
+              Content-Type: "application/json"
+            method: POST
+            body_format: json
+            body:
+              org_name: "proxy-quay.io"  # https://issues.redhat.com/browse/PROJQUAY-9042
+              upstream_registry: "quay.io"
+            return_content: true
+            status_code: 201
+          changed_when: true
+          register: _res
+        - debug:
+            var: _res
