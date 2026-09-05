@@ -1,0 +1,25 @@
+---
+# Python used to build the venv. The distro certbot is too old for the
+# hetzner-cloud plugin, so certbot itself runs from a venv; the distro
+# package is still installed for certbot-renew.timer and logrotate.
+certbot_python: python3.13
+certbot_venv: "/opt/certbot-venv-{{ certbot_python | replace('python', 'py') }}"
+
+certbot_pip_packages:
+  - certbot
+  - certbot-dns-hetzner-cloud
+
+certbot_authenticator: dns-hetzner-cloud
+certbot_credentials_file: /etc/letsencrypt/hetzner-cloud.ini
+certbot_hetzner_cloud_api_token: ""
+
+# Optional. Needed the first time an account is registered on a host.
+certbot_email: ""
+
+# Certificates to issue. Each entry is either a domain name or a dict:
+#   - jellyfin.example.com
+#   - { name: example.com, domains: [example.com, www.example.com] }
+certbot_certificates: []
+
+# Optional command to run after a successful renewal, e.g. "systemctl reload nginx"
+certbot_deploy_hook: ""

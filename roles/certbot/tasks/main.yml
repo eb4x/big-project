@@ -1,0 +1,61 @@
+---
+- name: Install packages
+  package:
+    name:
+      - certbot
+      - "{{ certbot_python }}"
+
+- name: Install certbot into venv
+  pip:
+    name: "{{ certbot_pip_packages }}"
+    virtualenv: "{{ certbot_venv }}"
+    virtualenv_command: "{{ certbot_python }} -m venv"
+
+- name: Link certbot into PATH
+  file:
+    state: link
+    src: "{{ certbot_venv }}/bin/certbot"
+    dest: /usr/local/bin/certbot
+
+- name: Configure hetzner-cloud credentials
+  copy:
+    content: |
+      dns_hetzner_cloud_api_token = {{ certbot_hetzner_cloud_api_token }}
+    dest: "{{ certbot_credentials_file }}"
+    mode: "0600"
+  no_log: true
+
+- name: Create certbot-renew override directory
+  file:
+    state: directory
+    path: /etc/systemd/system/certbot-renew.service.d
+
+- name: Use venv certbot for renewals
+  template:
+    src: certbot-renew-override.conf.j2
+    dest: /etc/systemd/system/certbot-renew.service.d/override.conf
+  notify: Reload systemd
+
+- meta: flush_handlers
+
+- name: Enable certbot-renew timer
+  systemd_service:
+    name: certbot-renew.timer
+    state: started
+    enabled: true
+
+- name: Issue certificates
+  command: >-
+    certbot certonly --non-interactive --agree-tos
+    {% if certbot_email %}--email {{ certbot_email }}{% endif %}
+    --authenticator {{ certbot_authenticator }}
+    --cert-name {{ _name }}
+    {% for domain in _domains %}-d {{ domain }} {% endfor %}
+  args:
+    creates: "/etc/letsencrypt/live/{{ _name }}/fullchain.pem"
+  vars:
+    _name: "{{ item.name | default(item) }}"
+    _domains: "{{ item.domains | default([_name]) }}"
+  loop: "{{ certbot_certificates }}"
+  loop_control:
+    label: "{{ _name }}"
